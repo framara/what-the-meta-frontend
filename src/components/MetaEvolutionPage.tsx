@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
+import React, { useEffect, useState, useMemo } from 'react';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { fetchSpecEvolution, fetchSeasons } from '../api';
 import { WOW_SPECIALIZATIONS, WOW_CLASS_COLORS, WOW_SPEC_TO_CLASS, WOW_MELEE_SPECS, WOW_RANGED_SPECS } from './wow-constants';
 import type { TooltipProps } from 'recharts';
@@ -38,7 +38,7 @@ const CustomTooltip = (props: TooltipProps<number, string>) => {
     }}>
       <div style={{ fontSize: 12, color: '#aaa', marginBottom: 2 }}>Week {label}</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-        {sortedPayload.map((entry: any, idx: number) => {
+        {sortedPayload.map((entry: any) => {
           const specId = Number(entry.dataKey);
           const color = WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888';
           return (
@@ -55,13 +55,21 @@ const CustomTooltip = (props: TooltipProps<number, string>) => {
 };
 
 export const MetaEvolutionPage: React.FC = () => {
+  type ChartGroup = { data: any[]; topSpecs: number[] };
+  type ChartDataState = Record<'all' | 'tank' | 'healer' | 'dps' | 'melee' | 'ranged', ChartGroup>;
+  const [charts, setCharts] = useState<ChartDataState>({
+    all: { data: [], topSpecs: [] },
+    tank: { data: [], topSpecs: [] },
+    healer: { data: [], topSpecs: [] },
+    dps: { data: [], topSpecs: [] },
+    melee: { data: [], topSpecs: [] },
+    ranged: { data: [], topSpecs: [] },
+  });
   const [seasons, setSeasons] = useState<{ season_id: number; season_name: string }[]>([]);
   const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
-  const [chartData, setChartData] = useState<any[]>([]);
-  const [topSpecs, setTopSpecs] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [infoHover, setInfoHover] = useState(false);
+  // const [error, setError] = useState<string | null>(null);
+  // const [infoHover, setInfoHover] = useState(false);
   const [tankChartData, setTankChartData] = useState<any[]>([]);
   const [topTankSpecs, setTopTankSpecs] = useState<number[]>([]);
   const [healerChartData, setHealerChartData] = useState<any[]>([]);
@@ -72,12 +80,12 @@ export const MetaEvolutionPage: React.FC = () => {
   const [topMeleeSpecs, setTopMeleeSpecs] = useState<number[]>([]);
   const [rangedChartData, setRangedChartData] = useState<any[]>([]);
   const [topRangedSpecs, setTopRangedSpecs] = useState<number[]>([]);
-  const [chartView, setChartView] = useState<'all' | 'tank' | 'healer' | 'melee' | 'ranged'>('all');
+  const [chartView, setChartView] = useState<'all' | 'tank' | 'healer' | 'dps' | 'melee' | 'ranged'>('all');
 
   // Fetch all seasons on mount (only if not already loaded)
   useEffect(() => {
     if (seasons.length > 0) return;
-    setError(null);
+    // setError(null); // error state removed
     fetchSeasons()
       .then(data => {
         const sorted = (data || []).sort((a, b) => b.season_id - a.season_id);
@@ -87,31 +95,15 @@ export const MetaEvolutionPage: React.FC = () => {
         }
       })
       .catch(err => {
-        if (err.response && err.response.status === 429) {
-          setError('Rate limited: Too many requests. Please wait and try again.');
-        } else {
-          setError('Failed to load seasons.');
-        }
+        // Error handling UI removed (error state unused)
       });
   }, [seasons.length]);
 
   // Fetch spec evolution when season changes
   useEffect(() => {
     if (!selectedSeason) return;
-    setChartData([]);
-    setTopSpecs([]);
-    setTankChartData([]);
-    setTopTankSpecs([]);
-    setHealerChartData([]);
-    setTopHealerSpecs([]);
-    setDpsChartData([]);
-    setTopDpsSpecs([]);
-    setMeleeChartData([]);
-    setTopMeleeSpecs([]);
-    setRangedChartData([]);
-    setTopRangedSpecs([]);
     setLoading(true);
-    setError(null);
+    // setError(null); // error state removed
     fetchSpecEvolution(selectedSeason)
       .then(data => {
         const evolution = data.evolution || [];
@@ -124,7 +116,6 @@ export const MetaEvolutionPage: React.FC = () => {
         const allTopSpecsSet = new Set<number>();
         weekTopSpecs.forEach(specs => specs.forEach(specId => allTopSpecsSet.add(specId)));
         const allTopSpecs = Array.from(allTopSpecsSet);
-        setTopSpecs(allTopSpecs);
         const chartRows = evolution.map((period, idx) => {
           const row: any = { week: idx + 1 };
           allTopSpecs.forEach(specId => {
@@ -132,7 +123,6 @@ export const MetaEvolutionPage: React.FC = () => {
           });
           return row;
         });
-        setChartData(chartRows);
         // Tank chart logic
         const tankSpecIds = Object.entries(WOW_SPEC_ROLES)
           .filter(([specId, role]) => role === 'tank')
@@ -146,7 +136,6 @@ export const MetaEvolutionPage: React.FC = () => {
         const allTopTankSpecsSet = new Set<number>();
         weekTopTankSpecs.forEach(specs => specs.forEach(specId => allTopTankSpecsSet.add(specId)));
         const allTopTankSpecs = Array.from(allTopTankSpecsSet);
-        setTopTankSpecs(allTopTankSpecs);
         const tankChartRows = evolution.map((period, idx) => {
           const row: any = { week: idx + 1 };
           allTopTankSpecs.forEach(specId => {
@@ -154,7 +143,6 @@ export const MetaEvolutionPage: React.FC = () => {
           });
           return row;
         });
-        setTankChartData(tankChartRows);
         // Healer chart logic
         const healerSpecIds = Object.entries(WOW_SPEC_ROLES)
           .filter(([specId, role]) => role === 'healer')
@@ -168,7 +156,6 @@ export const MetaEvolutionPage: React.FC = () => {
         const allTopHealerSpecsSet = new Set<number>();
         weekTopHealerSpecs.forEach(specs => specs.forEach(specId => allTopHealerSpecsSet.add(specId)));
         const allTopHealerSpecs = Array.from(allTopHealerSpecsSet);
-        setTopHealerSpecs(allTopHealerSpecs);
         const healerChartRows = evolution.map((period, idx) => {
           const row: any = { week: idx + 1 };
           allTopHealerSpecs.forEach(specId => {
@@ -176,7 +163,6 @@ export const MetaEvolutionPage: React.FC = () => {
           });
           return row;
         });
-        setHealerChartData(healerChartRows);
         // Melee DPS chart logic
         const weekTopMeleeSpecs: number[][] = evolution.map(period => {
           return Object.entries(period.spec_counts)
@@ -187,7 +173,6 @@ export const MetaEvolutionPage: React.FC = () => {
         const allTopMeleeSpecsSet = new Set<number>();
         weekTopMeleeSpecs.forEach(specs => specs.forEach(specId => allTopMeleeSpecsSet.add(specId)));
         const allTopMeleeSpecs = Array.from(allTopMeleeSpecsSet);
-        setTopMeleeSpecs(allTopMeleeSpecs);
         const meleeChartRows = evolution.map((period, idx) => {
           const row: any = { week: idx + 1 };
           allTopMeleeSpecs.forEach(specId => {
@@ -195,7 +180,6 @@ export const MetaEvolutionPage: React.FC = () => {
           });
           return row;
         });
-        setMeleeChartData(meleeChartRows);
         // Ranged DPS chart logic
         const weekTopRangedSpecs: number[][] = evolution.map(period => {
           return Object.entries(period.spec_counts)
@@ -206,7 +190,6 @@ export const MetaEvolutionPage: React.FC = () => {
         const allTopRangedSpecsSet = new Set<number>();
         weekTopRangedSpecs.forEach(specs => specs.forEach(specId => allTopRangedSpecsSet.add(specId)));
         const allTopRangedSpecs = Array.from(allTopRangedSpecsSet);
-        setTopRangedSpecs(allTopRangedSpecs);
         const rangedChartRows = evolution.map((period, idx) => {
           const row: any = { week: idx + 1 };
           allTopRangedSpecs.forEach(specId => {
@@ -214,27 +197,76 @@ export const MetaEvolutionPage: React.FC = () => {
           });
           return row;
         });
-        setRangedChartData(rangedChartRows);
+        // DPS chart logic (melee + ranged)
+        const dpsSpecIds = Object.entries(WOW_SPEC_ROLES)
+          .filter(([specId, role]) => role === 'dps')
+          .map(([specId]) => Number(specId));
+        const weekTopDpsSpecs: number[][] = evolution.map(period => {
+          return Object.entries(period.spec_counts)
+            .filter(([specId]) => dpsSpecIds.includes(Number(specId)))
+            .sort((a, b) => b[1] - a[1])
+            .map(([specId]) => Number(specId));
+        });
+        const allTopDpsSpecsSet = new Set<number>();
+        weekTopDpsSpecs.forEach(specs => specs.forEach(specId => allTopDpsSpecsSet.add(specId)));
+        const allTopDpsSpecs = Array.from(allTopDpsSpecsSet);
+        const dpsChartRows = evolution.map((period, idx) => {
+          const row: any = { week: idx + 1 };
+          allTopDpsSpecs.forEach(specId => {
+            row[specId] = weekTopDpsSpecs[idx].includes(specId) ? (period.spec_counts[specId] || 0) : 0;
+          });
+          return row;
+        });
+        setCharts({
+          all: { data: chartRows, topSpecs: allTopSpecs },
+          tank: { data: tankChartRows, topSpecs: allTopTankSpecs },
+          healer: { data: healerChartRows, topSpecs: allTopHealerSpecs },
+          dps: { data: dpsChartRows, topSpecs: allTopDpsSpecs },
+          melee: { data: meleeChartRows, topSpecs: allTopMeleeSpecs },
+          ranged: { data: rangedChartRows, topSpecs: allTopRangedSpecs },
+        });
         setLoading(false);
       })
       .catch(err => {
         setLoading(false);
-        if (err.response && err.response.status === 429) {
-          setError('Rate limited: Too many requests. Please wait and try again.');
-        } else {
-          setError('Failed to load meta evolution data.');
-        }
+        // Error handling UI removed (error state unused)
       });
   }, [selectedSeason]);
 
   // Compute all specs that appear in any week for the stacked bar chart
-  const allSpecsSet = new Set<number>();
-  (chartData || []).forEach(week => {
-    Object.keys(week).forEach(key => {
-      if (key !== 'week') allSpecsSet.add(Number(key));
+  const allSpecs = useMemo(() => {
+    const set = new Set<number>();
+    (charts.all.data || []).forEach((week: Record<string, any>) => {
+      Object.keys(week).forEach((key: string) => {
+        if (key !== 'week') set.add(Number(key));
+      });
     });
-  });
-  const allSpecs = Array.from(allSpecsSet);
+    return Array.from(set);
+  }, [charts.all.data]);
+
+  // Calculate the max Y value for the current chart view
+  const maxDataValue = useMemo(() => {
+    const chart = charts[chartView].data;
+    let max = 0;
+    chart.forEach((row: Record<string, any>) => {
+      Object.keys(row).forEach((key: string) => {
+        if (key !== 'week') {
+          max = Math.max(max, row[key]);
+        }
+      });
+    });
+    // Add a 5% buffer for visual clarity
+    return Math.ceil(max * 1.05);
+  }, [charts, chartView]);
+
+  const chartTitles = {
+    all: 'All Specs Evolution',
+    tank: 'Tank Evolution',
+    healer: 'Healer Evolution',
+    dps: 'DPS Evolution',
+    melee: 'Melee DPS Evolution',
+    ranged: 'Ranged DPS Evolution',
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -259,6 +291,7 @@ export const MetaEvolutionPage: React.FC = () => {
             { key: 'all', label: 'All Specs' },
             { key: 'tank', label: 'Tank' },
             { key: 'healer', label: 'Healer' },
+            { key: 'dps', label: 'DPS' },
             { key: 'melee', label: 'Melee DPS' },
             { key: 'ranged', label: 'Ranged DPS' },
           ].map(({ key, label }) => (
@@ -273,16 +306,23 @@ export const MetaEvolutionPage: React.FC = () => {
         </div>
         <div className="flex-1" />
       </div>
-      {/* Charts */}
-      {chartView === 'all' && (
-        <div className="bg-gray-900 rounded-xl shadow p-6">
-          <h3 className="text-xl font-semibold mb-4">All specs per period</h3>
+      {/* Unified Line Chart for all views */}
+      <div className="bg-gray-900 rounded-xl shadow p-6">
+        <h3 className="text-xl font-semibold mb-4">{chartTitles[chartView]}</h3>
+        {loading ? (
+          <div className="flex justify-center items-center h-[400px]">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
+          </div>
+        ) : (
           <ResponsiveContainer width="100%" height={450}>
-            <LineChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+            <LineChart
+              data={charts[chartView].data}
+              margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+            >
               <XAxis dataKey="week" stroke="#aaa" />
               <YAxis stroke="#aaa" allowDecimals={false} />
               <Tooltip content={<CustomTooltip />} />
-              {topSpecs.map(specId => (
+              {charts[chartView].topSpecs.map((specId: number) => (
                 <Line
                   key={specId}
                   type="monotone"
@@ -295,137 +335,37 @@ export const MetaEvolutionPage: React.FC = () => {
               ))}
             </LineChart>
           </ResponsiveContainer>
-        </div>
-      )}
-      {chartView === 'tank' && (
-        <div className="bg-gray-900 rounded-xl shadow p-6">
-          <h3 className="text-xl font-semibold mb-4">All tank specs per period</h3>
-          <ResponsiveContainer width="100%" height={350}>
-            <LineChart data={tankChartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-              <XAxis dataKey="week" stroke="#aaa" />
-              <YAxis stroke="#aaa" allowDecimals={false} />
-              <Tooltip content={<CustomTooltip />} />
-              {topTankSpecs.map(specId => (
-                <Line
-                  key={specId}
-                  type="monotone"
-                  dataKey={specId.toString()}
-                  stroke={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
-                  strokeWidth={2}
-                  dot={false}
-                  name={WOW_SPECIALIZATIONS[specId] || specId.toString()}
-                />
-              ))}
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-      {chartView === 'healer' && (
-        <div className="bg-gray-900 rounded-xl shadow p-6">
-          <h3 className="text-xl font-semibold mb-4">All healer specs per period</h3>
-          <ResponsiveContainer width="100%" height={350}>
-            <LineChart data={healerChartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-              <XAxis dataKey="week" stroke="#aaa" />
-              <YAxis stroke="#aaa" allowDecimals={false} />
-              <Tooltip content={<CustomTooltip />} />
-              {topHealerSpecs.map(specId => (
-                <Line
-                  key={specId}
-                  type="monotone"
-                  dataKey={specId.toString()}
-                  stroke={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
-                  strokeWidth={2}
-                  dot={false}
-                  name={WOW_SPECIALIZATIONS[specId] || specId.toString()}
-                />
-              ))}
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-      {chartView === 'melee' && (
-        <div className="bg-gray-900 rounded-xl shadow p-6">
-          <h3 className="text-xl font-semibold mb-4">All melee specs per period</h3>
-          <ResponsiveContainer width="100%" height={350}>
-            <LineChart data={meleeChartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-              <XAxis dataKey="week" stroke="#aaa" />
-              <YAxis stroke="#aaa" allowDecimals={false} />
-              <Tooltip content={<CustomTooltip />} />
-              {topMeleeSpecs.map(specId => (
-                <Line
-                  key={specId}
-                  type="monotone"
-                  dataKey={specId.toString()}
-                  stroke={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
-                  strokeWidth={2}
-                  dot={false}
-                  name={WOW_SPECIALIZATIONS[specId] || specId.toString()}
-                />
-              ))}
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-      {chartView === 'ranged' && (
-        <div className="bg-gray-900 rounded-xl shadow p-6">
-          <h3 className="text-xl font-semibold mb-4">All ranged specs per period</h3>
-          <ResponsiveContainer width="100%" height={350}>
-            <LineChart data={rangedChartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-              <XAxis dataKey="week" stroke="#aaa" />
-              <YAxis stroke="#aaa" allowDecimals={false} />
-              <Tooltip content={<CustomTooltip />} />
-              {topRangedSpecs.map(specId => (
-                <Line
-                  key={specId}
-                  type="monotone"
-                  dataKey={specId.toString()}
-                  stroke={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
-                  strokeWidth={2}
-                  dot={false}
-                  name={WOW_SPECIALIZATIONS[specId] || specId.toString()}
-                />
-              ))}
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      )}
+        )}
+      </div>
       {/* Stacked Bar Chart */}
       <div className="bg-gray-900 rounded-xl shadow p-6 mt-8">
         <h3 className="text-xl font-semibold mb-4"></h3>
-        <ResponsiveContainer width="100%" height={450}>
-          <BarChart
-            data={
-              chartView === 'all' ? chartData :
-              chartView === 'tank' ? tankChartData :
-              chartView === 'healer' ? healerChartData :
-              chartView === 'melee' ? meleeChartData :
-              chartView === 'ranged' ? rangedChartData :
-              chartData
-            }
-            margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
-          >
-            <XAxis dataKey="week" stroke="#aaa" />
-            <YAxis stroke="#aaa" allowDecimals={false} />
-            <Tooltip content={<CustomTooltip />} />
-            {(
-              chartView === 'all' ? allSpecs :
-              chartView === 'tank' ? topTankSpecs :
-              chartView === 'healer' ? topHealerSpecs :
-              chartView === 'melee' ? topMeleeSpecs :
-              chartView === 'ranged' ? topRangedSpecs :
-              allSpecs
-            ).map(specId => (
-              <Bar
-                key={specId}
-                dataKey={specId.toString()}
-                stackId="a"
-                fill={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
-                name={WOW_SPECIALIZATIONS[specId] || specId.toString()}
-                barSize={20}
-              />
-            ))}
-          </BarChart>
-        </ResponsiveContainer>
+        {loading ? (
+          <div className="flex justify-center items-center h-[400px]">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height={450}>
+            <BarChart
+              data={charts[chartView].data}
+              margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+            >
+              <XAxis dataKey="week" stroke="#aaa" />
+              <YAxis stroke="#aaa" allowDecimals={false} domain={[0, maxDataValue]} />
+              <Tooltip content={<CustomTooltip />} />
+              {(chartView === 'all' ? allSpecs : charts[chartView].topSpecs).map((specId: number) => (
+                <Bar
+                  key={specId}
+                  dataKey={specId.toString()}
+                  stackId="a"
+                  fill={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
+                  name={WOW_SPECIALIZATIONS[specId] || specId.toString()}
+                  barSize={20}
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </div>
     </div>
   );
