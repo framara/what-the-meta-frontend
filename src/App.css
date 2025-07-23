@@ -1,0 +1,112 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+body, #root {
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  background: #101322;
+  color: #f3f4f6;
+  min-height: 100vh;
+}
+
+header {
+  background: #181c2a;
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.12);
+}
+
+main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.saas-card {
+  background: #181c2a;
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.18);
+  padding: 2rem 2rem 1.5rem 2rem;
+  margin-bottom: 2rem;
+}
+
+.saas-filterbar {
+  background: #23263a;
+  border-radius: 1.25rem;
+  padding: 1rem 2rem;
+  margin-bottom: 2rem;
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.10);
+}
+
+.saas-filterbar select {
+  border-radius: 1.25rem;
+}
+
+.saas-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #181c2a;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.10);
+  border: 1.5px solid #23263a;
+}
+.saas-table th {
+  background: #23263a;
+  color: #f3f4f6;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  border-bottom: 1.5px solid #23263a;
+}
+.saas-table td {
+  padding: 0.6rem 0.5rem;
+  text-align: center;
+  font-size: 0.98rem;
+  border-bottom: 1px solid #23263a;
+}
+.saas-table tbody tr:nth-child(even) {
+  background: #20243a;
+}
+.saas-table tbody tr:hover {
+  background: #2a2e4a;
+  transition: background 0.2s;
+}
+.saas-table th:first-child, .saas-table td:first-child {
+  border-top-left-radius: 1rem;
+}
+.saas-table th:last-child, .saas-table td:last-child {
+  border-top-right-radius: 1rem;
+}
+
+/* Group squares */
+.saas-group-squares {
+  display: flex;
+  gap: 0.25rem;
+  justify-content: center;
+}
+.saas-group-square {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 1.5px solid #23263a;
+  margin-right: 2px;
+  vertical-align: middle;
+  cursor: pointer;
+  transition: transform 0.12s;
+}
+.saas-group-square:hover {
+  transform: scale(1.15);
+  z-index: 2;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background: #23263a;
+}
+::-webkit-scrollbar-thumb {
+  background: #181c2a;
+  border-radius: 8px;
+}
