@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import './App.css';
 import { fetchTopKeys, fetchSeasonInfo } from './api';
-import { FilterBar } from './components/FilterBar';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { useFilterState } from './FilterContext';
+import { FilterBar } from './components/FilterBar';
 import { LeaderboardTable } from './components/LeaderboardTable';
 import { SummaryStats } from './components/SummaryStats';
+import { MetaEvolutionPage } from './components/MetaEvolutionPage';
 
 function App() {
   const [apiData, setApiData] = useState<any>(null);
@@ -31,19 +33,22 @@ function App() {
   }, [filter.season_id]);
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 font-sans">
-      <header className="w-full py-6 px-4 bg-gray-900 shadow-md mb-8">
-        <h1 className="text-2xl font-bold tracking-wide text-center">What The Meta?</h1>
-      </header>
-      <main className="max-w-5xl mx-auto px-4">
-        <div className="bg-gray-900 rounded-xl shadow-lg p-6 mb-8">
-          <FilterBar />
-          <SummaryStats runs={apiData || []} dungeons={dungeons} />
-          {apiError && <div className="text-red-400 mb-4">Error: {apiError}</div>}
-          <LeaderboardTable runs={apiData || []} dungeons={dungeons} />
-        </div>
-      </main>
-    </div>
+    <Router>
+      <nav className="flex gap-6 px-8 py-4 bg-gray-900 text-gray-100 shadow mb-8 rounded-b-2xl">
+        <Link to="/" className="font-bold text-lg hover:text-blue-400 transition">Dashboard</Link>
+        <Link to="/meta-evolution" className="font-bold text-lg hover:text-blue-400 transition">Meta Evolution</Link>
+      </nav>
+      <Routes>
+        <Route path="/" element={
+          <div className="max-w-7xl mx-auto px-4">
+            <FilterBar />
+            <SummaryStats runs={apiData || []} dungeons={dungeons} />
+            <LeaderboardTable runs={apiData || []} dungeons={dungeons} />
+          </div>
+        } />
+        <Route path="/meta-evolution" element={<MetaEvolutionPage />} />
+      </Routes>
+    </Router>
   );
 }
 

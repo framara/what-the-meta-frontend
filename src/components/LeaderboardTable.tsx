@@ -93,7 +93,9 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
               <td className="px-2 py-1">
                 <div className="saas-group-squares">
                   {sortMembers(run.members).map((m, idx) => {
-                    const roleCap = m.role.charAt(0).toUpperCase() + m.role.slice(1);
+                    const roleCap = m.role && typeof m.role === 'string'
+                      ? m.role.charAt(0).toUpperCase() + m.role.slice(1)
+                      : 'Unknown';
                     const tooltipContent = `Name: ${m.character_name}\nRole: ${roleCap}\nClass: ${WOW_CLASS_NAMES[m.class_id] || m.class_id}\nSpec: ${WOW_SPECIALIZATIONS[m.spec_id] || m.spec_id}`;
                     const classColor = WOW_CLASS_COLORS[m.class_id] || '#23263a';
                     return (

@@ -38,4 +38,17 @@ export async function fetchSeasonInfo(seasonId: number) {
     periods: Array<{ period_id: number; period_name: string }>;
     dungeons: Array<{ dungeon_id: number; dungeon_name: string }>;
   };
+}
+
+export async function fetchSpecEvolution(seasonId: number) {
+  const url = `${API_BASE_URL}/meta/spec-evolution/${seasonId}`;
+  const response = await axios.get(url);
+  return response.data as {
+    season_id: number;
+    evolution: Array<{
+      period_id: number;
+      period_name?: string;
+      spec_counts: Record<string, number>;
+    }>;
+  };
 } 
