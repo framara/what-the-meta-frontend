@@ -1,43 +1,5 @@
 import React, { useState } from 'react';
-
-// WoW class colors (official)
-const WOW_CLASS_COLORS: Record<number, string> = {
-  1: '#C79C6E', // Warrior
-  2: '#F58CBA', // Paladin
-  3: '#ABD473', // Hunter
-  4: '#FFF569', // Rogue
-  5: '#FFFFFF', // Priest
-  6: '#C41F3B', // Death Knight
-  7: '#0070DE', // Shaman
-  8: '#69CCF0', // Mage
-  9: '#9482C9', // Warlock
-  10: '#00FF96', // Monk
-  11: '#FF7D0A', // Druid
-  12: '#A330C9', // Demon Hunter
-  13: '#33937F', // Evoker
-};
-
-// WoW spec names (id -> name)
-const WOW_SPECIALIZATIONS: Record<number, string> = {
-  71: 'Arms', 72: 'Fury', 73: 'Protection', // Warrior
-  65: 'Holy', 66: 'Protection', 70: 'Retribution', // Paladin
-  253: 'Beast Mastery', 254: 'Marksmanship', 255: 'Survival', // Hunter
-  259: 'Assassination', 260: 'Outlaw', 261: 'Subtlety', // Rogue
-  256: 'Discipline', 257: 'Holy', 258: 'Shadow', // Priest
-  250: 'Blood', 251: 'Frost', 252: 'Unholy', // Death Knight
-  262: 'Elemental', 263: 'Enhancement', 264: 'Restoration', // Shaman
-  62: 'Arcane', 63: 'Fire', 64: 'Frost', // Mage
-  265: 'Affliction', 266: 'Demonology', 267: 'Destruction', // Warlock
-  268: 'Brewmaster', 269: 'Windwalker', 270: 'Mistweaver', // Monk
-  102: 'Balance', 103: 'Feral', 104: 'Guardian', 105: 'Restoration', // Druid
-  577: 'Havoc', 581: 'Vengeance', // Demon Hunter
-  1467: 'Devastation', 1468: 'Preservation', 1473: 'Augmentation', // Evoker
-};
-
-// WoW class names (id -> name)
-const WOW_CLASS_NAMES: Record<number, string> = {
-  1: 'Warrior', 2: 'Paladin', 3: 'Hunter', 4: 'Rogue', 5: 'Priest', 6: 'Death Knight', 7: 'Shaman', 8: 'Mage', 9: 'Warlock', 10: 'Monk', 11: 'Druid', 12: 'Demon Hunter', 13: 'Evoker',
-};
+import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_CLASS_NAMES } from './wow-constants';
 
 interface GroupMember {
   character_name: string;
@@ -131,7 +93,8 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
               <td className="px-2 py-1">
                 <div className="saas-group-squares">
                   {sortMembers(run.members).map((m, idx) => {
-                    const tooltipContent = `Name: ${m.character_name}\nRole: ${m.role}\nClass: ${WOW_CLASS_NAMES[m.class_id] || m.class_id}\nSpec: ${WOW_SPECIALIZATIONS[m.spec_id] || m.spec_id}`;
+                    const roleCap = m.role.charAt(0).toUpperCase() + m.role.slice(1);
+                    const tooltipContent = `Name: ${m.character_name}\nRole: ${roleCap}\nClass: ${WOW_CLASS_NAMES[m.class_id] || m.class_id}\nSpec: ${WOW_SPECIALIZATIONS[m.spec_id] || m.spec_id}`;
                     const classColor = WOW_CLASS_COLORS[m.class_id] || '#23263a';
                     return (
                       <span
