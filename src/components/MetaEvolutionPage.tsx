@@ -59,6 +59,7 @@ export const MetaEvolutionPage: React.FC = () => {
   const [topMeleeSpecs, setTopMeleeSpecs] = useState<number[]>([]);
   const [rangedChartData, setRangedChartData] = useState<any[]>([]);
   const [topRangedSpecs, setTopRangedSpecs] = useState<number[]>([]);
+  const [chartView, setChartView] = useState<'all' | 'tank' | 'healer' | 'melee' | 'ranged'>('all');
 
   // Fetch all seasons on mount (only if not already loaded)
   useEffect(() => {
@@ -223,131 +224,155 @@ export const MetaEvolutionPage: React.FC = () => {
     <div className="max-w-6xl mx-auto px-4 py-8">
       <h2 className="text-3xl font-bold mb-6 text-center">Meta Evolution</h2>
       <div className="text-center text-md text-gray-400 mb-8">Sample data: Top 1000 dungeons per week.</div>
-      {/* Filter bar */}
-      <div className="flex gap-4 justify-center mb-8">
-        <select
-          className="px-4 py-2 rounded bg-gray-800 text-gray-100 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={selectedSeason || ''}
-          onChange={e => setSelectedSeason(Number(e.target.value))}
-          disabled={loading}
-        >
-          {seasons.map(s => (
-            <option key={s.season_id} value={s.season_id}>{s.season_name}</option>
+      {/* Filter bar and chart view selector on the same line */}
+      <div className="flex items-center justify-between mb-8 gap-4">
+        <div className="flex-1">
+          <select
+            className="px-4 py-2 rounded bg-gray-800 text-gray-100 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={selectedSeason || ''}
+            onChange={e => setSelectedSeason(Number(e.target.value))}
+            disabled={loading}
+          >
+            {seasons.map(s => (
+              <option key={s.season_id} value={s.season_id}>{s.season_name}</option>
+            ))}
+          </select>
+        </div>
+        <div className="flex-1 flex justify-center">
+          {[
+            { key: 'all', label: 'All Specs' },
+            { key: 'tank', label: 'Tank' },
+            { key: 'healer', label: 'Healer' },
+            { key: 'melee', label: 'Melee DPS' },
+            { key: 'ranged', label: 'Ranged DPS' },
+          ].map(({ key, label }) => (
+            <button
+              key={key}
+              className={`px-6 py-1.5 rounded-full font-semibold transition border-2 mx-1 ${chartView === key ? 'bg-blue-600 text-white border-blue-600 shadow' : 'bg-gray-800 text-gray-200 border-gray-700 hover:bg-gray-700'}`}
+              onClick={() => setChartView(key as any)}
+            >
+              {label}
+            </button>
           ))}
-        </select>
-        {loading && <span className="text-gray-400 ml-4">Loading...</span>}
-        {error && <span className="text-red-400 ml-4">{error}</span>}
+        </div>
+        <div className="flex-1" />
       </div>
-
-      <div className="bg-gray-900 rounded-xl shadow p-6">
-        <h3 className="text-xl font-semibold mb-4">Top 15 Specs Per Period</h3>
-        <ResponsiveContainer width="100%" height={450}>
-          <LineChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-            <XAxis dataKey="week" stroke="#aaa" />
-            <YAxis stroke="#aaa" allowDecimals={false} />
-            <Tooltip content={<CustomTooltip />} />
-            {topSpecs.map(specId => (
-              <Line
-                key={specId}
-                type="monotone"
-                dataKey={specId.toString()}
-                stroke={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
-                strokeWidth={2}
-                dot={false}
-                name={WOW_SPECIALIZATIONS[specId] || specId.toString()}
-              />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-      {/* Tank chart */}
-      <div className="bg-gray-900 rounded-xl shadow p-6 mt-8">
-        <h3 className="text-xl font-semibold mb-4">Top 6 Tank Specs Per Period</h3>
-        <ResponsiveContainer width="100%" height={350}>
-          <LineChart data={tankChartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-            <XAxis dataKey="week" stroke="#aaa" />
-            <YAxis stroke="#aaa" allowDecimals={false} />
-            <Tooltip content={<CustomTooltip />} />
-            {topTankSpecs.map(specId => (
-              <Line
-                key={specId}
-                type="monotone"
-                dataKey={specId.toString()}
-                stroke={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
-                strokeWidth={2}
-                dot={false}
-                name={WOW_SPECIALIZATIONS[specId] || specId.toString()}
-              />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-      {/* Healer chart */}
-      <div className="bg-gray-900 rounded-xl shadow p-6 mt-8">
-        <h3 className="text-xl font-semibold mb-4">Top 7 Healer Specs Per Period</h3>
-        <ResponsiveContainer width="100%" height={350}>
-          <LineChart data={healerChartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-            <XAxis dataKey="week" stroke="#aaa" />
-            <YAxis stroke="#aaa" allowDecimals={false} />
-            <Tooltip content={<CustomTooltip />} />
-            {topHealerSpecs.map(specId => (
-              <Line
-                key={specId}
-                type="monotone"
-                dataKey={specId.toString()}
-                stroke={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
-                strokeWidth={2}
-                dot={false}
-                name={WOW_SPECIALIZATIONS[specId] || specId.toString()}
-              />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-      {/* Melee DPS chart */}
-      <div className="bg-gray-900 rounded-xl shadow p-6 mt-8">
-        <h3 className="text-xl font-semibold mb-4">Top 10 Melee DPS Specs Per Period</h3>
-        <ResponsiveContainer width="100%" height={350}>
-          <LineChart data={meleeChartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-            <XAxis dataKey="week" stroke="#aaa" />
-            <YAxis stroke="#aaa" allowDecimals={false} />
-            <Tooltip content={<CustomTooltip />} />
-            {topMeleeSpecs.map(specId => (
-              <Line
-                key={specId}
-                type="monotone"
-                dataKey={specId.toString()}
-                stroke={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
-                strokeWidth={2}
-                dot={false}
-                name={WOW_SPECIALIZATIONS[specId] || specId.toString()}
-              />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-      {/* Ranged DPS chart */}
-      <div className="bg-gray-900 rounded-xl shadow p-6 mt-8">
-        <h3 className="text-xl font-semibold mb-4">Top 10 Ranged DPS Specs Per Period</h3>
-        <ResponsiveContainer width="100%" height={350}>
-          <LineChart data={rangedChartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-            <XAxis dataKey="week" stroke="#aaa" />
-            <YAxis stroke="#aaa" allowDecimals={false} />
-            <Tooltip content={<CustomTooltip />} />
-            {topRangedSpecs.map(specId => (
-              <Line
-                key={specId}
-                type="monotone"
-                dataKey={specId.toString()}
-                stroke={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
-                strokeWidth={2}
-                dot={false}
-                name={WOW_SPECIALIZATIONS[specId] || specId.toString()}
-              />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      {/* Charts */}
+      {chartView === 'all' && (
+        <div className="bg-gray-900 rounded-xl shadow p-6">
+          <h3 className="text-xl font-semibold mb-4">Top 15 Specs Per Period</h3>
+          <ResponsiveContainer width="100%" height={450}>
+            <LineChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+              <XAxis dataKey="week" stroke="#aaa" />
+              <YAxis stroke="#aaa" allowDecimals={false} />
+              <Tooltip content={<CustomTooltip />} />
+              {topSpecs.map(specId => (
+                <Line
+                  key={specId}
+                  type="monotone"
+                  dataKey={specId.toString()}
+                  stroke={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
+                  strokeWidth={2}
+                  dot={false}
+                  name={WOW_SPECIALIZATIONS[specId] || specId.toString()}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+      {chartView === 'tank' && (
+        <div className="bg-gray-900 rounded-xl shadow p-6">
+          <h3 className="text-xl font-semibold mb-4">Top 6 Tank Specs Per Period</h3>
+          <ResponsiveContainer width="100%" height={350}>
+            <LineChart data={tankChartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+              <XAxis dataKey="week" stroke="#aaa" />
+              <YAxis stroke="#aaa" allowDecimals={false} />
+              <Tooltip content={<CustomTooltip />} />
+              {topTankSpecs.map(specId => (
+                <Line
+                  key={specId}
+                  type="monotone"
+                  dataKey={specId.toString()}
+                  stroke={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
+                  strokeWidth={2}
+                  dot={false}
+                  name={WOW_SPECIALIZATIONS[specId] || specId.toString()}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+      {chartView === 'healer' && (
+        <div className="bg-gray-900 rounded-xl shadow p-6">
+          <h3 className="text-xl font-semibold mb-4">Top 7 Healer Specs Per Period</h3>
+          <ResponsiveContainer width="100%" height={350}>
+            <LineChart data={healerChartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+              <XAxis dataKey="week" stroke="#aaa" />
+              <YAxis stroke="#aaa" allowDecimals={false} />
+              <Tooltip content={<CustomTooltip />} />
+              {topHealerSpecs.map(specId => (
+                <Line
+                  key={specId}
+                  type="monotone"
+                  dataKey={specId.toString()}
+                  stroke={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
+                  strokeWidth={2}
+                  dot={false}
+                  name={WOW_SPECIALIZATIONS[specId] || specId.toString()}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+      {chartView === 'melee' && (
+        <div className="bg-gray-900 rounded-xl shadow p-6">
+          <h3 className="text-xl font-semibold mb-4">Top 10 Melee DPS Specs Per Period</h3>
+          <ResponsiveContainer width="100%" height={350}>
+            <LineChart data={meleeChartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+              <XAxis dataKey="week" stroke="#aaa" />
+              <YAxis stroke="#aaa" allowDecimals={false} />
+              <Tooltip content={<CustomTooltip />} />
+              {topMeleeSpecs.map(specId => (
+                <Line
+                  key={specId}
+                  type="monotone"
+                  dataKey={specId.toString()}
+                  stroke={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
+                  strokeWidth={2}
+                  dot={false}
+                  name={WOW_SPECIALIZATIONS[specId] || specId.toString()}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+      {chartView === 'ranged' && (
+        <div className="bg-gray-900 rounded-xl shadow p-6">
+          <h3 className="text-xl font-semibold mb-4">Top 10 Ranged DPS Specs Per Period</h3>
+          <ResponsiveContainer width="100%" height={350}>
+            <LineChart data={rangedChartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+              <XAxis dataKey="week" stroke="#aaa" />
+              <YAxis stroke="#aaa" allowDecimals={false} />
+              <Tooltip content={<CustomTooltip />} />
+              {topRangedSpecs.map(specId => (
+                <Line
+                  key={specId}
+                  type="monotone"
+                  dataKey={specId.toString()}
+                  stroke={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
+                  strokeWidth={2}
+                  dot={false}
+                  name={WOW_SPECIALIZATIONS[specId] || specId.toString()}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 }; 

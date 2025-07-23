@@ -36,11 +36,11 @@ export const FilterBar: React.FC = () => {
   }, [filter.season_id]);
 
   return (
-    <div className="saas-filterbar w-full flex flex-row items-center justify-between gap-6 px-8 py-4 bg-gray-800/80 rounded-2xl shadow-md border border-gray-700">
-      <div className="flex items-center gap-2 min-w-[180px] flex-1">
+    <div className="w-full flex flex-wrap items-center justify-between gap-4 px-8 py-4 bg-gray-800/80 rounded-2xl shadow-md border border-gray-700 mb-8">
+      <div className="flex items-center gap-2 mb-2">
         <span className="font-medium text-gray-100">Season:</span>
         <select
-          className="px-3 py-1 rounded-full bg-gray-900 text-gray-100 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all w-full"
+          className="px-4 py-2 rounded-md font-semibold border-2 bg-gray-900 text-gray-100 border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={filter.season_id}
           onChange={e => dispatch({ type: 'SET_SEASON', season_id: Number(e.target.value) })}
           disabled={loading || seasonOptions.length === 0}
@@ -50,10 +50,10 @@ export const FilterBar: React.FC = () => {
           ))}
         </select>
       </div>
-      <div className="flex items-center gap-2 min-w-[180px] flex-1">
+      <div className="flex items-center gap-2 mb-2">
         <span className="font-medium text-gray-100">Week:</span>
         <select
-          className="px-3 py-1 rounded-full bg-gray-900 text-gray-100 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all w-full"
+          className="px-4 py-2 rounded-md font-semibold border-2 bg-gray-900 text-gray-100 border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={filter.period_id || ''}
           onChange={e => dispatch({ type: 'SET_PERIOD', period_id: e.target.value ? Number(e.target.value) : undefined })}
           disabled={loading || periodOptions.length === 0}
@@ -64,10 +64,10 @@ export const FilterBar: React.FC = () => {
           ))}
         </select>
       </div>
-      <div className="flex items-center gap-2 min-w-[220px] flex-1">
+      <div className="flex items-center gap-2 mb-2">
         <span className="font-medium text-gray-100">Dungeon:</span>
         <select
-          className="px-3 py-1 rounded-full bg-gray-900 text-gray-100 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all w-full"
+          className="px-4 py-2 rounded-md font-semibold border-2 bg-gray-900 text-gray-100 border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 max-w-[220px]"
           value={filter.dungeon_id || ''}
           onChange={e => dispatch({ type: 'SET_DUNGEON', dungeon_id: e.target.value ? Number(e.target.value) : undefined })}
           disabled={loading || dungeonOptions.length === 0}
@@ -78,10 +78,10 @@ export const FilterBar: React.FC = () => {
           ))}
         </select>
       </div>
-      <div className="flex items-center gap-2 min-w-[120px] flex-1">
+      <div className="flex items-center gap-2 mb-2">
         <span className="font-medium text-gray-100">Top:</span>
         <select
-          className="px-3 py-1 rounded-full bg-gray-900 text-gray-100 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all w-full"
+          className="px-4 py-2 rounded-md font-semibold border-2 bg-gray-900 text-gray-100 border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={filter.limit}
           onChange={e => dispatch({ type: 'SET_LIMIT', limit: Number(e.target.value) })}
         >
