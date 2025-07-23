@@ -49,11 +49,11 @@ export const WOW_SPEC_ROLES: Record<number, string> = {
 
 // Melee DPS spec IDs
 export const WOW_MELEE_SPECS = new Set([
-  72, 73, 66, 70, 255, 260, 261, 252, 263, 269, 103, 104, 577, 581, 268, 269, 270, 1467, 1473,
+  71, 72, 70, 255, 259, 260, 261, 251, 252, 263, 269, 103, 577,
   // Add more if needed
 ]);
 // Ranged DPS spec IDs
 export const WOW_RANGED_SPECS = new Set([
-  62, 63, 64, 253, 254, 256, 257, 258, 262, 264, 102, 105, 265, 266, 267, 1468,
+  62, 63, 64, 253, 254, 258, 262, 102, 265, 266, 267, 1467, 1473
   // Add more if needed
 ]); 

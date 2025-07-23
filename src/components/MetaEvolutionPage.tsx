@@ -68,19 +68,8 @@ export const MetaEvolutionPage: React.FC = () => {
   const [seasons, setSeasons] = useState<{ season_id: number; season_name: string }[]>([]);
   const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
-  // const [error, setError] = useState<string | null>(null);
-  // const [infoHover, setInfoHover] = useState(false);
-  const [tankChartData, setTankChartData] = useState<any[]>([]);
-  const [topTankSpecs, setTopTankSpecs] = useState<number[]>([]);
-  const [healerChartData, setHealerChartData] = useState<any[]>([]);
-  const [topHealerSpecs, setTopHealerSpecs] = useState<number[]>([]);
-  const [dpsChartData, setDpsChartData] = useState<any[]>([]);
-  const [topDpsSpecs, setTopDpsSpecs] = useState<number[]>([]);
-  const [meleeChartData, setMeleeChartData] = useState<any[]>([]);
-  const [topMeleeSpecs, setTopMeleeSpecs] = useState<number[]>([]);
-  const [rangedChartData, setRangedChartData] = useState<any[]>([]);
-  const [topRangedSpecs, setTopRangedSpecs] = useState<number[]>([]);
   const [chartView, setChartView] = useState<'all' | 'tank' | 'healer' | 'dps' | 'melee' | 'ranged'>('all');
+  const [showHeatmap, setShowHeatmap] = useState(false);
 
   // Fetch all seasons on mount (only if not already loaded)
   useEffect(() => {
@@ -273,9 +262,9 @@ export const MetaEvolutionPage: React.FC = () => {
       <h2 className="text-3xl font-bold mb-6 text-center">Meta Evolution</h2>
       <div className="text-center text-md text-gray-400 mb-8">Sample data: Top 1000 dungeons per week.</div>
       {/* Filter bar and chart view selector on the same line */}
-      <div className="flex items-center justify-between mb-8 gap-4">
-        <div className="flex-1">
-          <select
+      
+      <div className="flex w-full items-center gap-2 mb-2">
+      <select
             className="px-4 py-2 rounded bg-gray-800 text-gray-100 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={selectedSeason || ''}
             onChange={e => setSelectedSeason(Number(e.target.value))}
@@ -285,8 +274,7 @@ export const MetaEvolutionPage: React.FC = () => {
               <option key={s.season_id} value={s.season_id}>{s.season_name}</option>
             ))}
           </select>
-        </div>
-        <div className="flex-1 flex justify-center">
+        <div className="flex flex-1 justify-center gap-2">
           {[
             { key: 'all', label: 'All Specs' },
             { key: 'tank', label: 'Tank' },
@@ -297,76 +285,161 @@ export const MetaEvolutionPage: React.FC = () => {
           ].map(({ key, label }) => (
             <button
               key={key}
-              className={`px-6 py-1.5 rounded-full font-semibold transition border-2 mx-1 ${chartView === key ? 'bg-blue-600 text-white border-blue-600 shadow' : 'bg-gray-800 text-gray-200 border-gray-700 hover:bg-gray-700'}`}
-              onClick={() => setChartView(key as any)}
+              className={`px-6 py-1.5 rounded-full font-semibold transition border-2 ${chartView === key && !showHeatmap ? 'bg-blue-600 text-white border-blue-600 shadow' : 'bg-gray-800 text-gray-200 border-gray-700 hover:bg-gray-700'}`}
+              onClick={() => { setChartView(key as any); setShowHeatmap(false); }}
             >
               {label}
             </button>
           ))}
         </div>
-        <div className="flex-1" />
+        <div className="flex items-center">
+          <button
+            className={`px-6 py-1.5 rounded-full font-semibold transition border-2 ml-6 ${showHeatmap ? 'bg-blue-600 text-white border-blue-600 shadow' : 'bg-gray-800 text-gray-200 border-gray-700 hover:bg-gray-700'}`}
+            onClick={() => setShowHeatmap(true)}
+          >
+            Heatmap
+          </button>
+        </div>
       </div>
-      {/* Unified Line Chart for all views */}
-      <div className="bg-gray-900 rounded-xl shadow p-6">
-        <h3 className="text-xl font-semibold mb-4">{chartTitles[chartView]}</h3>
-        {loading ? (
-          <div className="flex justify-center items-center h-[400px]">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
+      {/* Unified Line Chart and Stacked Bar Chart: Only show if not in heatmap mode */}
+      {!showHeatmap && (
+        <>
+          <div className="bg-gray-900 rounded-xl shadow p-6">
+            <h3 className="text-xl font-semibold mb-4">{chartTitles[chartView]}</h3>
+            {loading ? (
+              <div className="flex justify-center items-center h-[400px]">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={450}>
+                <LineChart
+                  data={charts[chartView].data}
+                  margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+                >
+                  <XAxis dataKey="week" stroke="#aaa" />
+                  <YAxis stroke="#aaa" allowDecimals={false} />
+                  <Tooltip content={<CustomTooltip />} />
+                  {charts[chartView].topSpecs.map((specId: number) => (
+                    <Line
+                      key={specId}
+                      type="monotone"
+                      dataKey={specId.toString()}
+                      stroke={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
+                      strokeWidth={2}
+                      dot={false}
+                      name={WOW_SPECIALIZATIONS[specId] || specId.toString()}
+                    />
+                  ))}
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </div>
-        ) : (
-          <ResponsiveContainer width="100%" height={450}>
-            <LineChart
-              data={charts[chartView].data}
-              margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
-            >
-              <XAxis dataKey="week" stroke="#aaa" />
-              <YAxis stroke="#aaa" allowDecimals={false} />
-              <Tooltip content={<CustomTooltip />} />
-              {charts[chartView].topSpecs.map((specId: number) => (
-                <Line
-                  key={specId}
-                  type="monotone"
-                  dataKey={specId.toString()}
-                  stroke={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
-                  strokeWidth={2}
-                  dot={false}
-                  name={WOW_SPECIALIZATIONS[specId] || specId.toString()}
-                />
-              ))}
-            </LineChart>
-          </ResponsiveContainer>
-        )}
-      </div>
-      {/* Stacked Bar Chart */}
-      <div className="bg-gray-900 rounded-xl shadow p-6 mt-8">
-        <h3 className="text-xl font-semibold mb-4"></h3>
-        {loading ? (
-          <div className="flex justify-center items-center h-[400px]">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
+          {/* Stacked Bar Chart */}
+          <div className="bg-gray-900 rounded-xl shadow p-6 mt-8">
+            <h3 className="text-xl font-semibold mb-4"></h3>
+            {loading ? (
+              <div className="flex justify-center items-center h-[400px]">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={450}>
+                <BarChart
+                  data={charts[chartView].data}
+                  margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+                >
+                  <XAxis dataKey="week" stroke="#aaa" />
+                  <YAxis stroke="#aaa" allowDecimals={false} domain={[0, maxDataValue]} />
+                  <Tooltip content={<CustomTooltip />} />
+                  {(chartView === 'all' ? allSpecs : charts[chartView].topSpecs).map((specId: number) => (
+                    <Bar
+                      key={specId}
+                      dataKey={specId.toString()}
+                      stackId="a"
+                      fill={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
+                      name={WOW_SPECIALIZATIONS[specId] || specId.toString()}
+                      barSize={20}
+                    />
+                  ))}
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
-        ) : (
-          <ResponsiveContainer width="100%" height={450}>
-            <BarChart
-              data={charts[chartView].data}
-              margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
-            >
-              <XAxis dataKey="week" stroke="#aaa" />
-              <YAxis stroke="#aaa" allowDecimals={false} domain={[0, maxDataValue]} />
-              <Tooltip content={<CustomTooltip />} />
-              {(chartView === 'all' ? allSpecs : charts[chartView].topSpecs).map((specId: number) => (
-                <Bar
-                  key={specId}
-                  dataKey={specId.toString()}
-                  stackId="a"
-                  fill={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
-                  name={WOW_SPECIALIZATIONS[specId] || specId.toString()}
-                  barSize={20}
-                />
-              ))}
-            </BarChart>
-          </ResponsiveContainer>
-        )}
+        </>
+      )}
+      {/* Heatmap view */}
+      {showHeatmap && !loading && (
+        <div className="bg-gray-900 rounded-xl shadow p-6 mt-8 overflow-x-auto">
+          <h3 className="text-xl font-semibold mb-4">Spec Popularity Heatmap</h3>
+          <HeatmapGrid data={charts.all.data} specs={allSpecs} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+// HeatmapGrid component
+const HeatmapGrid: React.FC<{ data: any[]; specs: number[] }> = ({ data, specs }) => {
+  // Build a matrix: rows = specs, cols = weeks
+  const weeks = data.map((row: any) => row.week);
+  // Find max value for color scaling
+  let max = 0;
+  specs.forEach(specId => {
+    data.forEach((row: any) => {
+      max = Math.max(max, row[specId] || 0);
+    });
+  });
+  // Tooltip state
+  const [tooltip, setTooltip] = React.useState<{ x: number; y: number; specId: number; week: number; value: number } | null>(null);
+  // Grid template: 1 column for spec name, then one for each week
+  const gridTemplate = `minmax(100px, 1fr) repeat(${weeks.length}, 40px)`;
+  return (
+    <div className="relative">
+      {/* Header row */}
+      <div
+        className="grid text-xs text-gray-400 mb-1"
+        style={{ gridTemplateColumns: gridTemplate }}
+      >
+        <div />
+        {weeks.map((w: number) => (
+          <div key={w} className="text-center">W{w}</div>
+        ))}
       </div>
+      {/* Data rows */}
+      {specs.map(specId => (
+        <div
+          key={specId}
+          className="grid items-center mb-0.5"
+          style={{ gridTemplateColumns: gridTemplate }}
+        >
+          <div className="truncate text-xs pr-2" style={{ color: WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#aaa' }}>{WOW_SPECIALIZATIONS[specId] || specId}</div>
+          {weeks.map((week, colIdx) => {
+            const value = data[colIdx]?.[specId] || 0;
+            // Color intensity: interpolate from gray to class color
+            const color = WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888';
+            const bg = value === 0 ? '#23263a' : color;
+            const opacity = value === 0 ? 0.05 : Math.max(0.1, value / max);
+            return (
+              <div
+                key={week}
+                className="h-6 rounded cursor-pointer relative"
+                style={{ background: bg, opacity, border: value > 0 ? '1px solid #222' : '1px solid #23263a', marginLeft: 2, marginRight: 2 }}
+                onMouseEnter={e => setTooltip({ x: e.currentTarget.getBoundingClientRect().x, y: e.currentTarget.getBoundingClientRect().y, specId, week, value })}
+                onMouseLeave={() => setTooltip(null)}
+              />
+            );
+          })}
+        </div>
+      ))}
+      {tooltip && (
+        <div
+          className="fixed z-50 px-3 py-2 rounded bg-gray-800 text-xs text-white shadow-lg pointer-events-none"
+          style={{ left: tooltip.x + 24, top: tooltip.y - 8 }}
+        >
+          <div><b>{WOW_SPECIALIZATIONS[tooltip.specId] || tooltip.specId}</b></div>
+          <div>Week {tooltip.week}</div>
+          <div>Runs: <b>{tooltip.value}</b></div>
+        </div>
+      )}
     </div>
   );
 }; 

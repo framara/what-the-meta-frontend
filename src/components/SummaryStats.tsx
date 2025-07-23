@@ -1,5 +1,5 @@
 import React from 'react';
-import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_CLASS_NAMES, WOW_SPEC_TO_CLASS, WOW_SPEC_ROLES } from './wow-constants';
+import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_SPEC_ROLES } from './wow-constants';
 
 interface GroupMember {
   character_name: string;
@@ -62,8 +62,6 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
       }
     });
   });
-  const mostPopularSpecId = Object.entries(specCounts).sort((a, b) => b[1] - a[1])[0]?.[0];
-  const mostPopularSpec = WOW_SPECIALIZATIONS[Number(mostPopularSpecId)] || '-';
   const mostPopularByRole: Record<string, string> = {};
   (['tank', 'healer', 'dps'] as const).forEach(role => {
     const entries = Object.entries(roleSpecCounts[role]);
