@@ -155,7 +155,7 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
             borderColor: '#23263a',
             borderWidth: 1.5,
             color:
-              tooltip.color.toLowerCase() === '#fff' || tooltip.color.toLowerCase() === '#ffffff'
+              tooltip.color.toLowerCase() === '#fff' || tooltip.color.toLowerCase() === '#ffffff' || tooltip.color.toLowerCase() === '#fff569'
                 ? '#23263a'
                 : '#fff',
             fontWeight: 500,
