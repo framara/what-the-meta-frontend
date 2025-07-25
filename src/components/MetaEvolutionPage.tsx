@@ -140,6 +140,7 @@ export const MetaEvolutionPage: React.FC = () => {
   const [showPercentAreaChart, setShowPercentAreaChart] = useState(true);
   const [showHeatmapGrid, setShowHeatmapGrid] = useState(true);
   const [showTreemap, setShowTreemap] = useState(true);
+  const [treemapWeek, setTreemapWeek] = useState<number | null>(null);
 
   // Fetch all seasons on mount (only if not already loaded)
   useEffect(() => {
@@ -334,6 +335,11 @@ export const MetaEvolutionPage: React.FC = () => {
     });
   }, [charts, chartView, allSpecs]);
 
+  // Reset treemapWeek when chartView or charts change (e.g., season or role changes)
+  React.useEffect(() => {
+    setTreemapWeek(null);
+  }, [chartView, charts]);
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <h2 className="text-3xl font-bold mb-6 text-center">Meta Evolution</h2>
@@ -521,28 +527,47 @@ export const MetaEvolutionPage: React.FC = () => {
           </button>
           <h3 className="text-xl font-semibold mb-4">Spec Popularity: treemap</h3>
           {showTreemap && (() => {
-            // Use the most recent week's data for the selected chartView
+            // Use the selected week's data for the selected chartView
             const chartData = charts[chartView].data;
             if (!chartData || chartData.length === 0) return <div className="text-center text-gray-400">No data</div>;
-            const lastWeek = chartData[chartData.length - 1];
+            const weekCount = chartData.length;
+            // Default to last week if not set
+            const weekIdx = treemapWeek !== null ? treemapWeek : weekCount - 1;
+            const weekData = chartData[weekIdx];
             const specs = (chartView === 'all' ? allSpecs : charts[chartView].topSpecs);
             const treemapData = specs.map(specId => ({
               name: WOW_SPECIALIZATIONS[specId] || specId,
-              value: lastWeek[specId] || 0,
+              value: weekData[specId] || 0,
               color: WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888',
             })).filter(d => d.value > 0);
             if (treemapData.length === 0) return <div className="text-center text-gray-400">No data</div>;
             return (
-              <ResponsiveContainer width="100%" height={400}>
-                <Treemap
-                  data={treemapData}
-                  dataKey="value"
-                  aspectRatio={4 / 3}
-                  content={<CustomContentTreemap />}
-                >
-                  <Tooltip content={<TreemapTooltip />} />
-                </Treemap>
-              </ResponsiveContainer>
+              <>
+                <div className="flex items-center gap-4 mb-2 mt-2">
+                  <span className="text-xs text-gray-400">Week</span>
+                  <input
+                    type="range"
+                    min={0}
+                    max={weekCount - 1}
+                    value={weekIdx}
+                    onChange={e => setTreemapWeek(Number(e.target.value))}
+                    style={{ flex: 1, accentColor: '#2563eb' }}
+                  />
+                  <span className="text-xs text-gray-400">{weekIdx + 1} / {weekCount}</span>
+                </div>
+                <ResponsiveContainer width="100%" height={400}>
+                  <Treemap
+                    data={treemapData}
+                    dataKey="value"
+                    aspectRatio={4 / 3}
+                    content={<CustomContentTreemap />}
+                    animationDuration={200}
+                    animationEasing='ease-in-out'
+                  >
+                    <Tooltip content={<TreemapTooltip />} />
+                  </Treemap>
+                </ResponsiveContainer>
+              </>
             );
           })()}
         </div>
@@ -571,12 +596,13 @@ export const MetaEvolutionPage: React.FC = () => {
 const HeatmapGrid: React.FC<{ data: any[]; specs: number[] }> = ({ data, specs }) => {
   // Build a matrix: rows = specs, cols = weeks
   const weeks = data.map((row: any) => row.week);
-  // Find max value for color scaling
-  let max = 0;
-  specs.forEach(specId => {
-    data.forEach((row: any) => {
+  // Find max value for each week (column) for color scaling
+  const weekMaxes = data.map((row: any) => {
+    let max = 0;
+    specs.forEach(specId => {
       max = Math.max(max, row[specId] || 0);
     });
+    return max;
   });
   // Determine if first period has 0 runs for all specs
   const firstPeriodZero = data.length > 0 && specs.every(specId => (data[0]?.[specId] || 0) === 0);
@@ -611,7 +637,8 @@ const HeatmapGrid: React.FC<{ data: any[]; specs: number[] }> = ({ data, specs }
             // Color intensity: interpolate from gray to class color
             const color = WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888';
             const bg = value === 0 ? '#23263a' : color;
-            const opacity = value === 0 ? 0.05 : Math.max(0.1, value / max);
+            const weekMax = weekMaxes[colIdx] || 1;
+            const opacity = value === 0 ? 0.05 : Math.max(0.1, value / weekMax);
             return (
               <div
                 key={week}
