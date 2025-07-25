@@ -179,28 +179,37 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
           {'»'}
         </button>
       </div>
-      {tooltip && (
-        <div
-          className="leaderboard-tooltip fixed z-50 px-4 py-2 rounded-lg text-xs shadow-lg border pointer-events-none"
-          style={{
-            left: tooltip.x + 8,
-            top: tooltip.y - 8,
-            minWidth: 160,
-            maxWidth: 240,
-            whiteSpace: 'pre-line',
-            background: tooltip.color,
-            borderColor: '#23263a',
-            borderWidth: 1.5,
-            color:
-              tooltip.color.toLowerCase() === '#fff' || tooltip.color.toLowerCase() === '#ffffff' || tooltip.color.toLowerCase() === '#fff569'
-                ? '#23263a'
-                : '#fff',
-            fontWeight: 500,
-            boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
-          }}
-          dangerouslySetInnerHTML={{ __html: tooltip.content }}
-        />
-      )}
+      {tooltip && (() => {
+        const minWidth = 160;
+        const maxWidth = 240;
+        const tooltipWidth = maxWidth;
+        let left = tooltip.x + 8;
+        if (typeof window !== 'undefined' && left + tooltipWidth > window.innerWidth - 8) {
+          left = Math.max(8, window.innerWidth - tooltipWidth - 8);
+        }
+        return (
+          <div
+            className="leaderboard-tooltip fixed z-50 px-4 py-2 rounded-lg text-xs shadow-lg border pointer-events-none"
+            style={{
+              left,
+              top: tooltip.y - 8,
+              minWidth,
+              maxWidth,
+              whiteSpace: 'pre-line',
+              background: tooltip.color,
+              borderColor: '#23263a',
+              borderWidth: 1.5,
+              color:
+                tooltip.color.toLowerCase() === '#fff' || tooltip.color.toLowerCase() === '#ffffff' || tooltip.color.toLowerCase() === '#fff569'
+                  ? '#23263a'
+                  : '#fff',
+              fontWeight: 500,
+              boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
+            }}
+            dangerouslySetInnerHTML={{ __html: tooltip.content }}
+          />
+        );
+      })()}
     </div>
   );
 }; 

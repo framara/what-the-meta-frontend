@@ -337,29 +337,38 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
         )}
       </div>
       {/* Custom tooltip for spec cards */}
-      {specTooltip && (
-        <div
-          className="fixed z-50 px-4 py-2 rounded-lg text-xs shadow-lg border pointer-events-none"
-          style={{
-            left: specTooltip.x,
-            top: specTooltip.y - 40,
-            minWidth: 80,
-            maxWidth: 180,
-            background: specTooltip.color,
-            borderColor: specTooltip.color,
-            borderWidth: 1.5,
-            color:
-              specTooltip.color.toLowerCase() === '#fff' || specTooltip.color.toLowerCase() === '#ffffff' || specTooltip.color.toLowerCase() === '#fff569'
-                ? '#23263a'
-                : '#fff',
-            fontWeight: 500,
-            boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
-            textAlign: 'center',
-          }}
-        >
-          {specTooltip.content}
-        </div>
-      )}
+      {specTooltip && (() => {
+        const minWidth = 80;
+        const maxWidth = 180;
+        const tooltipWidth = maxWidth;
+        let left = specTooltip.x;
+        if (typeof window !== 'undefined' && left + tooltipWidth > window.innerWidth - 8) {
+          left = Math.max(8, window.innerWidth - tooltipWidth - 8);
+        }
+        return (
+          <div
+            className="fixed z-50 px-4 py-2 rounded-lg text-xs shadow-lg border pointer-events-none"
+            style={{
+              left,
+              top: specTooltip.y - 40,
+              minWidth,
+              maxWidth,
+              background: specTooltip.color,
+              borderColor: specTooltip.color,
+              borderWidth: 1.5,
+              color:
+                specTooltip.color.toLowerCase() === '#fff' || specTooltip.color.toLowerCase() === '#ffffff' || specTooltip.color.toLowerCase() === '#fff569'
+                  ? '#23263a'
+                  : '#fff',
+              fontWeight: 500,
+              boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
+              textAlign: 'center',
+            }}
+          >
+            {specTooltip.content}
+          </div>
+        );
+      })()}
     </div>
   );
 }; 

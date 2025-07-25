@@ -32,7 +32,9 @@ export const FilterBar: React.FC = () => {
     fetchSeasons().then(seasons => {
       // Descending order
       const sorted = [...seasons].sort((a, b) => b.season_id - a.season_id);
-      setSeasonOptions(sorted.map(s => ({ label: s.season_name, value: s.season_id })));
+      setSeasonOptions(sorted
+        .filter(s => s.season_id >= 13)
+        .map(s => ({ label: s.season_name, value: s.season_id })));
       setLoading(false);
     });
   }, []);

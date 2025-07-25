@@ -283,7 +283,9 @@ export const MetaEvolutionPage: React.FC = () => {
           onChange={e => setSelectedSeason(Number(e.target.value))}
           disabled={loading}
         >
-          {seasons.map(s => (
+          {seasons
+            .filter(season => season.season_id >= 13)
+            .map(s => (
             <option key={s.season_id} value={s.season_id}>{s.season_name}</option>
           ))}
         </select>
