@@ -43,17 +43,18 @@ function App() {
 
   return (
     <Router>
-      <header className="w-full flex flex-row items-center justify-between px-4 sm:px-8 py-4 bg-gradient-to-b from-gray-950 to-gray-900 shadow-lg mb-6 gap-4 flex-wrap">
+      <header className="w-full flex flex-row items-center justify-between px-4 sm:px-8 py-4 bg-gradient-to-b from-gray-950 to-gray-900 shadow-lg mb-6 flex-nowrap">
         <div className="flex flex-col justify-center">
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-blue-400 drop-shadow-lg leading-tight">What the Meta?</h1>
-          <span className="text-sm sm:text-base text-gray-300 font-medium tracking-wide leading-tight">WoW Mythic+ Leaderboard & Meta Evolution</span>
+          <span className="text-sm sm:text-base text-gray-300 font-medium tracking-wide leading-tight">m+ statistics for nerds</span>
         </div>
         <nav className="relative flex items-center md:mr-8">
           {/* Hamburger menu for mobile */}
           <button
-            className="md:hidden block p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="md:hidden block p-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             aria-label="Open navigation menu"
             onClick={() => setNavOpen(v => !v)}
+            style={{ minWidth: 0, minHeight: 0 }}
           >
             {/* Hamburger icon */}
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>

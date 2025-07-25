@@ -5,4 +5,22 @@
   font-weight: 500;
   box-shadow: 0 4px 24px 0 rgba(0,0,0,0.18);
   /* background, color, left, top, borderColor are dynamic and set inline */
+}
+
+@media (max-width: 768px) {
+  .saas-group-squares {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.2rem;
+  }
+  .saas-group-square {
+    flex: 1 1 20%;
+    min-width: 0;
+    aspect-ratio: 1/1;
+    height: auto;
+    border-radius: 8px;
+    margin-right: 0;
+    max-width: none;
+  }
 } 

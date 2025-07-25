@@ -86,7 +86,7 @@
 @media (max-width: 768px) {
   .saas-table {
     font-size: 0.9rem;
-    min-width: 420px;
+    min-width: 320px;
     table-layout: fixed;
   }
   .saas-table th, .saas-table td {

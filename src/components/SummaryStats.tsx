@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_SPEC_ROLES } from './wow-constants';
 import './styles/SummaryStats.css';
 
@@ -148,6 +148,14 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
     groupSpecCount[specId] = (groupSpecCount[specId] || 0) + 1;
   });
 
+  // Tooltip state for spec cards
+  const [specTooltip, setSpecTooltip] = useState<{
+    x: number;
+    y: number;
+    content: string;
+    color: string;
+  } | null>(null);
+
   return (
     <div className="flex flex-wrap gap-6 mb-8">
       <div className="flex-1 min-w-[180px] bg-gray-800 rounded-xl p-4 shadow text-center">
@@ -169,7 +177,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
       {/* Most Popular Specs by Role */}
       <div className="w-full bg-gray-800 rounded-xl p-4 shadow text-center flex flex-col items-center mb-6">
         <div className="text-xs text-gray-400 mb-4">Most Popular Specs by Role</div>
-        <div className="flex justify-center gap-8 mb-2">
+        <div className="flex justify-center gap-8 mb-2 flex-wrap sm:gap-8 gap-3">
           {/* Tank */}
           <div className="flex flex-col items-center justify-center">
             <span
@@ -185,10 +193,20 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
+              onMouseEnter={e => {
+                const rect = (e.target as HTMLElement).getBoundingClientRect();
+                setSpecTooltip({
+                  x: rect.left + rect.width / 2,
+                  y: rect.top,
+                  content: WOW_SPECIALIZATIONS[topTankSpecId] || '-',
+                  color: WOW_CLASS_COLORS[tankClassId] || '#23263a',
+                });
+              }}
+              onMouseLeave={() => setSpecTooltip(null)}
             >
               <span>{roleEmoji.tank}</span>
             </span>
-            <span className="summary-spec-label text-lg font-bold mt-2">
+            <span className="summary-spec-label text-lg font-bold mt-2 hidden md:inline">
               {WOW_SPECIALIZATIONS[topTankSpecId] || '-'}
             </span>
             <span className="summary-spec-count text-xs text-gray-300 mt-1">x{specCountInRuns[topTankSpecId] || 0}</span>
@@ -208,10 +226,20 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
+              onMouseEnter={e => {
+                const rect = (e.target as HTMLElement).getBoundingClientRect();
+                setSpecTooltip({
+                  x: rect.left + rect.width / 2,
+                  y: rect.top,
+                  content: WOW_SPECIALIZATIONS[topHealerSpecId] || '-',
+                  color: WOW_CLASS_COLORS[healerClassId] || '#23263a',
+                });
+              }}
+              onMouseLeave={() => setSpecTooltip(null)}
             >
               <span>{roleEmoji.healer}</span>
             </span>
-            <span className="summary-spec-label text-lg font-bold mt-2">
+            <span className="summary-spec-label text-lg font-bold mt-2 hidden md:inline">
               {WOW_SPECIALIZATIONS[topHealerSpecId] || '-'}
             </span>
             <span className="summary-spec-count text-xs text-gray-300 mt-1">x{specCountInRuns[topHealerSpecId] || 0}</span>
@@ -237,10 +265,20 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
+                  onMouseEnter={e => {
+                    const rect = (e.target as HTMLElement).getBoundingClientRect();
+                    setSpecTooltip({
+                      x: rect.left + rect.width / 2,
+                      y: rect.top,
+                      content: WOW_SPECIALIZATIONS[specId] || '-',
+                      color: WOW_CLASS_COLORS[dpsClassId] || '#23263a',
+                    });
+                  }}
+                  onMouseLeave={() => setSpecTooltip(null)}
                 >
                   <span>{roleEmoji.dps}</span>
                 </span>
-                <span className="summary-spec-label text-lg font-bold mt-2">
+                <span className="summary-spec-label text-lg font-bold mt-2 hidden md:inline">
                   {WOW_SPECIALIZATIONS[specId] || '-'}
                 </span>
                 <span className="summary-spec-count text-xs text-gray-300 mt-1">x{specCountInRuns[specId] || 0}</span>
@@ -252,7 +290,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
       {/* Most Popular Group Composition */}
       <div className="w-full bg-gray-800 rounded-xl p-4 shadow text-center flex flex-col items-center">
         <div className="text-xs text-gray-400 mb-4">Most Popular Group Composition</div>
-        <div className="flex justify-center gap-8 mb-2">
+        <div className="flex justify-center gap-8 mb-2 flex-wrap sm:gap-8 gap-3">
           {mostPopularGroupSpecs.map((specId, i) => {
             const classId = getClassId(specId);
             const role = getRole(specId);
@@ -274,10 +312,20 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
+                  onMouseEnter={e => {
+                    const rect = (e.target as HTMLElement).getBoundingClientRect();
+                    setSpecTooltip({
+                      x: rect.left + rect.width / 2,
+                      y: rect.top,
+                      content: WOW_SPECIALIZATIONS[Number(specId)] || '-',
+                      color: WOW_CLASS_COLORS[Number(classId)] || '#23263a',
+                    });
+                  }}
+                  onMouseLeave={() => setSpecTooltip(null)}
                 >
                   <span>{roleEmoji[role] || ''}</span>
                 </span>
-                <span className="summary-spec-label text-lg font-bold mt-2">
+                <span className="summary-spec-label text-lg font-bold mt-2 hidden md:inline">
                   {WOW_SPECIALIZATIONS[Number(specId)] || '-'}
                 </span>
               </div>
@@ -288,6 +336,30 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
           <div className="text-xs text-gray-300 mt-2">x{mostPopularGroupCount} times</div>
         )}
       </div>
+      {/* Custom tooltip for spec cards */}
+      {specTooltip && (
+        <div
+          className="fixed z-50 px-4 py-2 rounded-lg text-xs shadow-lg border pointer-events-none"
+          style={{
+            left: specTooltip.x,
+            top: specTooltip.y - 40,
+            minWidth: 80,
+            maxWidth: 180,
+            background: specTooltip.color,
+            borderColor: specTooltip.color,
+            borderWidth: 1.5,
+            color:
+              specTooltip.color.toLowerCase() === '#fff' || specTooltip.color.toLowerCase() === '#ffffff' || specTooltip.color.toLowerCase() === '#fff569'
+                ? '#23263a'
+                : '#fff',
+            fontWeight: 500,
+            boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
+            textAlign: 'center',
+          }}
+        >
+          {specTooltip.content}
+        </div>
+      )}
     </div>
   );
 }; 

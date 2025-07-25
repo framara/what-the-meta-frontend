@@ -3,4 +3,19 @@
 }
 .summary-spec-count {
   color: #b3b3b3; /* matches text-gray-300 */
+}
+@media (max-width: 480px) {
+  .summary-spec-label {
+    font-size: 0.95rem;
+  }
+  .summary-spec-count {
+    font-size: 0.85rem;
+  }
+  .saas-group-square {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 18px !important;
+    border-radius: 10px !important;
+    margin-bottom: 6px !important;
+  }
 } 

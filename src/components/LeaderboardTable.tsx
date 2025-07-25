@@ -78,22 +78,27 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
       <table className="min-w-full border text-sm saas-table">
         <thead>
           <tr className="bg-gray-800 text-white">
-            <th className="px-2 py-1">Rank</th>
-            <th className="px-2 py-1">Keystone</th>
-            <th className="px-2 py-1">Score</th>
-            <th className="px-2 py-1">Dungeon</th>
-            <th className="px-2 py-1">Time</th>
-            <th className="px-2 py-1">Date</th>
-            <th className="px-2 py-1">Group</th>
+            <th className="px-1 py-1 w-6 md:w-auto">Rank</th>
+            {/* Mobile: Keystone column, Desktop: Key and Dungeon columns */}
+            <th className="px-1 py-1 w-10 md:hidden">Keystone</th>
+            <th className="px-1 py-1 w-8 hidden md:table-cell md:w-auto">Key</th>
+            <th className="px-1 py-1 w-16 hidden md:table-cell md:w-32 whitespace-nowrap">Dungeon</th>
+            <th className="px-1 py-1 w-8 md:w-auto">Score</th>
+            <th className="px-1 py-1 w-8 md:w-auto">Time</th>
+            <th className="px-1 py-1 w-20 md:w-auto">Date</th>
+            <th className="px-1 py-1 w-8 hidden md:table-cell md:w-auto">Group</th>
           </tr>
         </thead>
         <tbody>
           {pagedRuns.map((run, i) => (
             <tr key={run.id} className="border-b hover:bg-gray-100">
-              <td className="px-2 py-1 text-center">{page * PAGE_SIZE + i + 1}</td>
-              <td className="px-2 py-1 text-center">{run.keystone_level}</td>
-              <td className="px-2 py-1 text-center">{typeof run.score === 'number' ? run.score.toFixed(1) : run.score}</td>
-              <td className="px-2 py-1">
+              <td className="px-1 py-1 text-center w-6 md:w-auto">{page * PAGE_SIZE + i + 1}</td>
+              {/* Mobile: Keystone column, Desktop: Key and Dungeon columns */}
+              <td className="px-1 py-1 text-center w-10 md:hidden">
+                {run.keystone_level} {dungeonMap[run.dungeon_id] ? dungeonMap[run.dungeon_id].shortname : run.dungeon_id}
+              </td>
+              <td className="px-1 py-1 text-center w-8 hidden md:table-cell md:w-auto">{run.keystone_level}</td>
+              <td className="px-1 py-1 w-16 hidden md:table-cell md:w-32 whitespace-nowrap">
                 {dungeonMap[run.dungeon_id] ? (
                   <>
                     <span className="dungeon-name-desktop">{dungeonMap[run.dungeon_id].name}</span>
@@ -101,10 +106,11 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
                   </>
                 ) : run.dungeon_id}
               </td>
-              <td className="px-2 py-1 text-center">{msToTime(run.duration_ms)}</td>
-              <td className="px-2 py-1 text-center">{new Date(run.completed_at).toLocaleDateString()}</td>
-              <td className="px-2 py-1">
-                <div className="saas-group-squares">
+              <td className="px-1 py-1 text-center w-8 md:w-auto">{typeof run.score === 'number' ? run.score.toFixed(1) : run.score}</td>
+              <td className="px-1 py-1 text-center w-8 md:w-auto">{msToTime(run.duration_ms)}</td>
+              <td className="px-1 py-1 text-center w-8 hidden md:table-cell md:w-auto">{new Date(run.completed_at).toLocaleDateString()}</td>
+              <td className="px-1 py-1">
+                <div className="saas-group-squares w-20 md:w-32 mx-auto">
                   {sortMembers(run.members).map((m, idx) => {
                     const roleCap = m.role && typeof m.role === 'string'
                       ? m.role.charAt(0).toUpperCase() + m.role.slice(1)
@@ -136,13 +142,22 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
         </tbody>
       </table>
       {/* Pagination controls */}
-      <div className="flex justify-center items-center gap-4 mt-4">
+      <div className="flex flex-row md:flex-row justify-center items-center gap-2 md:gap-4 mt-4 mb-8">
+        <button
+          className="px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-600 transition"
+          onClick={() => setPage(0)}
+          disabled={page === 0}
+          aria-label="First page"
+        >
+          {'«'}
+        </button>
         <button
           className="px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-600 transition"
           onClick={() => setPage(p => Math.max(0, p - 1))}
           disabled={page === 0}
+          aria-label="Previous page"
         >
-          Prev
+          {'‹'}
         </button>
         <span className="text-gray-200 font-medium">
           Page {page + 1} of {pageCount}
@@ -151,8 +166,17 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
           className="px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-600 transition"
           onClick={() => setPage(p => Math.min(pageCount - 1, p + 1))}
           disabled={page >= pageCount - 1}
+          aria-label="Next page"
         >
-          Next
+          {'›'}
+        </button>
+        <button
+          className="px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-600 transition"
+          onClick={() => setPage(pageCount - 1)}
+          disabled={page >= pageCount - 1}
+          aria-label="Last page"
+        >
+          {'»'}
         </button>
       </div>
       {tooltip && (
