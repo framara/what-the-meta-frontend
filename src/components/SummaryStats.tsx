@@ -177,7 +177,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
       {/* Most Popular Specs by Role */}
       <div className="w-full bg-gray-800 rounded-xl p-4 shadow text-center flex flex-col items-center mb-6">
         <div className="text-xs text-gray-400 mb-4">Most Popular Specs by Role</div>
-        <div className="flex justify-center gap-8 mb-2 flex-wrap sm:gap-8 gap-3">
+        <div className="flex justify-center flex-wrap gap-2 md:gap-8 mb-2">
           {/* Tank */}
           <div className="flex flex-col items-center justify-center">
             <span
@@ -290,7 +290,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
       {/* Most Popular Group Composition */}
       <div className="w-full bg-gray-800 rounded-xl p-4 shadow text-center flex flex-col items-center">
         <div className="text-xs text-gray-400 mb-4">Most Popular Group Composition</div>
-        <div className="flex justify-center gap-8 mb-2 flex-wrap sm:gap-8 gap-3">
+        <div className="flex justify-center flex-wrap gap-2 md:gap-8 mb-2">
           {mostPopularGroupSpecs.map((specId, i) => {
             const classId = getClassId(specId);
             const role = getRole(specId);
