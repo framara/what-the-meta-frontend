@@ -1,0 +1,33 @@
+.wow-loading-screen {
+  position: fixed;
+  inset: 0;
+  background: #181c2a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.wow-spinner {
+  width: 64px;
+  height: 64px;
+  border: 8px solid #444;
+  border-top: 8px solid #7dd3fc;
+  border-radius: 50%;
+  animation: wow-spin 1s linear infinite;
+  margin-bottom: 24px;
+}
+
+@keyframes wow-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.wow-loading-text {
+  color: #fff;
+  font-size: 1.25rem;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}

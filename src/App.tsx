@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import LoadingScreen from './components/LoadingScreen';
 import './App.css';
 import { fetchTopKeys, fetchSeasonInfo } from './api';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
@@ -12,25 +13,32 @@ function App() {
   const [apiData, setApiData] = useState<any>(null);
   const [apiError, setApiError] = useState<string | null>(null);
   const [dungeons, setDungeons] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const filter = useFilterState();
 
   useEffect(() => {
     if (!filter.season_id) return;
     setApiData(null);
     setApiError(null);
+    setLoading(true);
     const params: any = { season_id: filter.season_id };
     if (filter.period_id) params.period_id = filter.period_id;
     if (filter.dungeon_id) params.dungeon_id = filter.dungeon_id;
     if (filter.limit) params.limit = filter.limit;
     fetchTopKeys(params)
       .then(data => setApiData(data))
-      .catch(err => setApiError(err.message || 'API error'));
+      .catch(err => setApiError(err.message || 'API error'))
+      .finally(() => setLoading(false));
   }, [filter.season_id, filter.period_id, filter.dungeon_id, filter.limit]);
 
   useEffect(() => {
     if (!filter.season_id) return;
     fetchSeasonInfo(filter.season_id).then(info => setDungeons(info.dungeons));
   }, [filter.season_id]);
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <Router>
