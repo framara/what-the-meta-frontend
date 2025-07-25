@@ -1,0 +1,41 @@
+.meta-tooltip {
+  background: #181c2a;
+  border-radius: 10px;
+  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.18);
+  padding: 8px 12px;
+  min-width: 220px;
+  max-width: 420px;
+  color: #f5f5f5;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.meta-tooltip__label {
+  font-size: 12px;
+  color: #aaa;
+  margin-bottom: 2px;
+}
+.meta-tooltip__columns {
+  display: flex;
+  gap: 24px;
+}
+.meta-tooltip__column {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 2px 12px;
+  align-items: center;
+  min-width: 120px;
+}
+
+.meta-heatmap-header {
+  /* grid, text-xs, text-gray-400, mb-1 are already in className */
+}
+.meta-heatmap-row {
+  /* grid, items-center, mb-0.5 are already in className */
+}
+.meta-heatmap-spec {
+  /* truncate, text-xs, pr-2 are already in className; color is dynamic */
+}
+.meta-heatmap-tooltip {
+  /* fixed, z-50, px-3, py-2, rounded, bg-gray-800, text-xs, text-white, shadow-lg, pointer-events-none are already in className; left/top are dynamic */
+} 

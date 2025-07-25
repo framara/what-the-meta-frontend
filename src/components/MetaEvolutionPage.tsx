@@ -5,6 +5,7 @@ import { WOW_SPECIALIZATIONS, WOW_CLASS_COLORS, WOW_SPEC_TO_CLASS, WOW_MELEE_SPE
 import type { TooltipProps } from 'recharts';
 import { WOW_SPEC_ROLES } from './wow-constants';
 import { FaChevronUp, FaChevronDown } from 'react-icons/fa';
+import './styles/MetaEvolutionPage.css';
 
 // Custom tooltip for better readability
 const CustomTooltip = (props: TooltipProps<number, string> & { percent?: boolean }) => {
@@ -30,30 +31,13 @@ const CustomTooltip = (props: TooltipProps<number, string> & { percent?: boolean
   const col2 = sortedPayload.slice(mid);
 
   return (
-    <div style={{
-      background: '#181c2a',
-      borderRadius: 10,
-      boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
-      padding: '8px 12px',
-      minWidth: 220,
-      maxWidth: 420,
-      color: '#f5f5f5',
-      fontWeight: 500,
-      fontSize: 13,
-      lineHeight: 1.4,
-    }}>
-      <div style={{ fontSize: 12, color: '#aaa', marginBottom: 2 }}>Week {label}</div>
-      <div style={{ display: 'flex', gap: 24 }}>
+    <div className="meta-tooltip">
+      <div className="meta-tooltip__label">Week {label}</div>
+      <div className="meta-tooltip__columns">
         {[col1, col2].map((col, i) => (
           <div
             key={i}
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'max-content 1fr',
-              gap: '2px 12px',
-              alignItems: 'center',
-              minWidth: 120,
-            }}
+            className="meta-tooltip__column"
           >
             {col.map((entry: any) => {
               const specId = Number(entry.dataKey);
@@ -490,7 +474,7 @@ const HeatmapGrid: React.FC<{ data: any[]; specs: number[] }> = ({ data, specs }
     <div className="relative">
       {/* Header row */}
       <div
-        className="grid text-xs text-gray-400 mb-1"
+        className="meta-heatmap-header grid text-xs text-gray-400 mb-1"
         style={{ gridTemplateColumns: gridTemplate }}
       >
         <div />
@@ -502,10 +486,10 @@ const HeatmapGrid: React.FC<{ data: any[]; specs: number[] }> = ({ data, specs }
       {specs.map(specId => (
         <div
           key={specId}
-          className="grid items-center mb-0.5"
+          className="meta-heatmap-row grid items-center mb-0.5"
           style={{ gridTemplateColumns: gridTemplate }}
         >
-          <div className="truncate text-xs pr-2" style={{ color: WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#aaa' }}>{WOW_SPECIALIZATIONS[specId] || specId}</div>
+          <div className="meta-heatmap-spec truncate text-xs pr-2" style={{ color: WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#aaa' }}>{WOW_SPECIALIZATIONS[specId] || specId}</div>
           {weeks.map((week, colIdx) => {
             const value = data[colIdx]?.[specId] || 0;
             // Color intensity: interpolate from gray to class color
@@ -526,7 +510,7 @@ const HeatmapGrid: React.FC<{ data: any[]; specs: number[] }> = ({ data, specs }
       ))}
       {tooltip && (
         <div
-          className="fixed z-50 px-3 py-2 rounded bg-gray-800 text-xs text-white shadow-lg pointer-events-none"
+          className="meta-heatmap-tooltip fixed z-50 px-3 py-2 rounded bg-gray-800 text-xs text-white shadow-lg pointer-events-none"
           style={{ left: tooltip.x + 24, top: tooltip.y - 8 }}
         >
           <div><b>{WOW_SPECIALIZATIONS[tooltip.specId] || tooltip.specId}</b></div>

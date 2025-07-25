@@ -1,5 +1,6 @@
 import React from 'react';
 import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_SPEC_ROLES } from './wow-constants';
+import './styles/SummaryStats.css';
 
 interface GroupMember {
   character_name: string;
@@ -187,8 +188,10 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
             >
               <span>{roleEmoji.tank}</span>
             </span>
-            <span className="text-lg font-bold mt-2" style={{ color: '#fff' }}>{WOW_SPECIALIZATIONS[topTankSpecId] || '-'}</span>
-            <span className="text-xs text-gray-300 mt-1">x{specCountInRuns[topTankSpecId] || 0}</span>
+            <span className="summary-spec-label text-lg font-bold mt-2">
+              {WOW_SPECIALIZATIONS[topTankSpecId] || '-'}
+            </span>
+            <span className="summary-spec-count text-xs text-gray-300 mt-1">x{specCountInRuns[topTankSpecId] || 0}</span>
           </div>
           {/* Healer */}
           <div className="flex flex-col items-center justify-center">
@@ -208,8 +211,10 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
             >
               <span>{roleEmoji.healer}</span>
             </span>
-            <span className="text-lg font-bold mt-2" style={{ color: '#fff' }}>{WOW_SPECIALIZATIONS[topHealerSpecId] || '-'}</span>
-            <span className="text-xs text-gray-300 mt-1">x{specCountInRuns[topHealerSpecId] || 0}</span>
+            <span className="summary-spec-label text-lg font-bold mt-2">
+              {WOW_SPECIALIZATIONS[topHealerSpecId] || '-'}
+            </span>
+            <span className="summary-spec-count text-xs text-gray-300 mt-1">x{specCountInRuns[topHealerSpecId] || 0}</span>
           </div>
           {/* Top 3 DPS */}
           {topDps.map((specId, i) => {
@@ -235,8 +240,10 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
                 >
                   <span>{roleEmoji.dps}</span>
                 </span>
-                <span className="text-lg font-bold mt-2" style={{ color: '#fff' }}>{WOW_SPECIALIZATIONS[specId] || '-'}</span>
-                <span className="text-xs text-gray-300 mt-1">x{specCountInRuns[specId] || 0}</span>
+                <span className="summary-spec-label text-lg font-bold mt-2">
+                  {WOW_SPECIALIZATIONS[specId] || '-'}
+                </span>
+                <span className="summary-spec-count text-xs text-gray-300 mt-1">x{specCountInRuns[specId] || 0}</span>
               </div>
             );
           })}
@@ -270,7 +277,9 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
                 >
                   <span>{roleEmoji[role] || ''}</span>
                 </span>
-                <span className="text-lg font-bold mt-2" style={{ color: '#fff' }}>{WOW_SPECIALIZATIONS[Number(specId)] || '-'}</span>
+                <span className="summary-spec-label text-lg font-bold mt-2">
+                  {WOW_SPECIALIZATIONS[Number(specId)] || '-'}
+                </span>
               </div>
             );
           })}

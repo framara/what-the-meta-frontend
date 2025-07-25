@@ -1,5 +1,5 @@
 import React from 'react';
-import './LoadingScreen.css';
+import './styles/LoadingScreen.css';
 
 const LoadingScreen: React.FC = () => (
   <div className="wow-loading-screen">

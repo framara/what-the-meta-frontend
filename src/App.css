@@ -1,5 +1,272 @@
+/* Collapsible FilterBar for mobile */
+.filterbar-toggle-btn {
+  display: none;
+}
+@media (max-width: 640px) {
+  .filterbar-toggle-btn {
+    display: block;
+    width: 100%;
+    background: #23263a;
+    color: #f3f4f6;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 0.75rem;
+    margin-bottom: 0.5rem;
+    padding: 0.7rem 0.5rem;
+    box-shadow: 0 2px 8px 0 rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: background 0.18s;
+  }
+  .filterbar-toggle-btn:active {
+    background: #374151;
+  }
+  .filterbar-controls.collapsed {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: max-height 0.25s cubic-bezier(0.4,0,0.2,1), opacity 0.18s;
+  }
+  .filterbar-controls.expanded {
+    max-height: 800px;
+    opacity: 1;
+    pointer-events: auto;
+    transition: max-height 0.25s cubic-bezier(0.4,0,0.2,1), opacity 0.18s;
+  }
+}
+/* Show dungeon shortname on mobile, full name on desktop */
+.dungeon-name-mobile {
+  display: none;
+}
+.dungeon-name-desktop {
+  display: inline;
+}
+@media (max-width: 640px) {
+  .dungeon-name-mobile {
+    display: inline;
+  }
+  .dungeon-name-desktop {
+    display: none;
+  }
+}
+/* Hide Date column and shrink table more on mobile */
+@media (max-width: 640px) {
+  /* Hide Date, Score, and Time columns */
+  .saas-table th:nth-child(3),
+  .saas-table td:nth-child(3),
+  .saas-table th:nth-child(5),
+  .saas-table td:nth-child(5),
+  .saas-table th:nth-child(6),
+  .saas-table td:nth-child(6) {
+    display: none;
+  }
+  .saas-table th, .saas-table td {
+    font-size: 0.85rem;
+    padding: 0.2rem 0.08rem;
+  }
+}
+/* Responsive LeaderboardTable styles */
+@media (max-width: 900px) {
+  .saas-table {
+    font-size: 0.95rem;
+  }
+  .saas-table th, .saas-table td {
+    padding: 0.4rem 0.2rem;
+  }
+  .leaderboard-tooltip {
+    font-size: 0.95rem;
+    min-width: 120px;
+    max-width: 180px;
+  }
+}
+
+@media (max-width: 640px) {
+  .saas-table {
+    font-size: 0.9rem;
+    min-width: 420px;
+    table-layout: fixed;
+  }
+  .saas-table th, .saas-table td {
+    padding: 0.15rem 0.05rem;
+    font-size: 0.85rem;
+    word-break: break-word;
+    max-width: 80px;
+  }
+  .overflow-x-auto {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .leaderboard-tooltip {
+    font-size: 0.9rem;
+    min-width: 100px;
+    max-width: 140px;
+    padding: 0.5rem 0.5rem;
+  }
+  .flex.justify-center.items-center.gap-4.mt-4 {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+/* Responsive SummaryStats styles */
+@media (max-width: 900px) {
+  .summary-stats {
+    gap: 1rem;
+  }
+  .summary-card {
+    min-width: 140px;
+    padding: 1rem 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .summary-stats {
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .summary-card {
+    width: 100%;
+    min-width: 0;
+    padding: 0.75rem 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+  .summary-spec-label, .summary-spec-count {
+    font-size: 0.95rem;
+  }
+  .saas-group-square {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 1.1rem !important;
+    margin-right: 0.1rem !important;
+    border-radius: 10px !important;
+  }
+  .summary-stats .flex.justify-center.gap-8.mb-2 {
+    gap: 0.3rem !important;
+  }
+}
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
+/* Responsive styles */
+@media (max-width: 900px) {
+  main {
+    max-width: 100%;
+    padding: 0 0.5rem;
+  }
+  .saas-card, .saas-filterbar {
+    padding: 1rem 1rem;
+  }
+  .saas-table th, .saas-table td {
+    font-size: 0.95rem;
+    padding: 0.5rem 0.25rem;
+  }
+}
+
+@media (max-width: 640px) {
+  nav {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem 0.5rem;
+    font-size: 1rem;
+    border-radius: 0 0 1rem 1rem;
+  }
+  .saas-card, .saas-filterbar {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0.75rem 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .saas-table th, .saas-table td {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.15rem;
+  }
+  .saas-group-squares {
+    gap: 0.1rem;
+  }
+}
+
+/* Responsive FilterBar styles */
+@media (max-width: 900px) {
+  .filter-bar {
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem 0.5rem;
+  }
+  .filter-label {
+    min-width: 120px;
+    flex: 1 1 45%;
+    margin-bottom: 0.5rem;
+  }
+}
+
+@media (min-width: 641px) {
+  .filter-bar {
+    display: flex !important;
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0;
+    margin-bottom: 0;
+    flex-wrap: nowrap !important;
+  }
+  .filter-label {
+    display: flex !important;
+    flex-direction: row;
+    align-items: center;
+    width: auto;
+    max-width: none;
+    min-width: 120px;
+    margin-bottom: 0;
+    gap: 0.5rem;
+    flex: 0 0 auto !important;
+  }
+  .filter-select {
+    width: auto;
+    min-width: 120px;
+    max-width: 220px;
+    display: inline-block !important;
+    flex: 0 0 auto !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.3rem;
+    padding: 0.25rem 0.15rem 0.15rem 0.15rem;
+    margin-bottom: 0.5rem;
+    overflow-x: auto;
+    min-height: 0;
+  }
+  .filter-label {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 0.15rem;
+  }
+  .filter-select {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    font-size: 0.97rem;
+    padding: 0.35rem 0.4rem;
+    box-sizing: border-box;
+    display: block;
+  }
+  .saas-filterbar {
+    padding: 0.5rem 0.2rem;
+    margin-bottom: 0.7rem;
+    min-height: 0;
+  }
+}
+
+/* Global styles */
 body, #root {
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   background: #101322;

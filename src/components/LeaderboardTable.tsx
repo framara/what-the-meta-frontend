@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_CLASS_NAMES } from './wow-constants';
+import './styles/LeaderboardTable.css';
 
 interface GroupMember {
   character_name: string;
@@ -38,8 +39,13 @@ function msToTime(ms: number) {
 
 export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeons }) => {
   const dungeonMap = React.useMemo(() => {
-    const map: Record<number, string> = {};
-    dungeons.forEach(d => { map[d.dungeon_id] = d.dungeon_name; });
+    const map: Record<number, { name: string; shortname: string } > = {};
+    dungeons.forEach(d => {
+      map[d.dungeon_id] = {
+        name: (d as any).dungeon_name || (d as any).name || '',
+        shortname: (d as any).dungeon_shortname || (d as any).shortname || ''
+      };
+    });
     return map;
   }, [dungeons]);
 
@@ -87,7 +93,14 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
               <td className="px-2 py-1 text-center">{page * PAGE_SIZE + i + 1}</td>
               <td className="px-2 py-1 text-center">{run.keystone_level}</td>
               <td className="px-2 py-1 text-center">{typeof run.score === 'number' ? run.score.toFixed(1) : run.score}</td>
-              <td className="px-2 py-1">{dungeonMap[run.dungeon_id] || run.dungeon_id}</td>
+              <td className="px-2 py-1">
+                {dungeonMap[run.dungeon_id] ? (
+                  <>
+                    <span className="dungeon-name-desktop">{dungeonMap[run.dungeon_id].name}</span>
+                    <span className="dungeon-name-mobile">{dungeonMap[run.dungeon_id].shortname}</span>
+                  </>
+                ) : run.dungeon_id}
+              </td>
               <td className="px-2 py-1 text-center">{msToTime(run.duration_ms)}</td>
               <td className="px-2 py-1 text-center">{new Date(run.completed_at).toLocaleDateString()}</td>
               <td className="px-2 py-1">
@@ -144,7 +157,7 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
       </div>
       {tooltip && (
         <div
-          className="fixed z-50 px-4 py-2 rounded-lg text-xs shadow-lg border pointer-events-none"
+          className="leaderboard-tooltip fixed z-50 px-4 py-2 rounded-lg text-xs shadow-lg border pointer-events-none"
           style={{
             left: tooltip.x + 8,
             top: tooltip.y - 8,
