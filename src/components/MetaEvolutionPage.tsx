@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, AreaChart, Area } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, AreaChart, Area, Treemap } from 'recharts';
 import { fetchSpecEvolution, fetchSeasons } from '../api';
 import { WOW_SPECIALIZATIONS, WOW_CLASS_COLORS, WOW_SPEC_TO_CLASS, WOW_MELEE_SPECS, WOW_RANGED_SPECS } from './wow-constants';
 import type { TooltipProps } from 'recharts';
@@ -56,6 +56,69 @@ const CustomTooltip = (props: TooltipProps<number, string> & { percent?: boolean
   );
 };
 
+// Helper to determine readable text color based on background
+const getTextColor = (bg: string) => {
+  if (!bg) return '#fff';
+  const hex = bg.replace('#', '');
+  if (hex.length !== 6) return '#fff';
+  const r = parseInt(hex.substring(0,2),16);
+  const g = parseInt(hex.substring(2,4),16);
+  const b = parseInt(hex.substring(4,6),16);
+  const luminance = (0.299*r + 0.587*g + 0.114*b)/255;
+  return luminance > 0.5 ? '#23263a' : '#fff';
+};
+
+// Helper to shorten spec name based on cell width
+const getShortName = (name: string, width: number) => {
+  if (width < 60) return name.slice(0, 4);
+  if (width < 80) return name.slice(0, 5);
+  return name;
+};
+
+// Custom content renderer for Treemap
+const CustomContentTreemap = (props: any) => {
+  const { x, y, width, height, name, value, color } = props;
+  const textColor = getTextColor(color);
+  return (
+    <g>
+      <rect x={x} y={y} width={width} height={height} style={{ fill: color, stroke: '#23263a', strokeWidth: 1.5 }} />
+      {width > 40 && height > 24 && (
+        <text x={x + width / 2} y={y + height / 2 - 4} textAnchor="middle" fill={textColor} fontSize={12} fontWeight={700}>
+          {getShortName(name, width)}
+        </text>
+      )}
+      {width > 40 && height > 24 && (
+        <text x={x + width / 2} y={y + height / 2 + 12} textAnchor="middle" fill={textColor} fontSize={11} fontWeight={500}>
+          {value}
+        </text>
+      )}
+    </g>
+  );
+};
+
+// Custom tooltip for Treemap
+const TreemapTooltip = ({ active, payload }: any) => {
+  if (!active || !payload || !payload[0]) return null;
+  const { name, value, color } = payload[0].payload;
+  return (
+    <div style={{
+      background: color || '#23263a',
+      color: getTextColor(color),
+      borderRadius: 8,
+      padding: '8px 12px',
+      fontWeight: 500,
+      fontSize: 13,
+      boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
+      border: `1.5px solid ${color || '#23263a'}`,
+      minWidth: 100,
+      textAlign: 'center',
+    }}>
+      <div><b>{name}</b></div>
+      <div>Runs: {value}</div>
+    </div>
+  );
+};
+
 export const MetaEvolutionPage: React.FC = () => {
   type ChartGroup = { data: any[]; topSpecs: number[] };
   type ChartDataState = Record<'all' | 'tank' | 'healer' | 'dps' | 'melee' | 'ranged', ChartGroup>;
@@ -76,6 +139,7 @@ export const MetaEvolutionPage: React.FC = () => {
   const [showBarChart, setShowBarChart] = useState(true);
   const [showPercentAreaChart, setShowPercentAreaChart] = useState(true);
   const [showHeatmapGrid, setShowHeatmapGrid] = useState(true);
+  const [showTreemap, setShowTreemap] = useState(true);
 
   // Fetch all seasons on mount (only if not already loaded)
   useEffect(() => {
@@ -300,8 +364,8 @@ export const MetaEvolutionPage: React.FC = () => {
           ].map(({ key, label }) => (
             <button
               key={key}
-              className={`px-6 py-1.5 rounded-full font-semibold transition border-2 ${chartView === key && !showHeatmapGrid ? 'bg-blue-600 text-white border-blue-600 shadow' : 'bg-gray-800 text-gray-200 border-gray-700 hover:bg-gray-700'}`}
-              onClick={() => { setChartView(key as any); setShowHeatmapGrid(false); }}
+              className={`px-6 py-1.5 rounded-full font-semibold transition border-2 ${chartView === key  ? 'bg-blue-600 text-white border-blue-600 shadow' : 'bg-gray-800 text-gray-200 border-gray-700 hover:bg-gray-700'}`}
+              onClick={() => { setChartView(key as any); }}
             >
               {label}
             </button>
@@ -311,7 +375,7 @@ export const MetaEvolutionPage: React.FC = () => {
       <div>
 
         {/* Line Chart */}
-        <div className="bg-gray-900 rounded-xl shadow p-6 mb-8 relative">
+        <div className="meta-chart-scroll bg-gray-900 rounded-xl shadow p-6 mb-8 relative">
           <button
             className="absolute top-4 right-4 text-gray-400 hover:text-blue-400 transition"
             onClick={() => setShowLineChart(v => !v)}
@@ -319,7 +383,7 @@ export const MetaEvolutionPage: React.FC = () => {
           >
             {showLineChart ? <FaChevronUp /> : <FaChevronDown />}
           </button>
-          <h3 className="text-xl font-semibold mb-4">Spec Popularity Over Time</h3>
+          <h3 className="text-xl font-semibold mb-4">Spec Popularity: simple line chart</h3>
           {showLineChart && (
             loading ? (
               <div className="flex justify-center items-center h-[400px]">
@@ -331,9 +395,13 @@ export const MetaEvolutionPage: React.FC = () => {
                   data={charts[chartView].data}
                   margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
                 >
-                  <XAxis dataKey="week" stroke="#aaa" />
-                  <YAxis stroke="#aaa" allowDecimals={false} />
-                  <Tooltip content={<CustomTooltip />} />
+                  {typeof window === 'undefined' || window.innerWidth > 768 ? (
+                    <>
+                      <XAxis dataKey="week" stroke="#aaa" />
+                      <YAxis stroke="#aaa" allowDecimals={false} />
+                      <Tooltip content={<CustomTooltip />} />
+                    </>
+                  ) : null}
                   {charts[chartView].topSpecs.map((specId: number) => (
                     <Line
                       key={specId}
@@ -352,7 +420,7 @@ export const MetaEvolutionPage: React.FC = () => {
         </div>
 
         {/* Stacked Bar Chart */}
-        <div className="bg-gray-900 rounded-xl shadow p-6 mb-8 relative">
+        <div className="meta-chart-scroll bg-gray-900 rounded-xl shadow p-6 mb-8 relative">
           <button
             className="absolute top-4 right-4 text-gray-400 hover:text-blue-400 transition"
             onClick={() => setShowBarChart(v => !v)}
@@ -360,7 +428,7 @@ export const MetaEvolutionPage: React.FC = () => {
           >
             {showBarChart ? <FaChevronUp /> : <FaChevronDown />}
           </button>
-          <h3 className="text-xl font-semibold mb-4">Spec Popularity (Stacked Bar)</h3>
+          <h3 className="text-xl font-semibold mb-4">Spec Popularity: stacked bars</h3>
           {showBarChart && (
             loading ? (
               <div className="flex justify-center items-center h-[400px]">
@@ -372,9 +440,13 @@ export const MetaEvolutionPage: React.FC = () => {
                   data={charts[chartView].data}
                   margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
                 >
-                  <XAxis dataKey="week" stroke="#aaa" />
-                  <YAxis stroke="#aaa" allowDecimals={false} domain={[0, maxDataValue]} />
-                  <Tooltip content={<CustomTooltip />} />
+                  {typeof window === 'undefined' || window.innerWidth > 768 ? (
+                    <>
+                      <XAxis dataKey="week" stroke="#aaa" />
+                      <YAxis stroke="#aaa" allowDecimals={false} domain={[0, maxDataValue]} />
+                      <Tooltip content={<CustomTooltip />} />
+                    </>
+                  ) : null}
                   {(chartView === 'all' ? allSpecs : charts[chartView].topSpecs).map((specId: number) => (
                     <Bar
                       key={specId}
@@ -392,7 +464,7 @@ export const MetaEvolutionPage: React.FC = () => {
         </div>
 
         {/* Percent Area Chart */}
-        <div className="bg-gray-900 rounded-xl shadow p-6 mt-8 relative">
+        <div className="meta-chart-scroll bg-gray-900 rounded-xl shadow p-6 mt-8 relative">
           <button
             className="absolute top-4 right-4 text-gray-400 hover:text-blue-400 transition"
             onClick={() => setShowPercentAreaChart(v => !v)}
@@ -400,7 +472,7 @@ export const MetaEvolutionPage: React.FC = () => {
           >
             {showPercentAreaChart ? <FaChevronUp /> : <FaChevronDown />}
           </button>
-          <h3 className="text-xl font-semibold mb-4">Spec Popularity (% of Runs per Week)</h3>
+          <h3 className="text-xl font-semibold mb-4">Spec Popularity: percent area chart</h3>
           {showPercentAreaChart && (
             loading ? (
               <div className="flex justify-center items-center h-[400px]">
@@ -413,9 +485,13 @@ export const MetaEvolutionPage: React.FC = () => {
                   margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
                   stackOffset="expand"
                 >
-                  <XAxis dataKey="week" stroke="#aaa" />
-                  <YAxis stroke="#aaa" allowDecimals={false} domain={[0, 100]} tickFormatter={v => `${v.toFixed(0)}%`} />
-                  <Tooltip content={<CustomTooltip percent={true} />} />
+                  {typeof window === 'undefined' || window.innerWidth > 768 ? (
+                    <>
+                      <XAxis dataKey="week" stroke="#aaa" />
+                      <YAxis stroke="#aaa" allowDecimals={false} domain={[0, 100]} tickFormatter={v => `${v.toFixed(0)}%`} />
+                      <Tooltip content={<CustomTooltip percent={true} />} />
+                    </>
+                  ) : null}
                   {(chartView === 'all' ? allSpecs : charts[chartView].topSpecs).map((specId: number) => (
                     <Area
                       key={specId}
@@ -434,6 +510,43 @@ export const MetaEvolutionPage: React.FC = () => {
           )}
         </div>
 
+        {/* Treemap Chart */}
+        <div className="meta-chart-scroll bg-gray-900 rounded-xl shadow p-6 mt-8 relative">
+          <button
+            className="absolute top-4 right-4 text-gray-400 hover:text-blue-400 transition"
+            onClick={() => setShowTreemap(v => !v)}
+            aria-label={showTreemap ? 'Hide treemap' : 'Show treemap'}
+          >
+            {showTreemap ? <FaChevronUp /> : <FaChevronDown />}
+          </button>
+          <h3 className="text-xl font-semibold mb-4">Spec Popularity: treemap</h3>
+          {showTreemap && (() => {
+            // Use the most recent week's data for the selected chartView
+            const chartData = charts[chartView].data;
+            if (!chartData || chartData.length === 0) return <div className="text-center text-gray-400">No data</div>;
+            const lastWeek = chartData[chartData.length - 1];
+            const specs = (chartView === 'all' ? allSpecs : charts[chartView].topSpecs);
+            const treemapData = specs.map(specId => ({
+              name: WOW_SPECIALIZATIONS[specId] || specId,
+              value: lastWeek[specId] || 0,
+              color: WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888',
+            })).filter(d => d.value > 0);
+            if (treemapData.length === 0) return <div className="text-center text-gray-400">No data</div>;
+            return (
+              <ResponsiveContainer width="100%" height={400}>
+                <Treemap
+                  data={treemapData}
+                  dataKey="value"
+                  aspectRatio={4 / 3}
+                  content={<CustomContentTreemap />}
+                >
+                  <Tooltip content={<TreemapTooltip />} />
+                </Treemap>
+              </ResponsiveContainer>
+            );
+          })()}
+        </div>
+
         {/* Heatmap view */}
         <div className="bg-gray-900 rounded-xl shadow p-6 mt-8 relative">
           <button
@@ -443,11 +556,12 @@ export const MetaEvolutionPage: React.FC = () => {
           >
             {showHeatmapGrid ? <FaChevronUp /> : <FaChevronDown />}
           </button>
-          <h3 className="text-xl font-semibold mb-4">Spec Popularity Heatmap</h3>
+          <h3 className="text-xl font-semibold mb-4">Spec Popularity: heatmap</h3>
           {showHeatmapGrid && (
             <HeatmapGrid data={charts[chartView].data} specs={chartView === 'all' ? allSpecs : charts[chartView].topSpecs} />
           )}
         </div>
+
       </div>
     </div>
   );

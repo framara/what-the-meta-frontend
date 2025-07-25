@@ -3,8 +3,8 @@
   border-radius: 10px;
   box-shadow: 0 4px 24px 0 rgba(0,0,0,0.18);
   padding: 8px 12px;
-  min-width: 220px;
-  max-width: 420px;
+  min-width: 180px;
+  max-width: 320px;
   color: #f5f5f5;
   font-weight: 500;
   font-size: 13px;
@@ -27,15 +27,24 @@
   min-width: 120px;
 }
 
-.meta-heatmap-header {
-  /* grid, text-xs, text-gray-400, mb-1 are already in className */
+
+
+@media (max-width: 600px) {
+  .meta-tooltip {
+    min-width: 120px;
+    max-width: 98vw;
+    font-size: 12px;
+    padding: 6px 6px;
+  }
+  .meta-tooltip__columns {
+    gap: 8px;
+  }
 }
-.meta-heatmap-row {
-  /* grid, items-center, mb-0.5 are already in className */
-}
-.meta-heatmap-spec {
-  /* truncate, text-xs, pr-2 are already in className; color is dynamic */
-}
-.meta-heatmap-tooltip {
-  /* fixed, z-50, px-3, py-2, rounded, bg-gray-800, text-xs, text-white, shadow-lg, pointer-events-none are already in className; left/top are dynamic */
+@media (max-width: 768px) {
+  .meta-chart-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-left: 0;
+    padding-right: 0;
+  }
 } 
