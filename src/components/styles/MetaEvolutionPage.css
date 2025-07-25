@@ -39,6 +39,10 @@
   .meta-tooltip__columns {
     gap: 8px;
   }
+  .recharts-responsive-container {
+    margin-left: 14px;
+    margin-right: 14px;
+  }
 }
 @media (max-width: 768px) {
   .meta-chart-scroll {
@@ -46,5 +50,9 @@
     -webkit-overflow-scrolling: touch;
     padding-left: 0;
     padding-right: 0;
+  }
+  .recharts-responsive-container {
+    margin-left: 14px;
+    margin-right: 14px;
   }
 } 

@@ -142,6 +142,9 @@ export const MetaEvolutionPage: React.FC = () => {
   const [showTreemap, setShowTreemap] = useState(true);
   const [treemapWeek, setTreemapWeek] = useState<number | null>(null);
 
+  // Helper to detect mobile
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+
   // Fetch all seasons on mount (only if not already loaded)
   useEffect(() => {
     if (seasons.length > 0) return;
@@ -359,8 +362,21 @@ export const MetaEvolutionPage: React.FC = () => {
             <option key={s.season_id} value={s.season_id}>{s.season_name}</option>
           ))}
         </select>
-        <div className="flex flex-1 justify-center gap-2">
-          {[
+        <div className="flex-1 flex justify-center gap-2">
+          {isMobile ? (
+            <select
+              className="px-4 py-2 rounded bg-gray-800 text-gray-100 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full max-w-xs"
+              value={chartView}
+              onChange={e => setChartView(e.target.value as any)}
+            >
+              <option value="all">All Specs</option>
+              <option value="tank">Tank</option>
+              <option value="healer">Healer</option>
+              <option value="dps">DPS</option>
+              <option value="melee">Melee DPS</option>
+              <option value="ranged">Ranged DPS</option>
+            </select>
+          ) : ([
             { key: 'all', label: 'All Specs' },
             { key: 'tank', label: 'Tank' },
             { key: 'healer', label: 'Healer' },
@@ -375,7 +391,7 @@ export const MetaEvolutionPage: React.FC = () => {
             >
               {label}
             </button>
-          ))}
+          )))}
         </div>
       </div>
       <div>
