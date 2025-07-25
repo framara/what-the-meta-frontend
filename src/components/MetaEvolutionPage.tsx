@@ -1,17 +1,18 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, AreaChart, Area } from 'recharts';
 import { fetchSpecEvolution, fetchSeasons } from '../api';
 import { WOW_SPECIALIZATIONS, WOW_CLASS_COLORS, WOW_SPEC_TO_CLASS, WOW_MELEE_SPECS, WOW_RANGED_SPECS } from './wow-constants';
 import type { TooltipProps } from 'recharts';
 import { WOW_SPEC_ROLES } from './wow-constants';
+import { FaChevronUp, FaChevronDown } from 'react-icons/fa';
 
 // Custom tooltip for better readability
-const CustomTooltip = (props: TooltipProps<number, string>) => {
-  const { active, payload, label } = props as any;
+const CustomTooltip = (props: TooltipProps<number, string> & { percent?: boolean }) => {
+  const { active, payload, label, percent } = props as any;
   if (!active || !payload || payload.length === 0) return null;
 
   // Sort by class, then spec name
-  const classOrder = [1,2,3,4,5,6,7,8,9,10,11,12,13];
+  const classOrder = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
   const sortedPayload = [...payload]
     .filter((entry: any) => entry.value !== 0)
     .sort((a: any, b: any) => {
@@ -23,32 +24,49 @@ const CustomTooltip = (props: TooltipProps<number, string>) => {
       return aSpec.localeCompare(bSpec);
     });
 
+  // Split into two columns
+  const mid = Math.ceil(sortedPayload.length / 2);
+  const col1 = sortedPayload.slice(0, mid);
+  const col2 = sortedPayload.slice(mid);
+
   return (
     <div style={{
       background: '#181c2a',
       borderRadius: 10,
       boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
       padding: '8px 12px',
-      minWidth: 100,
-      maxWidth: 320,
+      minWidth: 220,
+      maxWidth: 420,
       color: '#f5f5f5',
       fontWeight: 500,
       fontSize: 13,
       lineHeight: 1.4,
     }}>
       <div style={{ fontSize: 12, color: '#aaa', marginBottom: 2 }}>Week {label}</div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-        {sortedPayload.map((entry: any) => {
-          const specId = Number(entry.dataKey);
-          const color = WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888';
-          return (
-            <div key={specId} style={{ color, minWidth: 110, display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
-              <span style={{ fontWeight: 600 }}>{WOW_SPECIALIZATIONS[specId] || specId}</span>
-              <span style={{ marginLeft: 4, fontWeight: 400 }}>:</span>
-              <span style={{ fontWeight: 700 }}>{entry.value}</span>
-            </div>
-          );
-        })}
+      <div style={{ display: 'flex', gap: 24 }}>
+        {[col1, col2].map((col, i) => (
+          <div
+            key={i}
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'max-content 1fr',
+              gap: '2px 12px',
+              alignItems: 'center',
+              minWidth: 120,
+            }}
+          >
+            {col.map((entry: any) => {
+              const specId = Number(entry.dataKey);
+              const color = WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888';
+              return [
+                <span key={specId + '-name'} style={{ color, fontWeight: 600 }}>{WOW_SPECIALIZATIONS[specId] || specId}</span>,
+                <span key={specId + '-val'} style={{ color, fontWeight: 700, textAlign: 'right' }}>
+                  {percent ? `${Number(entry.value).toFixed(2)}%` : entry.value}
+                </span>
+              ];
+            })}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -69,7 +87,12 @@ export const MetaEvolutionPage: React.FC = () => {
   const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [chartView, setChartView] = useState<'all' | 'tank' | 'healer' | 'dps' | 'melee' | 'ranged'>('all');
-  const [showHeatmap, setShowHeatmap] = useState(false);
+  // Restore chart visibility state for all charts
+  const [showLineChart, setShowLineChart] = useState(true);
+  const [showBarChart, setShowBarChart] = useState(true);
+  const [showPercentAreaChart, setShowPercentAreaChart] = useState(true);
+  const [showHeatmapGrid, setShowHeatmapGrid] = useState(true);
+  const [hoveredSpecId, setHoveredSpecId] = useState<number | null>(null);
 
   // Fetch all seasons on mount (only if not already loaded)
   useEffect(() => {
@@ -248,32 +271,39 @@ export const MetaEvolutionPage: React.FC = () => {
     return Math.ceil(max * 1.05);
   }, [charts, chartView]);
 
-  const chartTitles = {
-    all: 'All Specs Evolution',
-    tank: 'Tank Evolution',
-    healer: 'Healer Evolution',
-    dps: 'DPS Evolution',
-    melee: 'Melee DPS Evolution',
-    ranged: 'Ranged DPS Evolution',
-  };
+  // Add percentData computation
+  const percentData = useMemo(() => {
+    const data = charts[chartView].data;
+    if (!data || data.length === 0) return [];
+    return data.map((row: any) => {
+      const total = Object.keys(row)
+        .filter(k => k !== 'week')
+        .reduce((sum, k) => sum + (row[k] || 0), 0);
+      const percentRow: any = { week: row.week };
+      (chartView === 'all' ? allSpecs : charts[chartView].topSpecs).forEach((specId: number) => {
+        percentRow[specId] = total > 0 ? ((row[specId] || 0) / total) * 100 : 0;
+      });
+      return percentRow;
+    });
+  }, [charts, chartView, allSpecs]);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <h2 className="text-3xl font-bold mb-6 text-center">Meta Evolution</h2>
       <div className="text-center text-md text-gray-400 mb-8">Sample data: Top 1000 dungeons per week.</div>
       {/* Filter bar and chart view selector on the same line */}
-      
+
       <div className="flex w-full items-center gap-2 mb-2">
-      <select
-            className="px-4 py-2 rounded bg-gray-800 text-gray-100 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={selectedSeason || ''}
-            onChange={e => setSelectedSeason(Number(e.target.value))}
-            disabled={loading}
-          >
-            {seasons.map(s => (
-              <option key={s.season_id} value={s.season_id}>{s.season_name}</option>
-            ))}
-          </select>
+        <select
+          className="px-4 py-2 rounded bg-gray-800 text-gray-100 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={selectedSeason || ''}
+          onChange={e => setSelectedSeason(Number(e.target.value))}
+          disabled={loading}
+        >
+          {seasons.map(s => (
+            <option key={s.season_id} value={s.season_id}>{s.season_name}</option>
+          ))}
+        </select>
         <div className="flex flex-1 justify-center gap-2">
           {[
             { key: 'all', label: 'All Specs' },
@@ -285,28 +315,28 @@ export const MetaEvolutionPage: React.FC = () => {
           ].map(({ key, label }) => (
             <button
               key={key}
-              className={`px-6 py-1.5 rounded-full font-semibold transition border-2 ${chartView === key && !showHeatmap ? 'bg-blue-600 text-white border-blue-600 shadow' : 'bg-gray-800 text-gray-200 border-gray-700 hover:bg-gray-700'}`}
-              onClick={() => { setChartView(key as any); setShowHeatmap(false); }}
+              className={`px-6 py-1.5 rounded-full font-semibold transition border-2 ${chartView === key && !showHeatmapGrid ? 'bg-blue-600 text-white border-blue-600 shadow' : 'bg-gray-800 text-gray-200 border-gray-700 hover:bg-gray-700'}`}
+              onClick={() => { setChartView(key as any); setShowHeatmapGrid(false); }}
             >
               {label}
             </button>
           ))}
         </div>
-        <div className="flex items-center">
-          <button
-            className={`px-6 py-1.5 rounded-full font-semibold transition border-2 ml-6 ${showHeatmap ? 'bg-blue-600 text-white border-blue-600 shadow' : 'bg-gray-800 text-gray-200 border-gray-700 hover:bg-gray-700'}`}
-            onClick={() => setShowHeatmap(true)}
-          >
-            Heatmap
-          </button>
-        </div>
       </div>
-      {/* Unified Line Chart and Stacked Bar Chart: Only show if not in heatmap mode */}
-      {!showHeatmap && (
-        <>
-          <div className="bg-gray-900 rounded-xl shadow p-6">
-            <h3 className="text-xl font-semibold mb-4">{chartTitles[chartView]}</h3>
-            {loading ? (
+      <div>
+
+        {/* Line Chart */}
+        <div className="bg-gray-900 rounded-xl shadow p-6 mb-8 relative">
+          <button
+            className="absolute top-4 right-4 text-gray-400 hover:text-blue-400 transition"
+            onClick={() => setShowLineChart(v => !v)}
+            aria-label={showLineChart ? 'Hide chart' : 'Show chart'}
+          >
+            {showLineChart ? <FaChevronUp /> : <FaChevronDown />}
+          </button>
+          <h3 className="text-xl font-semibold mb-4">Spec Popularity Over Time</h3>
+          {showLineChart && (
+            loading ? (
               <div className="flex justify-center items-center h-[400px]">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
               </div>
@@ -332,12 +362,22 @@ export const MetaEvolutionPage: React.FC = () => {
                   ))}
                 </LineChart>
               </ResponsiveContainer>
-            )}
-          </div>
-          {/* Stacked Bar Chart */}
-          <div className="bg-gray-900 rounded-xl shadow p-6 mt-8">
-            <h3 className="text-xl font-semibold mb-4"></h3>
-            {loading ? (
+            )
+          )}
+        </div>
+
+        {/* Stacked Bar Chart */}
+        <div className="bg-gray-900 rounded-xl shadow p-6 mb-8 relative">
+          <button
+            className="absolute top-4 right-4 text-gray-400 hover:text-blue-400 transition"
+            onClick={() => setShowBarChart(v => !v)}
+            aria-label={showBarChart ? 'Hide chart' : 'Show chart'}
+          >
+            {showBarChart ? <FaChevronUp /> : <FaChevronDown />}
+          </button>
+          <h3 className="text-xl font-semibold mb-4">Spec Popularity (Stacked Bar)</h3>
+          {showBarChart && (
+            loading ? (
               <div className="flex justify-center items-center h-[400px]">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
               </div>
@@ -362,17 +402,68 @@ export const MetaEvolutionPage: React.FC = () => {
                   ))}
                 </BarChart>
               </ResponsiveContainer>
-            )}
-          </div>
-        </>
-      )}
-      {/* Heatmap view */}
-      {showHeatmap && !loading && (
-        <div className="bg-gray-900 rounded-xl shadow p-6 mt-8 overflow-x-auto">
-          <h3 className="text-xl font-semibold mb-4">Spec Popularity Heatmap</h3>
-          <HeatmapGrid data={charts.all.data} specs={allSpecs} />
+            )
+          )}
         </div>
-      )}
+
+        {/* Percent Area Chart */}
+        <div className="bg-gray-900 rounded-xl shadow p-6 mt-8 relative">
+          <button
+            className="absolute top-4 right-4 text-gray-400 hover:text-blue-400 transition"
+            onClick={() => setShowPercentAreaChart(v => !v)}
+            aria-label={showPercentAreaChart ? 'Hide chart' : 'Show chart'}
+          >
+            {showPercentAreaChart ? <FaChevronUp /> : <FaChevronDown />}
+          </button>
+          <h3 className="text-xl font-semibold mb-4">Spec Popularity (% of Runs per Week)</h3>
+          {showPercentAreaChart && (
+            loading ? (
+              <div className="flex justify-center items-center h-[400px]">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={450}>
+                <AreaChart
+                  data={percentData}
+                  margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+                  stackOffset="expand"
+                >
+                  <XAxis dataKey="week" stroke="#aaa" />
+                  <YAxis stroke="#aaa" allowDecimals={false} domain={[0, 100]} tickFormatter={v => `${v.toFixed(0)}%`} />
+                  <Tooltip content={<CustomTooltip percent={true} />} />
+                  {(chartView === 'all' ? allSpecs : charts[chartView].topSpecs).map((specId: number) => (
+                    <Area
+                      key={specId}
+                      type="monotone"
+                      dataKey={specId.toString()}
+                      stackId="percent"
+                      stroke={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
+                      fill={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
+                      name={WOW_SPECIALIZATIONS[specId] || specId.toString()}
+                      isAnimationActive={true}
+                    />
+                  ))}
+                </AreaChart>
+              </ResponsiveContainer>
+            )
+          )}
+        </div>
+
+        {/* Heatmap view */}
+        <div className="bg-gray-900 rounded-xl shadow p-6 mt-8 relative">
+          <button
+            className="absolute top-4 right-4 text-gray-400 hover:text-blue-400 transition"
+            onClick={() => setShowHeatmapGrid(v => !v)}
+            aria-label={showHeatmapGrid ? 'Hide heatmap' : 'Show heatmap'}
+          >
+            {showHeatmapGrid ? <FaChevronUp /> : <FaChevronDown />}
+          </button>
+          <h3 className="text-xl font-semibold mb-4">Spec Popularity Heatmap</h3>
+          {showHeatmapGrid && (
+            <HeatmapGrid data={charts[chartView].data} specs={chartView === 'all' ? allSpecs : charts[chartView].topSpecs} />
+          )}
+        </div>
+      </div>
     </div>
   );
 };
@@ -388,6 +479,10 @@ const HeatmapGrid: React.FC<{ data: any[]; specs: number[] }> = ({ data, specs }
       max = Math.max(max, row[specId] || 0);
     });
   });
+  // Determine if first period has 0 runs for all specs
+  const firstPeriodZero = data.length > 0 && specs.every(specId => (data[0]?.[specId] || 0) === 0);
+  // Build week labels accordingly
+  const weekLabels = weeks.map((w, idx) => firstPeriodZero ? `W${idx}` : `W${idx + 1}`);
   // Tooltip state
   const [tooltip, setTooltip] = React.useState<{ x: number; y: number; specId: number; week: number; value: number } | null>(null);
   // Grid template: 1 column for spec name, then one for each week
@@ -400,8 +495,8 @@ const HeatmapGrid: React.FC<{ data: any[]; specs: number[] }> = ({ data, specs }
         style={{ gridTemplateColumns: gridTemplate }}
       >
         <div />
-        {weeks.map((w: number) => (
-          <div key={w} className="text-center">W{w}</div>
+        {weekLabels.map((label, idx) => (
+          <div key={label} className="text-center">{label}</div>
         ))}
       </div>
       {/* Data rows */}
