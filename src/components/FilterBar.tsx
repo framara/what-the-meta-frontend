@@ -19,7 +19,7 @@ export const FilterBar: React.FC = () => {
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     function handleResize() {
-      setIsMobile(window.innerWidth <= 640);
+      setIsMobile(window.innerWidth <= 768);
     }
     handleResize();
     window.addEventListener('resize', handleResize);

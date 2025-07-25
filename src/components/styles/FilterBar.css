@@ -22,7 +22,7 @@
   margin-bottom: 0;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .filter-bar {
     flex-direction: column;
     flex-wrap: wrap;
@@ -30,8 +30,9 @@
     gap: 0.3rem;
     padding: 0.75rem 0.75rem 0.5rem 0.75rem;
     margin-bottom: 1.5rem;
-    margin-left: 0.5rem;
-    margin-right: 0.5rem;
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
   }
   .filter-label {
     flex-direction: column;
@@ -50,7 +51,7 @@
     display: block;
   }
 }
-@media (min-width: 641px) {
+@media (min-width: 769px) {
   .filter-bar {
     display: flex !important;
     flex-direction: row !important;
