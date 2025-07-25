@@ -92,7 +92,6 @@ export const MetaEvolutionPage: React.FC = () => {
   const [showBarChart, setShowBarChart] = useState(true);
   const [showPercentAreaChart, setShowPercentAreaChart] = useState(true);
   const [showHeatmapGrid, setShowHeatmapGrid] = useState(true);
-  const [hoveredSpecId, setHoveredSpecId] = useState<number | null>(null);
 
   // Fetch all seasons on mount (only if not already loaded)
   useEffect(() => {
