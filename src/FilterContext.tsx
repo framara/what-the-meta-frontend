@@ -20,7 +20,12 @@ export type FilterAction =
 function filterReducer(state: FilterState, action: FilterAction): FilterState {
   switch (action.type) {
     case 'SET_SEASON':
-      return { ...state, season_id: action.season_id };
+      return { 
+        ...state, 
+        season_id: action.season_id,
+        period_id: undefined,  // Reset period when season changes
+        dungeon_id: undefined  // Reset dungeon when season changes
+      };
     case 'SET_PERIOD':
       return { ...state, period_id: action.period_id };
     case 'SET_DUNGEON':

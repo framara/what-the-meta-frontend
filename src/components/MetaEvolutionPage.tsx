@@ -340,7 +340,20 @@ export const MetaEvolutionPage: React.FC = () => {
 
   // Reset treemapWeek when chartView or charts change (e.g., season or role changes)
   React.useEffect(() => {
-    setTreemapWeek(null);
+    // Find the first week with any data for the current chartView
+    const chartData = charts[chartView].data;
+    let firstWithData: number | null = null;
+    if (chartData && chartData.length > 0) {
+      for (let i = 0; i < chartData.length; ++i) {
+        const week = chartData[i];
+        const specs = chartView === 'all' ? allSpecs : charts[chartView].topSpecs;
+        if (specs.some((specId: number) => week[specId] && week[specId] > 0)) {
+          firstWithData = i;
+          break;
+        }
+      }
+    }
+    setTreemapWeek(firstWithData);
   }, [chartView, charts]);
 
   return (
@@ -556,7 +569,6 @@ export const MetaEvolutionPage: React.FC = () => {
               value: weekData[specId] || 0,
               color: WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888',
             })).filter(d => d.value > 0);
-            if (treemapData.length === 0) return <div className="text-center text-gray-400">No data</div>;
             return (
               <>
                 <div className="flex items-center gap-4 mb-2 mt-2">
@@ -571,18 +583,22 @@ export const MetaEvolutionPage: React.FC = () => {
                   />
                   <span className="text-xs text-gray-400">{weekIdx + 1} / {weekCount}</span>
                 </div>
-                <ResponsiveContainer width="100%" height={400}>
-                  <Treemap
-                    data={treemapData}
-                    dataKey="value"
-                    aspectRatio={4 / 3}
-                    content={<CustomContentTreemap />}
-                    animationDuration={200}
-                    animationEasing='ease-in-out'
-                  >
-                    <Tooltip content={<TreemapTooltip />} />
-                  </Treemap>
-                </ResponsiveContainer>
+                {treemapData.length === 0 ? (
+                  <div className="text-center text-gray-400">No data</div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={400}>
+                    <Treemap
+                      data={treemapData}
+                      dataKey="value"
+                      aspectRatio={4 / 3}
+                      content={<CustomContentTreemap />}
+                      animationDuration={200}
+                      animationEasing='ease-in-out'
+                    >
+                      <Tooltip content={<TreemapTooltip />} />
+                    </Treemap>
+                  </ResponsiveContainer>
+                )}
               </>
             );
           })()}

@@ -85,8 +85,21 @@ function App() {
         <Route path="/" element={
           <div className="max-w-7xl mx-auto px-4">
             <FilterBar />
-            <SummaryStats runs={apiData || []} dungeons={dungeons} />
-            <LeaderboardTable runs={apiData || []} dungeons={dungeons} />
+            {apiData && apiData.length > 0 ? (
+              <>
+                <SummaryStats runs={apiData} dungeons={dungeons} />
+                <LeaderboardTable runs={apiData} dungeons={dungeons} />
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="text-6xl mb-4">📊</div>
+                <h2 className="text-2xl font-bold text-gray-200 mb-2">All keys were depleted this week</h2>
+                <h3 className="text-1xl font-bold text-gray-200 mb-2">or perhaps season was not on going yet/already</h3>
+                <p className="text-gray-400 max-w-md">
+                  Try adjusting the season, period or dungeon.
+                </p>
+              </div>
+            )}
           </div>
         } />
         <Route path="/meta-evolution" element={<MetaEvolutionPage />} />
