@@ -357,7 +357,7 @@ export const MetaEvolutionPage: React.FC = () => {
           disabled={loading}
         >
           {seasons
-            .filter(season => season.season_id >= 13)
+            .filter(season => season.season_id >= 12)
             .map(s => (
             <option key={s.season_id} value={s.season_id}>{s.season_name}</option>
           ))}
