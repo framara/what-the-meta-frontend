@@ -98,13 +98,66 @@
 }
 
 .spec-role-title {
-  font-size: 1rem;
-  color: #94a3b8;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 700;
   margin-bottom: 1.5rem;
   text-align: center;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 3s ease-in-out infinite;
+  position: relative;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.meta-evolution-link {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.meta-evolution-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+}
+
+.meta-evolution-button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(59, 130, 246, 0.1);
 }
 
 /* Spec cards container */

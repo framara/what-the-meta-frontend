@@ -286,6 +286,18 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
             );
           })}
         </div>
+        <div className="meta-evolution-button-container">
+          <button 
+            className="meta-evolution-link"
+            onClick={() => {
+              // Navigate to the meta evolution page
+              window.location.href = '/meta-evolution';
+            }}
+            title="View Meta Evolution Charts"
+          >
+            📊 View Charts
+          </button>
+        </div>
       </div>
 
       {/* Most Popular Group Composition */}
