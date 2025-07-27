@@ -48,12 +48,7 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.6) 100%);
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(59, 130, 246, 0.15);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  overflow: visible;
 }
 
 .season-filter label {
@@ -101,12 +96,6 @@
 .chart-view-selector {
   display: flex;
   gap: 0.75rem;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.6) 100%);
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(59, 130, 246, 0.15);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
 .chart-view-button {
@@ -520,7 +509,7 @@
   .meta-evolution-page {
     padding: 1.5rem;
     border-radius: 16px;
-    margin: 0.5rem;
+    margin: 0.5rem 0.5rem 0.5rem 0.5rem;
   }
   
   .controls-section {
@@ -597,7 +586,15 @@
     padding: 0.625rem 0.875rem;
     font-size: 0.75rem;
   }
-  
+       
+  /* Hide heatmap and treemap buttons on mobile */
+  .chart-type-toggle .chart-view-button[data-first-letter="H"],
+  .chart-type-toggle .chart-view-button[data-first-letter="T"],
+  .chart-type-toggle.compact .chart-view-button[data-first-letter="H"],
+  .chart-type-toggle.compact .chart-view-button[data-first-letter="T"] {
+    display: none;
+  }
+         
   .chart-container {
     padding: 1rem;
   }
@@ -630,11 +627,16 @@
   transform: scale(1.01);
 }
 
-/* Mobile chart margin */
+/* Chart container positioning */
+.recharts-responsive-container {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Mobile chart margin - reduced */
 @media (max-width: 768px) {
   .recharts-responsive-container {
-    margin-left: 14px;
-    margin-right: 14px;
+    margin-left: -40px;
   }
 } 
 
@@ -656,9 +658,6 @@
 .button-group {
   display: flex;
   gap: 0;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(30,41,59,0.08);
 }
 .button-group .chart-view-button {
   border-radius: 0;
@@ -677,13 +676,17 @@
 
 .chart-type-toggle {
   display: flex;
-  gap: 0.75rem;
   padding: 1.5rem;
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.6) 100%);
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(59, 130, 246, 0.15);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.chart-type-toggle.compact {
+  padding: 0.75rem;
+}
+
+.chart-type-toggle.compact .chart-view-button {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  min-width: 80px;
 }
 
 .chart-controls-row {

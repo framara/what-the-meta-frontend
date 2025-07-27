@@ -11,6 +11,10 @@ const CustomTooltip = (props: TooltipProps<number, string> & { percent?: boolean
   const { active, payload, label, percent } = props as any;
   if (!active || !payload || payload.length === 0) return null;
 
+  // Don't show tooltip on mobile
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+  if (isMobile) return null;
+
   // Sort by value (descending), then by class, then spec name
   const classOrder = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
   const sortedPayload = [...payload]
@@ -158,12 +162,9 @@ export const MetaEvolutionPage: React.FC = () => {
   const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [chartView, setChartView] = useState<'all' | 'tank' | 'healer' | 'dps' | 'melee' | 'ranged'>('all');
-  // Restore chart visibility state for all charts
-  const [showLineChart, setShowLineChart] = useState(true);
-  const [showBarChart, setShowBarChart] = useState(true);
-  const [showPercentAreaChart, setShowPercentAreaChart] = useState(true);
-  const [showHeatmapGrid, setShowHeatmapGrid] = useState(true);
-  const [showTreemap, setShowTreemap] = useState(true);
+  // Replace chart visibility states with a single activeChart state
+  const [activeChart, setActiveChart] = useState<'line' | 'bar' | 'area' | 'heatmap' | 'treemap'>('line');
+  const [chartLoading, setChartLoading] = useState(false);
   const [treemapWeek, setTreemapWeek] = useState<number | null>(null);
 
   // Helper to detect mobile
@@ -382,9 +383,10 @@ export const MetaEvolutionPage: React.FC = () => {
 
   // Before rendering the BarChart, calculate the max value for the Y axis:
   const barChartMax = Math.max(
-    ...charts[chartView].data.flatMap(row =>
-      charts[chartView].topSpecs.map(specId => row[specId] || 0)
-    )
+    ...charts[chartView].data.map(row => {
+      // Sum all specs for this week to get the total height of the stacked bar
+      return charts[chartView].topSpecs.reduce((sum, specId) => sum + (row[specId] || 0), 0);
+    })
   );
 
   return (
@@ -392,7 +394,7 @@ export const MetaEvolutionPage: React.FC = () => {
       {/* Controls Section */}
       <div className="controls-section">
         <div className="controls-row">
-          <div className="season-filter">
+                    <div className="season-filter">
             <label>Season:</label>
             <select
               value={selectedSeason || ''}
@@ -407,45 +409,108 @@ export const MetaEvolutionPage: React.FC = () => {
             </select>
           </div>
           <div className="button-group chart-view-selector">
-            <button className={`chart-view-button ${chartView === 'all' ? 'active' : ''}`} onClick={() => setChartView('all')}>All</button>
-            <button className={`chart-view-button ${chartView === 'tank' ? 'active' : ''}`} onClick={() => setChartView('tank')}>Tank</button>
-            <button className={`chart-view-button ${chartView === 'healer' ? 'active' : ''}`} onClick={() => setChartView('healer')}>Healer</button>
-            <button className={`chart-view-button ${chartView === 'dps' ? 'active' : ''}`} onClick={() => setChartView('dps')}>DPS</button>
-            <button className={`chart-view-button ${chartView === 'melee' ? 'active' : ''}`} onClick={() => setChartView('melee')}>Melee</button>
-            <button className={`chart-view-button ${chartView === 'ranged' ? 'active' : ''}`} onClick={() => setChartView('ranged')}>Ranged</button>
-          </div>
-        </div>
-        <div className="chart-controls-row">
-          <div className="button-group chart-type-toggle">
-            <button className={`chart-view-button ${showLineChart ? 'active' : ''}`} onClick={() => setShowLineChart(!showLineChart)}>{showLineChart ? 'Hide' : 'Show'} Line Chart</button>
-            <button className={`chart-view-button ${showBarChart ? 'active' : ''}`} onClick={() => setShowBarChart(!showBarChart)}>{showBarChart ? 'Hide' : 'Show'} Bar Chart</button>
-            <button className={`chart-view-button ${showPercentAreaChart ? 'active' : ''}`} onClick={() => setShowPercentAreaChart(!showPercentAreaChart)}>{showPercentAreaChart ? 'Hide' : 'Show'} Area Chart</button>
-            <button className={`chart-view-button ${showHeatmapGrid ? 'active' : ''}`} onClick={() => setShowHeatmapGrid(!showHeatmapGrid)}>{showHeatmapGrid ? 'Hide' : 'Show'} Heatmap</button>
-            <button className={`chart-view-button ${showTreemap ? 'active' : ''}`} onClick={() => setShowTreemap(!showTreemap)}>{showTreemap ? 'Hide' : 'Show'} Treemap</button>
+            <button className={`chart-view-button ${chartView === 'all' ? 'active' : ''}`} onClick={() => setChartView('all')} title="All">
+              {isMobile ? '📚' : 'All'}
+            </button>
+            <button className={`chart-view-button ${chartView === 'tank' ? 'active' : ''}`} onClick={() => setChartView('tank')} title="Tank">
+              {isMobile ? '🛡️' : 'Tank'}
+            </button>
+            <button className={`chart-view-button ${chartView === 'healer' ? 'active' : ''}`} onClick={() => setChartView('healer')} title="Healer">
+              {isMobile ? '💚' : 'Healer'}
+            </button>
+            <button className={`chart-view-button ${chartView === 'dps' ? 'active' : ''}`} onClick={() => setChartView('dps')} title="DPS">
+              {isMobile ? '⚔️' : 'DPS'}
+            </button>
+            <button className={`chart-view-button ${chartView === 'melee' ? 'active' : ''}`} onClick={() => setChartView('melee')} title="Melee">
+              {isMobile ? '🗡️' : 'Melee'}
+            </button>
+            <button className={`chart-view-button ${chartView === 'ranged' ? 'active' : ''}`} onClick={() => setChartView('ranged')} title="Ranged">
+              {isMobile ? '🔥' : 'Ranged'}
+            </button>
           </div>
         </div>
       </div>
 
-      {loading ? (
+      {/* Mobile Alert - Charts recommended for desktop */}
+      {isMobile && (
+        <div className="mb-4 p-4 bg-blue-900 border border-blue-700 rounded-lg shadow-lg">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-blue-300" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-blue-200">
+                Desktop Recommended
+              </h3>
+              <div className="mt-1 text-sm text-blue-300">
+                <p>
+                  For the best experience with charts and data visualization, we recommend using a desktop device.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Chart Type Toggle - now above the chart area, aligned to the right */}
+      <div className="chart-controls-row" style={{ marginBottom: '1.5rem', justifyContent: 'flex-end' }}>
+        <div className="button-group chart-type-toggle compact">
+          <button className={`chart-view-button ${activeChart === 'line' ? 'active' : ''}`} onClick={() => {
+            if (activeChart !== 'line') {
+              setChartLoading(true);
+              setActiveChart('line');
+              setTimeout(() => setChartLoading(false), 400);
+            }
+          }} data-first-letter="L">Line</button>
+          <button className={`chart-view-button ${activeChart === 'bar' ? 'active' : ''}`} onClick={() => {
+            if (activeChart !== 'bar') {
+              setChartLoading(true);
+              setActiveChart('bar');
+              setTimeout(() => setChartLoading(false), 400);
+            }
+          }} data-first-letter="B">Bar</button>
+          <button className={`chart-view-button ${activeChart === 'area' ? 'active' : ''}`} onClick={() => {
+            if (activeChart !== 'area') {
+              setChartLoading(true);
+              setActiveChart('area');
+              setTimeout(() => setChartLoading(false), 400);
+            }
+          }} data-first-letter="A">Area</button>
+          <button className={`chart-view-button ${activeChart === 'heatmap' ? 'active' : ''}`} onClick={() => {
+            if (activeChart !== 'heatmap') {
+              setChartLoading(true);
+              setActiveChart('heatmap');
+              setTimeout(() => setChartLoading(false), 400);
+            }
+          }} data-first-letter="H">Heatmap</button>
+          <button className={`chart-view-button ${activeChart === 'treemap' ? 'active' : ''}`} onClick={() => {
+            if (activeChart !== 'treemap') {
+              setChartLoading(true);
+              setActiveChart('treemap');
+              setTimeout(() => setChartLoading(false), 400);
+            }
+          }} data-first-letter="T">Treemap</button>
+        </div>
+      </div>
+
+      {chartLoading ? (
         <div className="loading-container">
           <div className="loading-spinner"></div>
         </div>
       ) : (
         <>
-          {/* Line Chart */}
-          {showLineChart && (
+          {activeChart === 'line' && (
             <div className="chart-container">
               <div className="chart-header">
                 <h3 className="chart-title">Spec Popularity Over Time</h3>
-                <button className="chart-toggle" onClick={() => setShowLineChart(false)}>
-                  Hide
-                </button>
               </div>
               <div className="meta-chart-scroll">
-                <ResponsiveContainer width="100%" height={400}>
+                <ResponsiveContainer width="100%" height={600}>
                   <LineChart data={charts[chartView].data}>
-                    <XAxis dataKey="week" tick={{ fontSize: '0.75rem' }} />
-                    <YAxis tick={{ fontSize: '0.75rem' }} />
+                    <XAxis dataKey="week" tick={{ fontSize: isMobile ? 0 : '0.75rem' }} />
+                    <YAxis tick={{ fontSize: isMobile ? 0 : '0.75rem' }} />
                     <Tooltip content={<CustomTooltip />} wrapperStyle={{ marginTop: '-40px' }} />
                     {charts[chartView].topSpecs.map(specId => (
                       <Line
@@ -463,21 +528,16 @@ export const MetaEvolutionPage: React.FC = () => {
               </div>
             </div>
           )}
-
-          {/* Stacked Bar Chart */}
-          {showBarChart && (
+          {activeChart === 'bar' && (
             <div className="chart-container">
               <div className="chart-header">
                 <h3 className="chart-title">Spec Distribution by Week</h3>
-                <button className="chart-toggle" onClick={() => setShowBarChart(false)}>
-                  Hide
-                </button>
               </div>
               <div className="meta-chart-scroll">
-                <ResponsiveContainer width="100%" height={400}>
+                <ResponsiveContainer width="100%" height={600}>
                   <BarChart data={charts[chartView].data}>
-                    <XAxis dataKey="week" tick={{ fontSize: '0.75rem' }} />
-                    <YAxis tick={{ fontSize: '0.75rem' }} domain={[0, barChartMax]} />
+                    <XAxis dataKey="week" tick={{ fontSize: isMobile ? 0 : '0.75rem' }} />
+                    <YAxis tick={{ fontSize: isMobile ? 0 : '0.75rem' }} domain={[0, barChartMax]} ticks={[barChartMax/4, barChartMax/2, (barChartMax*3)/4, barChartMax]} />
                     <Tooltip content={<CustomTooltip />} wrapperStyle={{ marginTop: '-40px' }} />
                     {charts[chartView].topSpecs.map(specId => (
                       <Bar
@@ -492,21 +552,16 @@ export const MetaEvolutionPage: React.FC = () => {
               </div>
             </div>
           )}
-
-          {/* Percent Area Chart */}
-          {showPercentAreaChart && (
+          {activeChart === 'area' && (
             <div className="chart-container">
               <div className="chart-header">
                 <h3 className="chart-title">Spec Popularity Percentage</h3>
-                <button className="chart-toggle" onClick={() => setShowPercentAreaChart(false)}>
-                  Hide
-                </button>
               </div>
               <div className="meta-chart-scroll">
-                <ResponsiveContainer width="100%" height={400}>
+                <ResponsiveContainer width="100%" height={600}>
                   <AreaChart data={percentData}>
-                    <XAxis dataKey="week" tick={{ fontSize: '0.75rem' }} />
-                    <YAxis tick={{ fontSize: '0.75rem' }} domain={[0, 100]} tickFormatter={v => `${Math.round(v * 100) / 100}%`} ticks={[25, 50, 75, 100]} />
+                    <XAxis dataKey="week" tick={{ fontSize: isMobile ? 0 : '0.75rem' }} />
+                    <YAxis tick={{ fontSize: isMobile ? 0 : '0.75rem' }} domain={[0, 100]} tickFormatter={v => `${Math.round(v * 100) / 100}%`} ticks={[25, 50, 75, 100]} />
                     <Tooltip content={<CustomTooltip percent />} wrapperStyle={{ marginTop: '-40px' }} />
                     {charts[chartView].topSpecs.map(specId => (
                       <Area
@@ -523,28 +578,18 @@ export const MetaEvolutionPage: React.FC = () => {
               </div>
             </div>
           )}
-
-          {/* Heatmap */}
-          {showHeatmapGrid && (
+          {activeChart === 'heatmap' && (
             <div className="chart-container">
               <div className="chart-header">
                 <h3 className="chart-title">Spec Popularity Heatmap</h3>
-                <button className="chart-toggle" onClick={() => setShowHeatmapGrid(false)}>
-                  Hide
-                </button>
               </div>
               <HeatmapGrid data={charts[chartView].data} specs={charts[chartView].topSpecs} />
             </div>
           )}
-
-          {/* Treemap */}
-          {showTreemap && (
+          {activeChart === 'treemap' && (
             <div className="chart-container">
               <div className="chart-header">
                 <h3 className="chart-title">Spec Popularity Treemap</h3>
-                <button className="chart-toggle" onClick={() => setShowTreemap(false)}>
-                  Hide
-                </button>
               </div>
               {(() => {
                 const chartData = charts[chartView].data;
@@ -575,7 +620,7 @@ export const MetaEvolutionPage: React.FC = () => {
                     {treemapData.length === 0 ? (
                       <div className="text-center text-gray-400">No data</div>
                     ) : (
-                      <ResponsiveContainer width="100%" height={400}>
+                      <ResponsiveContainer width="100%" height={700}>
                         <Treemap
                           data={treemapData}
                           dataKey="value"
@@ -618,7 +663,7 @@ const HeatmapGrid: React.FC<{ data: any[]; specs: number[] }> = ({ data, specs }
   // Tooltip state
   const [tooltip, setTooltip] = React.useState<{ x: number; y: number; specId: number; week: number; value: number } | null>(null);
   // Grid template: 1 column for spec name, then one for each week
-  const gridTemplate = `minmax(100px, 1fr) repeat(${weeks.length}, 40px)`;
+  const gridTemplate = `minmax(100px, 1fr) repeat(${weeks.length}, 1fr)`;
   return (
     <div className="relative">
       {/* Header row */}
