@@ -1,58 +1,736 @@
-.meta-tooltip {
-  background: #181c2a;
+/* MetaEvolutionPage.css - Enhanced modern styling */
+
+/* Page container */
+.meta-evolution-page {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  margin-bottom: 2rem;
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.meta-evolution-page::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.05), transparent);
+  transition: left 0.8s ease;
+}
+
+.meta-evolution-page:hover::before {
+  left: 100%;
+}
+
+/* Controls section - Group all controls together */
+.controls-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Season filter */
+.season-filter {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.6) 100%);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.season-filter label {
+  font-weight: 600;
+  color: #e2e8f0;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  min-width: 80px;
+}
+
+.season-filter select {
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.8) 100%);
+  border: 2px solid rgba(59, 130, 246, 0.2);
+  border-radius: 8px;
+  color: #f8fafc;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  min-width: 200px;
+  cursor: pointer;
+  background: #1e293b;
+  color: #f8fafc;
+  border: 2px solid #3b82f6;
+}
+.season-filter option {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+.season-filter select:hover {
+  border-color: rgba(59, 130, 246, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
+}
+
+.season-filter select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  outline: none;
+}
+
+/* Chart view selector */
+.chart-view-selector {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.6) 100%);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.chart-view-button {
+  padding: 0.875rem 1.75rem;
+  background: linear-gradient(135deg, #1e293b, #334155);
+  border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 10px;
-  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.18);
-  padding: 8px 12px;
-  min-width: 180px;
-  max-width: 320px;
-  color: #f5f5f5;
+  color: #cbd5e1;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+
+.chart-view-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.chart-view-button:hover::before {
+  left: 100%;
+}
+
+.chart-view-button:hover {
+  color: #f8fafc;
+  border-color: rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.25);
+}
+
+.chart-view-button.active {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: white;
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Chart container */
+.chart-container {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(15px);
+  transition: all 0.4s ease;
+  margin-bottom: 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.chart-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.05), transparent);
+  transition: left 0.6s ease;
+}
+
+.chart-container:hover::before {
+  left: 100%;
+}
+
+.chart-container:hover {
+  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Chart header */
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.chart-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #f8fafc;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.chart-toggle {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #1e293b, #334155);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 8px;
+  color: #e2e8f0;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.chart-toggle:hover {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Enhanced tooltip */
+.meta-tooltip {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.75) 0%, rgba(30, 41, 59, 0.75) 100%);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(59, 130, 246, 0.25);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+  color: #f8fafc;
+  font-size: 0.78rem;
   font-weight: 500;
-  font-size: 13px;
-  line-height: 1.4;
+  animation: tooltipFadeIn 0.2s ease;
+  min-width: 180px;
+  max-width: 560px;
+  overflow-x: hidden;
+  word-break: break-word;
+  white-space: normal;
+  z-index: 1000;
 }
-.meta-tooltip__label {
-  font-size: 12px;
-  color: #aaa;
-  margin-bottom: 2px;
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
+
+.meta-tooltip__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+  padding-bottom: 0.2rem;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.13);
+}
+
+.meta-tooltip__title {
+  font-weight: 700;
+  color: #3b82f6;
+  font-size: 0.92rem;
+}
+
+.meta-tooltip__total {
+  font-weight: 600;
+  color: #94a3b8;
+  font-size: 0.78rem;
+}
+
 .meta-tooltip__columns {
   display: flex;
-  gap: 24px;
+  gap: 0.85rem;
 }
+
 .meta-tooltip__column {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 2px 12px;
-  align-items: center;
-  min-width: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.32rem;
+  min-width: 160px;
+  width: 160px;
+  flex: 1;
 }
 
+.meta-tooltip__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
 
+.meta-tooltip__spec-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  flex: 1;
+}
 
-@media (max-width: 600px) {
+.meta-tooltip__spec-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  line-height: 1.1;
+}
+
+.meta-tooltip__class-name {
+  font-weight: 400;
+  color: #94a3b8;
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+.meta-tooltip__value {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+  min-width: 38px;
+}
+
+.meta-tooltip__primary-value {
+  font-weight: 600;
+  font-size: 0.78rem;
+  color: #f8fafc;
+}
+
+.meta-tooltip__percentage {
+  font-weight: 400;
+  color: #94a3b8;
+  font-size: 0.7rem;
+}
+
+/* Treemap controls */
+.treemap-controls {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(51, 65, 85, 0.8) 100%);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+}
+
+.treemap-slider {
+  flex: 1;
+  height: 8px;
+  background: linear-gradient(90deg, #1e293b, #334155);
+  border-radius: 4px;
+  outline: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.treemap-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transition: all 0.3s ease;
+}
+
+.treemap-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
+
+.treemap-slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transition: all 0.3s ease;
+}
+
+.treemap-slider::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
+
+.treemap-label {
+  font-weight: 600;
+  color: #e2e8f0;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.treemap-info {
+  font-weight: 600;
+  color: #94a3b8;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+/* Chart scroll container */
+.meta-chart-scroll {
+  padding: 0.5rem 0;
+  margin: 0 -0.5rem;
+}
+
+.meta-chart-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.meta-chart-scroll::-webkit-scrollbar-track {
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 4px;
+}
+
+.meta-chart-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.meta-chart-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+}
+
+/* Loading state */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem;
+  color: #94a3b8;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(59, 130, 246, 0.2);
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Heatmap grid */
+.meta-heatmap-header {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(51, 65, 85, 0.6) 100%);
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.meta-heatmap-row {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.4) 0%, rgba(30, 41, 59, 0.4) 100%);
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(59, 130, 246, 0.05);
+  transition: all 0.3s ease;
+}
+
+.meta-heatmap-row:hover {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.6) 100%);
+  border-color: rgba(59, 130, 246, 0.15);
+}
+
+.meta-heatmap-spec {
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.3);
+  backdrop-filter: blur(5px);
+}
+
+.meta-heatmap-tooltip {
+  position: fixed;
+  z-index: 1000;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  border-radius: 8px;
+  color: #f8fafc;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  animation: tooltipFadeIn 0.2s ease;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .meta-evolution-page {
+    padding: 1.5rem;
+    border-radius: 16px;
+    margin: 0.5rem;
+  }
+  
+  .controls-section {
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+  
+  .season-filter {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+  
+  .season-filter select {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .chart-view-selector {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+  
+  .chart-view-button {
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .chart-container {
+    padding: 1.5rem;
+    border-radius: 12px;
+  }
+  
+  .chart-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .chart-title {
+    font-size: 1.25rem;
+  }
+  
+  .treemap-controls {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .meta-tooltip__columns {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .meta-tooltip__column {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .meta-evolution-page {
+    padding: 1rem;
+  }
+  
+  .controls-section {
+    padding: 1rem;
+  }
+  
+  .chart-view-button {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.75rem;
+  }
+  
+  .chart-container {
+    padding: 1rem;
+  }
+  
+  .treemap-controls {
+    padding: 0.75rem;
+  }
+  
+  .treemap-slider {
+    height: 6px;
+  }
+  
+  .treemap-slider::-webkit-slider-thumb {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .treemap-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* Chart-specific enhancements */
+.recharts-responsive-container {
+  transition: all 0.3s ease;
+}
+
+.recharts-responsive-container:hover {
+  transform: scale(1.01);
+}
+
+/* Mobile chart margin */
+@media (max-width: 768px) {
+  .recharts-responsive-container {
+    margin-left: 14px;
+    margin-right: 14px;
+  }
+} 
+
+@media (max-width: 768px) {
   .meta-tooltip {
     min-width: 120px;
     max-width: 98vw;
-    font-size: 12px;
-    padding: 6px 6px;
+    font-size: 0.72rem;
+    padding: 0.4rem 0.5rem;
   }
   .meta-tooltip__columns {
-    gap: 8px;
+    gap: 0.5rem;
   }
-  .recharts-responsive-container {
-    margin-left: 14px;
-    margin-right: 14px;
+  .meta-tooltip__column {
+    min-width: 90px;
   }
+} 
+
+.button-group {
+  display: flex;
+  gap: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(30,41,59,0.08);
 }
-@media (max-width: 768px) {
-  .meta-chart-scroll {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-left: 0;
-    padding-right: 0;
+.button-group .chart-view-button {
+  border-radius: 0;
+  margin: 0;
+  border-right: 1px solid rgba(59,130,246,0.10);
+}
+.button-group .chart-view-button:first-child {
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+.button-group .chart-view-button:last-child {
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  border-right: none;
+} 
+
+.chart-type-toggle {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.6) 100%);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.chart-controls-row {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+@media (max-width: 900px) {
+  .chart-controls-row {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
   }
-  .recharts-responsive-container {
-    margin-left: 14px;
-    margin-right: 14px;
+} 
+
+.controls-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+}
+@media (max-width: 900px) {
+  .controls-row {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
   }
+  .controls-row .season-filter,
+  .controls-row .button-group.chart-view-selector {
+    min-width: 0;
+    width: 100%;
+    flex: 1 1 100%;
+  }
+} 
+
+.controls-row .season-filter {
+  min-width: auto;
+  max-width: 100%;
+}
+.controls-row .button-group.chart-view-selector {
+  flex: 1 1 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 } 

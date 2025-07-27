@@ -98,12 +98,22 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
   const roleEmoji: Record<string, string> = { tank: '🛡️', healer: '💚', dps: '⚔️' };
 
   // Helper to sort members by role: tank, heal, dps, dps, dps
-  function sortMembers<T extends { role: string }>(members: T[]): T[] {
+  // Within same role, sort by spec_id
+  function sortMembers<T extends { role: string; spec_id?: number }>(members: T[]): T[] {
     const roleOrder: Record<string, number> = { tank: 0, healer: 1, dps: 2 };
     return [...members].sort((a, b) => {
       const ra = roleOrder[a.role] ?? 99;
       const rb = roleOrder[b.role] ?? 99;
-      return ra - rb;
+      
+      // First sort by role
+      if (ra !== rb) {
+        return ra - rb;
+      }
+      
+      // Within same role, sort by spec_id
+      const specA = a.spec_id ?? 0;
+      const specB = b.spec_id ?? 0;
+      return specA - specB;
     });
   }
 
@@ -156,42 +166,48 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
     color: string;
   } | null>(null);
 
+  // Helper to determine text color for tooltip
+  function getTextColor(bgColor: string): string {
+    const hex = bgColor.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.5 ? '#23263a' : '#fff';
+  }
+
   return (
-    <div className="flex flex-wrap gap-6 mb-8">
-      <div className="flex-1 min-w-[180px] bg-gray-800 rounded-xl p-4 shadow text-center">
-        <div className="text-xs text-gray-400 mb-1">Top Runs</div>
-        <div className="text-xl font-bold">{totalRuns}</div>
+    <div className="mb-8">
+      {/* Summary Stats Grid */}
+      <div className="stats-grid">
+        <div className="stats-card">
+          <div className="label">Top Runs</div>
+          <div className="value">{totalRuns}</div>
+        </div>
+        <div className="stats-card">
+          <div className="label">Highest Keystone</div>
+          <div className="value">{highestKeystone}</div>
+        </div>
+        <div className="stats-card">
+          <div className="label">Fastest Time</div>
+          <div className="value">{fastestTime}</div>
+        </div>
+        <div className="stats-card">
+          <div className="label">Most Popular Dungeon</div>
+          <div className="value">{mostPopularDungeon}</div>
+        </div>
       </div>
-      <div className="flex-1 min-w-[180px] bg-gray-800 rounded-xl p-4 shadow text-center">
-        <div className="text-xs text-gray-400 mb-1">Highest Keystone</div>
-        <div className="text-xl font-bold">{highestKeystone}</div>
-      </div>
-      <div className="flex-1 min-w-[180px] bg-gray-800 rounded-xl p-4 shadow text-center">
-        <div className="text-xs text-gray-400 mb-1">Fastest Time</div>
-        <div className="text-xl font-bold">{fastestTime}</div>
-      </div>
-      <div className="flex-1 min-w-[180px] bg-gray-800 rounded-xl p-4 shadow text-center">
-        <div className="text-xs text-gray-400 mb-1">Most Popular Dungeon</div>
-        <div className="text-xl font-bold">{mostPopularDungeon}</div>
-      </div>
+
       {/* Most Popular Specs by Role */}
-      <div className="w-full bg-gray-800 rounded-xl p-4 shadow text-center flex flex-col items-center mb-6">
-        <div className="text-xs text-gray-400 mb-4">Most Popular Specs by Role</div>
-        <div className="flex justify-center flex-wrap gap-2 md:gap-8 mb-2">
+      <div className="spec-role-section">
+        <div className="spec-role-title">Most Popular Specs by Role</div>
+        <div className="spec-cards-container">
           {/* Tank */}
-          <div className="flex flex-col items-center justify-center">
+          <div className="spec-card">
             <span
-              className="saas-group-square"
+              className="spec-square"
               style={{
                 background: WOW_CLASS_COLORS[tankClassId] || '#fff',
-                width: 80,
-                height: 80,
-                borderRadius: 20,
-                fontSize: 32,
-                marginBottom: 10,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
               }}
               onMouseEnter={e => {
                 const rect = (e.target as HTMLElement).getBoundingClientRect();
@@ -206,25 +222,17 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
             >
               <span>{roleEmoji.tank}</span>
             </span>
-            <span className="summary-spec-label text-lg font-bold mt-2 hidden md:inline">
+            <span className="spec-label">
               {WOW_SPECIALIZATIONS[topTankSpecId] || '-'}
             </span>
-            <span className="summary-spec-count text-xs text-gray-300 mt-1">x{specCountInRuns[topTankSpecId] || 0}</span>
+            <span className="spec-count">x{specCountInRuns[topTankSpecId] || 0}</span>
           </div>
           {/* Healer */}
-          <div className="flex flex-col items-center justify-center">
+          <div className="spec-card">
             <span
-              className="saas-group-square"
+              className="spec-square"
               style={{
                 background: WOW_CLASS_COLORS[healerClassId] || '#fff',
-                width: 80,
-                height: 80,
-                borderRadius: 20,
-                fontSize: 32,
-                marginBottom: 10,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
               }}
               onMouseEnter={e => {
                 const rect = (e.target as HTMLElement).getBoundingClientRect();
@@ -239,10 +247,10 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
             >
               <span>{roleEmoji.healer}</span>
             </span>
-            <span className="summary-spec-label text-lg font-bold mt-2 hidden md:inline">
+            <span className="spec-label">
               {WOW_SPECIALIZATIONS[topHealerSpecId] || '-'}
             </span>
-            <span className="summary-spec-count text-xs text-gray-300 mt-1">x{specCountInRuns[topHealerSpecId] || 0}</span>
+            <span className="spec-count">x{specCountInRuns[topHealerSpecId] || 0}</span>
           </div>
           {/* Top 3 DPS */}
           {topDps.map((specId, i) => {
@@ -250,20 +258,12 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
             return (
               <div
                 key={specId}
-                className="flex flex-col items-center justify-center"
+                className="spec-card"
               >
                 <span
-                  className="saas-group-square"
+                  className="spec-square"
                   style={{
                     background: WOW_CLASS_COLORS[dpsClassId] || '#fff',
-                    width: 80,
-                    height: 80,
-                    borderRadius: 20,
-                    fontSize: 32,
-                    marginBottom: 10,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
                   }}
                   onMouseEnter={e => {
                     const rect = (e.target as HTMLElement).getBoundingClientRect();
@@ -278,39 +278,32 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
                 >
                   <span>{roleEmoji.dps}</span>
                 </span>
-                <span className="summary-spec-label text-lg font-bold mt-2 hidden md:inline">
+                <span className="spec-label">
                   {WOW_SPECIALIZATIONS[specId] || '-'}
                 </span>
-                <span className="summary-spec-count text-xs text-gray-300 mt-1">x{specCountInRuns[specId] || 0}</span>
+                <span className="spec-count">x{specCountInRuns[specId] || 0}</span>
               </div>
             );
           })}
         </div>
       </div>
+
       {/* Most Popular Group Composition */}
-      <div className="w-full bg-gray-800 rounded-xl p-4 shadow text-center flex flex-col items-center">
-        <div className="text-xs text-gray-400 mb-4">Most Popular Group Composition</div>
-        <div className="flex justify-center flex-wrap gap-2 md:gap-8 mb-2">
+      <div className="group-composition-section">
+        <div className="spec-role-title">Most Popular Group Composition</div>
+        <div className="spec-cards-container">
           {mostPopularGroupSpecs.map((specId, i) => {
             const classId = getClassId(specId);
             const role = getRole(specId);
             return (
               <div
                 key={specId + '-' + i}
-                className="flex flex-col items-center justify-center"
+                className="spec-card"
               >
                 <span
-                  className="saas-group-square"
+                  className="spec-square"
                   style={{
                     background: WOW_CLASS_COLORS[Number(classId)] || '#fff',
-                    width: 80,
-                    height: 80,
-                    borderRadius: 20,
-                    fontSize: 32,
-                    marginBottom: 10,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
                   }}
                   onMouseEnter={e => {
                     const rect = (e.target as HTMLElement).getBoundingClientRect();
@@ -325,7 +318,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
                 >
                   <span>{roleEmoji[role] || ''}</span>
                 </span>
-                <span className="summary-spec-label text-lg font-bold mt-2 hidden md:inline">
+                <span className="spec-label">
                   {WOW_SPECIALIZATIONS[Number(specId)] || '-'}
                 </span>
               </div>
@@ -333,42 +326,25 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
           })}
         </div>
         {mostPopularGroupCount > 0 && (
-          <div className="text-xs text-gray-300 mt-2">x{mostPopularGroupCount} times</div>
+          <div className="group-count">x{mostPopularGroupCount} times</div>
         )}
       </div>
-      {/* Custom tooltip for spec cards */}
-      {specTooltip && (() => {
-        const minWidth = 80;
-        const maxWidth = 180;
-        const tooltipWidth = maxWidth;
-        let left = specTooltip.x;
-        if (typeof window !== 'undefined' && left + tooltipWidth > window.innerWidth - 8) {
-          left = Math.max(8, window.innerWidth - tooltipWidth - 8);
-        }
-        return (
-          <div
-            className="fixed z-50 px-4 py-2 rounded-lg text-xs shadow-lg border pointer-events-none"
-            style={{
-              left,
-              top: specTooltip.y - 40,
-              minWidth,
-              maxWidth,
-              background: specTooltip.color,
-              borderColor: specTooltip.color,
-              borderWidth: 1.5,
-              color:
-                specTooltip.color.toLowerCase() === '#fff' || specTooltip.color.toLowerCase() === '#ffffff' || specTooltip.color.toLowerCase() === '#fff569'
-                  ? '#23263a'
-                  : '#fff',
-              fontWeight: 500,
-              boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
-              textAlign: 'center',
-            }}
-          >
-            {specTooltip.content}
-          </div>
-        );
-      })()}
+
+      {/* Enhanced Tooltip */}
+      {specTooltip && (
+        <div
+          className="spec-tooltip"
+          style={{
+            left: specTooltip.x,
+            top: specTooltip.y - 10,
+            background: specTooltip.color,
+            borderColor: specTooltip.color,
+            color: getTextColor(specTooltip.color),
+          }}
+        >
+          {specTooltip.content}
+        </div>
+      )}
     </div>
   );
 }; 

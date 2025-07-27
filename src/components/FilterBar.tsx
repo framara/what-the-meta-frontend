@@ -33,7 +33,7 @@ export const FilterBar: React.FC = () => {
       // Descending order
       const sorted = [...seasons].sort((a, b) => b.season_id - a.season_id);
       setSeasonOptions(sorted
-        .filter(s => s.season_id >= 12)
+        .filter(s => s.season_id >= 10)
         .map(s => ({ label: s.season_name, value: s.season_id })));
       setLoading(false);
     });
@@ -53,90 +53,77 @@ export const FilterBar: React.FC = () => {
   }, [filter.season_id]);
 
   return (
-    <div className={
-      `filter-bar w-full flex flex-wrap items-center justify-between gap-4 px-8 py-4 bg-gray-800/80 rounded-2xl shadow-md border border-gray-700 mb-8` +
-      (isMobile ? ' filter-bar-mobile' : '')
-    }>
-      {isMobile && (
-        <button
-          className="filterbar-toggle-btn"
-          onClick={() => setMobileCollapsed((c) => !c)}
-          aria-expanded={!mobileCollapsed}
-          aria-controls="filterbar-controls"
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}
-        >
-          <span style={{ fontWeight: 600 }}>
-            {filter.season_id && seasonOptions.length > 0
-              ? seasonOptions.find((s) => s.value === filter.season_id)?.label || 'Season'
-              : 'Season'}
-          </span>
-          {mobileCollapsed ? (
-            <FaChevronDown size={18} />
-          ) : (
-            <FaChevronUp size={18} />
-          )}
-        </button>
-      )}
-      <div
-        id="filterbar-controls"
-        className={
-          'filterbar-controls' +
-          (isMobile ? (mobileCollapsed ? ' collapsed' : ' expanded') : '')
-        }
-        style={isMobile ? { width: '100%' } : {}}
+    <div className="filter-bar">
+      {/* Mobile toggle button */}
+      <button
+        className="filterbar-toggle-btn md:hidden"
+        onClick={() => setMobileCollapsed((c) => !c)}
       >
-        <div className="filter-label flex items-center gap-2 mb-2">
-          <span className="font-medium text-gray-100">Season:</span>
+        {mobileCollapsed 
+          ? (filter.season_id 
+              ? seasonOptions.find(opt => opt.value === filter.season_id)?.label || 'Select Season'
+              : 'Select Season')
+          : 'Hide Filters'
+        }
+      </button>
+
+      {/* Filter controls */}
+      <div className={`filterbar-controls ${mobileCollapsed ? 'collapsed' : 'expanded'} md:!flex`}>
+        <div className="filter-label">
+          <span>Season:</span>
           <select
-            className="filter-select px-4 py-2 rounded-md font-semibold border-2 bg-gray-900 text-gray-100 border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="filter-select"
             value={filter.season_id}
             onChange={e => dispatch({ type: 'SET_SEASON', season_id: Number(e.target.value) })}
-            disabled={loading || seasonOptions.length === 0}
+            disabled={loading}
           >
             {seasonOptions.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
         </div>
-        <div className="filter-label flex items-center gap-2 mb-2">
-          <span className="font-medium text-gray-100">Week:</span>
+
+        <div className="filter-label">
+          <span>Period:</span>
           <select
-            className="filter-select px-4 py-2 rounded-md font-semibold border-2 bg-gray-900 text-gray-100 border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="filter-select"
             value={filter.period_id || ''}
             onChange={e => dispatch({ type: 'SET_PERIOD', period_id: e.target.value ? Number(e.target.value) : undefined })}
-            disabled={loading || periodOptions.length === 0}
+            disabled={!filter.season_id || loading}
           >
-            <option value="">All</option>
+            <option value="">Entire Season</option>
             {periodOptions.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
         </div>
-        <div className="filter-label flex items-center gap-2 mb-2">
-          <span className="font-medium text-gray-100">Dungeon:</span>
+
+        <div className="filter-label">
+          <span>Dungeon:</span>
           <select
-            className="filter-select px-4 py-2 rounded-md font-semibold border-2 bg-gray-900 text-gray-100 border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 max-w-[220px]"
+            className="filter-select"
             value={filter.dungeon_id || ''}
             onChange={e => dispatch({ type: 'SET_DUNGEON', dungeon_id: e.target.value ? Number(e.target.value) : undefined })}
-            disabled={loading || dungeonOptions.length === 0}
+            disabled={!filter.season_id || loading}
           >
-            <option value="">All</option>
+            <option value="">All Dungeons</option>
             {dungeonOptions.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
         </div>
-        <div className="filter-label flex items-center gap-2 mb-2">
-          <span className="font-medium text-gray-100">Top:</span>
+
+        <div className="filter-label">
+          <span>Top N:</span>
           <select
-            className="filter-select px-4 py-2 rounded-md font-semibold border-2 bg-gray-900 text-gray-100 border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="filter-select"
             value={filter.limit}
             onChange={e => dispatch({ type: 'SET_LIMIT', limit: Number(e.target.value) })}
           >
-            <option value={100}>100</option>
-            <option value={250}>250</option>
-            <option value={500}>500</option>
-            <option value={1000}>1000</option>
+            <option value={100}>Top 100</option>
+            <option value={250}>Top 250</option>
+            <option value={500}>Top 500</option>
+            <option value={1000}>Top 1000</option>
           </select>
         </div>
       </div>
