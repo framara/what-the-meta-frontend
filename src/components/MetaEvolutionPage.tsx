@@ -6,6 +6,32 @@ import type { TooltipProps } from 'recharts';
 import { WOW_SPEC_ROLES } from './wow-constants';
 import './styles/MetaEvolutionPage.css';
 
+// Popover description component
+const ChartDescriptionPopover: React.FC = () => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  return (
+    <div className="chart-description-popover">
+      <button
+        className="chart-description-trigger"
+        onClick={() => setIsVisible(!isVisible)}
+        title="Data sample information"
+      >
+        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+        </svg>
+      </button>
+      {isVisible && (
+        <div className="chart-description-content">
+          <div className="chart-description-text">
+            Data sample: Top 1,000 runs per week across all dungeons for the selected season.
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Custom tooltip for better readability
 const CustomTooltip = (props: TooltipProps<number, string> & { percent?: boolean }) => {
   const { active, payload, label, percent } = props as any;
@@ -505,6 +531,7 @@ export const MetaEvolutionPage: React.FC = () => {
             <div className="chart-container">
               <div className="chart-header">
                 <h3 className="chart-title">Spec Popularity Over Time</h3>
+                <ChartDescriptionPopover />
               </div>
               <div className="meta-chart-scroll">
                 <ResponsiveContainer width="100%" height={600}>
@@ -532,6 +559,7 @@ export const MetaEvolutionPage: React.FC = () => {
             <div className="chart-container">
               <div className="chart-header">
                 <h3 className="chart-title">Spec Distribution by Week</h3>
+                <ChartDescriptionPopover />
               </div>
               <div className="meta-chart-scroll">
                 <ResponsiveContainer width="100%" height={600}>
@@ -556,6 +584,7 @@ export const MetaEvolutionPage: React.FC = () => {
             <div className="chart-container">
               <div className="chart-header">
                 <h3 className="chart-title">Spec Popularity Percentage</h3>
+                <ChartDescriptionPopover />
               </div>
               <div className="meta-chart-scroll">
                 <ResponsiveContainer width="100%" height={600}>
@@ -582,6 +611,7 @@ export const MetaEvolutionPage: React.FC = () => {
             <div className="chart-container">
               <div className="chart-header">
                 <h3 className="chart-title">Spec Popularity Heatmap</h3>
+                <ChartDescriptionPopover />
               </div>
               <HeatmapGrid data={charts[chartView].data} specs={charts[chartView].topSpecs} />
             </div>
@@ -590,6 +620,7 @@ export const MetaEvolutionPage: React.FC = () => {
             <div className="chart-container">
               <div className="chart-header">
                 <h3 className="chart-title">Spec Popularity Treemap</h3>
+                <ChartDescriptionPopover />
               </div>
               {(() => {
                 const chartData = charts[chartView].data;
