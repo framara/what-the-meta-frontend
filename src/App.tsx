@@ -8,6 +8,7 @@ import { FilterBar } from './components/FilterBar';
 import { LeaderboardTable } from './components/LeaderboardTable';
 import { SummaryStats } from './components/SummaryStats';
 import { MetaEvolutionPage } from './components/MetaEvolutionPage';
+import { GroupCompositionPage } from './components/GroupCompositionPage';
 import Footer from './components/Footer';
 
 function App() {
@@ -86,6 +87,7 @@ function App() {
             <div className={`flex-col md:flex md:flex-row md:gap-6 md:static absolute top-full right-0 w-56 bg-gray-900 md:bg-transparent z-50 transition-all duration-200 ${navOpen ? 'flex' : 'hidden'} md:!flex`} style={{ boxShadow: navOpen ? '0 4px 16px 0 rgba(0,0,0,0.18)' : undefined, marginTop: navOpen ? '0.5rem' : undefined }}>
               <Link to="/" className="font-bold text-lg hover:text-blue-400 transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap" onClick={() => setNavOpen(false)}>Dashboard</Link>
               <Link to="/meta-evolution" className="font-bold text-lg hover:text-blue-400 transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap" onClick={() => setNavOpen(false)}>Meta Evolution</Link>
+              <Link to="/group-composition" className="font-bold text-lg hover:text-blue-400 transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap" onClick={() => setNavOpen(false)}>Group Composition</Link>
             </div>
           </nav>
           </div>
@@ -113,6 +115,7 @@ function App() {
               </div>
             } />
             <Route path="/meta-evolution" element={<MetaEvolutionPage />} />
+            <Route path="/group-composition" element={<GroupCompositionPage />} />
           </Routes>
         </main>
         <Footer />

@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { BarChart as RechartsBarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { WOW_CLASS_COLORS, WOW_SPEC_TO_CLASS } from '../../wow-constants';
 import { CustomTooltip } from '../components/CustomTooltip';
-import { ChartDescriptionPopover } from '../components/ChartDescriptionPopover';
 
 interface BarChartProps {
   data: any[];
@@ -21,7 +20,6 @@ export const BarChart: React.FC<BarChartProps> = ({ data, topSpecs, isMobile }) 
     <div className="chart-container">
       <div className="chart-header">
         <h3 className="chart-title">Spec Distribution by Week</h3>
-        <ChartDescriptionPopover />
       </div>
       <div className="meta-chart-scroll">
         <ResponsiveContainer width="100%" height={600}>

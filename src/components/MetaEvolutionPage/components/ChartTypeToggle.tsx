@@ -8,8 +8,8 @@ interface ChartTypeToggleProps {
 
 export const ChartTypeToggle: React.FC<ChartTypeToggleProps> = ({ activeChart, setActiveChart }) => {
   return (
-    <div className="chart-controls-row" style={{ marginBottom: '1.5rem', justifyContent: 'flex-end' }}>
-      <div className="button-group chart-type-toggle compact">
+    <div className="chart-controls-row" style={{ justifyContent: 'flex-end' }}>
+      <div className="button-group chart-type-toggle">
         <button 
           className={`chart-view-button ${activeChart === 'line' ? 'active' : ''}`} 
           onClick={() => setActiveChart('line')} 

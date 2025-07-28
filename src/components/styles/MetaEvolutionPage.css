@@ -680,7 +680,6 @@
 
 .chart-type-toggle {
   display: flex;
-  padding: 1.5rem;
 }
 
 .chart-type-toggle.compact {
@@ -700,7 +699,6 @@
   justify-content: flex-start;
   align-items: center;
   flex-wrap: wrap;
-  margin-bottom: 0.5rem;
 }
 @media (max-width: 900px) {
   .chart-controls-row {
@@ -770,32 +768,33 @@
 
 .chart-description-content {
   position: absolute;
-  top: 100%;
+  bottom: 100%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(-12px);
   background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
   border: 1px solid rgba(59, 130, 246, 0.3);
   border-radius: 8px;
   padding: 0.75rem 1rem;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
-  z-index: 1000;
+  z-index: 9999;
   min-width: 280px;
-  margin-top: 0.5rem;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
   animation: popoverFadeIn 0.2s ease-out;
 }
 
 .chart-description-content::before {
   content: '';
   position: absolute;
-  top: -6px;
+  bottom: -6px;
   left: 50%;
   transform: translateX(-50%);
   width: 0;
   height: 0;
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-bottom: 6px solid rgba(59, 130, 246, 0.3);
+  border-top: 6px solid rgba(59, 130, 246, 0.3);
 }
 
 .chart-description-text {
@@ -809,11 +808,11 @@
 @keyframes popoverFadeIn {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(-10px);
+    transform: translateX(-50%) translateY(-24px);
   }
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translateX(-50%) translateY(-12px);
   }
 }
 
@@ -833,5 +832,28 @@
   .chart-description-content {
     min-width: 200px;
     font-size: 0.75rem;
+  }
+} 
+
+@media (max-width: 768px) {
+  .controls-row {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.75rem;
+    flex-wrap: nowrap !important;
+    padding: 1rem;
+  }
+  .season-filter {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.5rem;
+    padding: 0;
+    flex-wrap: nowrap !important;
+  }
+  .season-filter select {
+    min-width: auto;
+    width: auto !important;
+    flex: none !important;
+    display: inline-block !important;
   }
 } 

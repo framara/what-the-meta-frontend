@@ -340,6 +340,18 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
         {mostPopularGroupCount > 0 && (
           <div className="group-count">x{mostPopularGroupCount} times</div>
         )}
+        <div className="meta-evolution-button-container">
+          <button 
+            className="meta-evolution-link"
+            onClick={() => {
+              // Navigate to the group composition page
+              window.location.href = '/group-composition';
+            }}
+            title="View Group Composition Analysis"
+          >
+            👥 View Analysis
+          </button>
+        </div>
       </div>
 
       {/* Enhanced Tooltip */}

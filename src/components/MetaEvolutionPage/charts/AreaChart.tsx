@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { AreaChart as RechartsAreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { WOW_CLASS_COLORS, WOW_SPEC_TO_CLASS } from '../../wow-constants';
 import { CustomTooltip } from '../components/CustomTooltip';
-import { ChartDescriptionPopover } from '../components/ChartDescriptionPopover';
 
 interface AreaChartProps {
   data: any[];
@@ -26,7 +25,6 @@ export const AreaChart: React.FC<AreaChartProps> = ({ data, topSpecs, isMobile }
     <div className="chart-container">
       <div className="chart-header">
         <h3 className="chart-title">Spec Popularity Percentage</h3>
-        <ChartDescriptionPopover />
       </div>
       <div className="meta-chart-scroll">
         <ResponsiveContainer width="100%" height={600}>

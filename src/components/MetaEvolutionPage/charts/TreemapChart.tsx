@@ -2,7 +2,6 @@ import React from 'react';
 import { Treemap, ResponsiveContainer, Tooltip } from 'recharts';
 import { WOW_SPECIALIZATIONS, WOW_CLASS_COLORS, WOW_SPEC_TO_CLASS } from '../../wow-constants';
 import { CustomContentTreemap, TreemapTooltip } from '../components/TreemapComponents';
-import { ChartDescriptionPopover } from '../components/ChartDescriptionPopover';
 import type { TreemapDataItem } from '../types';
 
 interface TreemapChartProps {
@@ -42,7 +41,6 @@ export const TreemapChart: React.FC<TreemapChartProps> = ({
     <div className="chart-container">
       <div className="chart-header">
         <h3 className="chart-title">Spec Popularity Treemap</h3>
-        <ChartDescriptionPopover />
       </div>
       
       <div className="treemap-controls">

@@ -2,7 +2,6 @@ import React from 'react';
 import { LineChart as RechartsLineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { WOW_CLASS_COLORS, WOW_SPEC_TO_CLASS } from '../../wow-constants';
 import { CustomTooltip } from '../components/CustomTooltip';
-import { ChartDescriptionPopover } from '../components/ChartDescriptionPopover';
 
 interface LineChartProps {
   data: any[];
@@ -15,7 +14,6 @@ export const LineChart: React.FC<LineChartProps> = ({ data, topSpecs, isMobile }
     <div className="chart-container">
       <div className="chart-header">
         <h3 className="chart-title">Spec Popularity Over Time</h3>
-        <ChartDescriptionPopover />
       </div>
       <div className="meta-chart-scroll">
         <ResponsiveContainer width="100%" height={600}>
