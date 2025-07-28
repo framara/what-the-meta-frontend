@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { fetchSeasons, fetchTopKeys } from '../../api';
-import { GroupCompositionControls } from './components/GroupCompositionControls';
 import { GroupCompositionStats } from './components/GroupCompositionStats';
 import LoadingScreen from '../LoadingScreen';
 import './styles/GroupCompositionPage.css';
@@ -106,13 +105,6 @@ export const GroupCompositionPage: React.FC = () => {
           Analyze the most popular group compositions, specs by role, and team dynamics across different seasons.
         </p>
       </div>
-
-      <GroupCompositionControls
-        seasons={seasons}
-        selectedSeason={selectedSeason}
-        setSelectedSeason={setSelectedSeason}
-        loading={loading}
-      />
 
       {loading ? (
         <LoadingScreen />

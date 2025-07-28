@@ -1,4 +1,5 @@
 // Components
+export { GroupCompositionPage } from './index.tsx';
 export { GroupCompositionStats } from './components/GroupCompositionStats';
 export { SpecSelector } from './components/SpecSelector';
 export { CompositionsSection } from './components/CompositionsSection';
