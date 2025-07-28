@@ -295,7 +295,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
             }}
             title="View Meta Evolution Charts"
           >
-            📊 View Charts
+            View Charts
           </button>
         </div>
       </div>
@@ -349,7 +349,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
             }}
             title="View Group Composition Analysis"
           >
-            👥 View Analysis
+            View More
           </button>
         </div>
       </div>

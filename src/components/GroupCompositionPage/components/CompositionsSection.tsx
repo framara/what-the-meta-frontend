@@ -34,7 +34,7 @@ export const CompositionsSection: React.FC<CompositionsSectionProps> = ({
           ))
         ) : (
           <div className="no-compositions">
-            <p>No compositions found for the selected spec.</p>
+            <p>No love for that spec during that season :(</p>
           </div>
         )}
       </div>
