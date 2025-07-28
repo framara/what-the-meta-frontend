@@ -17,7 +17,7 @@ export const ChartDescriptionPopover: React.FC = () => {
       {isVisible && (
         <div className="chart-description-content">
           <div className="chart-description-text">
-            Data sample: Top 1,000 runs per week across all dungeons for the selected season.
+            Data sample: Top 1,000 runs per week across all regions and dungeons for the selected season.
           </div>
         </div>
       )}
