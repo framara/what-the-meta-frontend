@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useRef, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_SPEC_ROLES, WOW_CLASS_NAMES } from '../../wow-constants';
 
 interface SpecSelectorProps {
@@ -26,6 +27,21 @@ export const SpecSelector: React.FC<SpecSelectorProps> = ({
   setHoveredClass,
   dropdownRef
 }) => {
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // Update dropdown position when it opens
+  useEffect(() => {
+    if (isDropdownOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width
+      });
+    }
+  }, [isDropdownOpen]);
+
   // Create class options for the selector
   const classOptions = Object.entries(WOW_CLASS_NAMES)
     .map(([classId, className]) => ({
@@ -71,6 +87,7 @@ export const SpecSelector: React.FC<SpecSelectorProps> = ({
       <div className="spec-selector-container">
         <div className={`multi-level-dropdown ${isDropdownOpen ? 'open' : ''}`} ref={dropdownRef}>
           <button
+            ref={buttonRef}
             className="dropdown-button"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             type="button"
@@ -81,8 +98,17 @@ export const SpecSelector: React.FC<SpecSelectorProps> = ({
             </svg>
           </button>
 
-          {isDropdownOpen && (
-            <div className="dropdown-menu">
+          {isDropdownOpen && createPortal(
+            <div 
+              className="dropdown-menu"
+              style={{
+                position: 'absolute',
+                top: dropdownPosition.top,
+                left: dropdownPosition.left,
+                width: dropdownPosition.width,
+                zIndex: 99999
+              }}
+            >
               <div className="dropdown-content">
                 {/* Classes */}
                 <div className="class-section">
@@ -123,7 +149,8 @@ export const SpecSelector: React.FC<SpecSelectorProps> = ({
                   </div>
                 </div>
               </div>
-            </div>
+            </div>,
+            document.body
           )}
         </div>
 

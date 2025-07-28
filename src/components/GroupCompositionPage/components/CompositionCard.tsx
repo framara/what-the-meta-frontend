@@ -44,10 +44,17 @@ export const CompositionCard: React.FC<CompositionCardProps> = ({
                 boxShadow: isSelectedSpec ? '0 0 0 2px rgba(59, 130, 246, 0.3)' : '0 2px 4px rgba(0, 0, 0, 0.2)',
               }}
               onMouseEnter={e => {
-                const rect = (e.target as HTMLElement).getBoundingClientRect();
                 setSpecTooltip({
-                  x: rect.left + rect.width / 2,
-                  y: rect.top,
+                  x: e.clientX,
+                  y: e.clientY,
+                  content: WOW_SPECIALIZATIONS[specId] || '-',
+                  color: WOW_CLASS_COLORS[classId] || '#23263a',
+                });
+              }}
+              onMouseMove={e => {
+                setSpecTooltip({
+                  x: e.clientX,
+                  y: e.clientY,
                   content: WOW_SPECIALIZATIONS[specId] || '-',
                   color: WOW_CLASS_COLORS[classId] || '#23263a',
                 });

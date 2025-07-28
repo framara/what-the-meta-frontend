@@ -146,6 +146,10 @@
   flex: 1;
   min-width: 0;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
 }
 
 .chart-view-button::before {
@@ -797,10 +801,7 @@
 }
 
 .chart-description-content {
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%) translateY(-12px);
+  position: fixed;
   background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
   border: 1px solid rgba(59, 130, 246, 0.3);
   border-radius: 8px;
@@ -809,8 +810,6 @@
   backdrop-filter: blur(10px);
   z-index: 9999;
   min-width: 280px;
-  margin-top: 0;
-  margin-bottom: 0.5rem;
   animation: popoverFadeIn 0.2s ease-out;
 }
 

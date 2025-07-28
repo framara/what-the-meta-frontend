@@ -382,4 +382,30 @@
   background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
   background-size: 200px 100%;
   animation: shimmer 1.5s infinite;
+}
+
+/* Desktop styles - make spec cards 50% bigger */
+@media (min-width: 769px) {
+  .spec-role-section .spec-cards-container,
+  .group-composition-section .spec-cards-container {
+    gap: 2.25rem; /* Increased from 1.5rem */
+  }
+  
+  .spec-role-section .spec-square,
+  .group-composition-section .spec-square {
+    width: 70px !important; /* Increased from 80px (50% bigger) */
+    height: 70px !important; /* Increased from 80px (50% bigger) */
+    font-size: 1.2rem !important; /* Increased from 2rem (50% bigger) */
+    border-radius: 15px !important; /* Increased from 20px (50% bigger) */
+  }
+  
+  .spec-role-section .spec-label,
+  .group-composition-section .spec-label {
+    font-size: 1rem !important; /* Increased from 1rem (50% bigger) */
+  }
+  
+  .spec-role-section .spec-count,
+  .group-composition-section .spec-count {
+    font-size: 1rem !important; /* Increased from 0.75rem (50% bigger) */
+  }
 } 
