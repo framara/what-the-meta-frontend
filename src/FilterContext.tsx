@@ -43,7 +43,7 @@ const FilterDispatchContext = createContext<Dispatch<FilterAction> | undefined>(
 
 // Provider
 export const FilterProvider = ({ children }: { children: ReactNode }) => {
-  const [state, dispatch] = useReducer(filterReducer, { season_id: 14, limit: 100 });
+  const [state, dispatch] = useReducer(filterReducer, { season_id: 14, limit: 1000 });
   return (
     <FilterStateContext.Provider value={state}>
       <FilterDispatchContext.Provider value={dispatch}>

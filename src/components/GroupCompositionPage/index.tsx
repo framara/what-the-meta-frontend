@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { fetchSeasons, fetchTopKeys } from '../../api';
 import { GroupCompositionStats } from './components/GroupCompositionStats';
 import LoadingScreen from '../LoadingScreen';
+import { FilterBar } from '../FilterBar';
+import { useFilterState } from '../../FilterContext';
 import './styles/GroupCompositionPage.css';
 
 interface Season {
@@ -25,48 +27,25 @@ interface Run {
 }
 
 export const GroupCompositionPage: React.FC = () => {
-  const [seasons, setSeasons] = useState<Season[]>([]);
-  const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
+  const filter = useFilterState();
   const [runs, setRuns] = useState<Run[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch seasons on component mount
-  useEffect(() => {
-    const loadSeasons = async () => {
-      try {
-        const seasonsData = await fetchSeasons();
-        setSeasons(seasonsData);
-        // Set the latest season as default
-        if (seasonsData.length > 0) {
-          const latestSeason = seasonsData
-            .filter(s => s.season_id >= 9)
-            .sort((a, b) => b.season_id - a.season_id)[0];
-          if (latestSeason) {
-            setSelectedSeason(latestSeason.season_id);
-          }
-        }
-      } catch (err) {
-        setError('Failed to load seasons');
-        console.error('Error loading seasons:', err);
-      }
-    };
-
-    loadSeasons();
-  }, []);
-
-  // Fetch runs when season changes
+  // Fetch runs when filter changes
   useEffect(() => {
     const loadRuns = async () => {
-      if (!selectedSeason) return;
+      if (!filter.season_id) return;
 
       setLoading(true);
       setError(null);
 
       try {
         const runsData = await fetchTopKeys({
-          season_id: selectedSeason,
-          limit: 1000 // Get more data for better analysis
+          season_id: filter.season_id,
+          period_id: filter.period_id,
+          dungeon_id: filter.dungeon_id,
+          limit: filter.limit || 1000 // Get more data for better analysis
         });
         setRuns(runsData);
       } catch (err) {
@@ -78,7 +57,7 @@ export const GroupCompositionPage: React.FC = () => {
     };
 
     loadRuns();
-  }, [selectedSeason]);
+  }, [filter.season_id, filter.period_id, filter.dungeon_id, filter.limit]);
 
   if (error) {
     return (
@@ -105,6 +84,8 @@ export const GroupCompositionPage: React.FC = () => {
           Analyze the most popular group compositions, specs by role, and team dynamics across different seasons.
         </p>
       </div>
+
+      <FilterBar />
 
       {loading ? (
         <LoadingScreen />
