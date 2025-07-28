@@ -39,6 +39,12 @@ const Footer: React.FC = () => {
                                  >
                                      Meta Evolution
                                  </a>
+                                 <a
+                                     href="/group-composition"
+                                     className="text-gray-300 hover:text-blue-400 transition-colors duration-200"
+                                 >
+                                     Group Composition
+                                 </a>
                              </div>
                          </div>
 
