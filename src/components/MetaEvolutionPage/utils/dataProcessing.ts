@@ -1,4 +1,4 @@
-import { WOW_SPEC_ROLES, WOW_MELEE_SPECS, WOW_RANGED_SPECS } from '../../wow-constants';
+import { WOW_SPEC_ROLES, WOW_MELEE_SPECS, WOW_RANGED_SPECS } from '../../../constants/wow-constants';
 import type { SpecEvolutionData, ChartDataState } from '../types';
 
 export const processSpecEvolutionData = (data: SpecEvolutionData): ChartDataState => {

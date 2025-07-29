@@ -1,6 +1,6 @@
 import React from 'react';
 import type { TooltipProps } from 'recharts';
-import { WOW_SPECIALIZATIONS, WOW_CLASS_COLORS, WOW_SPEC_TO_CLASS } from '../../wow-constants';
+import { WOW_SPECIALIZATIONS, WOW_CLASS_COLORS, WOW_SPEC_TO_CLASS } from '../../../constants/wow-constants';
 
 interface CustomTooltipProps extends TooltipProps<number, string> {
   percent?: boolean;

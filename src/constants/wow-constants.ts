@@ -56,4 +56,4 @@ export const WOW_MELEE_SPECS = new Set([
 export const WOW_RANGED_SPECS = new Set([
   62, 63, 64, 253, 254, 258, 262, 102, 265, 266, 267, 1467, 1473
   // Add more if needed
-]); 
+]);

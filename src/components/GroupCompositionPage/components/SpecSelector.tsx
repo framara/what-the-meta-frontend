@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_SPEC_ROLES, WOW_CLASS_NAMES } from '../../wow-constants';
+import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_SPEC_ROLES, WOW_CLASS_NAMES } from '../../../constants/wow-constants';
 
 interface SpecSelectorProps {
   selectedClass: number | null;

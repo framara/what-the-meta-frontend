@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import { useFilterState, useFilterDispatch } from '../FilterContext';
-import { fetchSeasons, fetchSeasonInfo } from '../api';
+import { useFilterState, useFilterDispatch } from './FilterContext';
+import { fetchSeasons, fetchSeasonInfo } from '../services/api';
 import './styles/FilterBar.css';
 
 export const FilterBar: React.FC = () => {

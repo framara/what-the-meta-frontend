@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { fetchSeasons, fetchTopKeys } from '../../api';
+import { useFilterState } from '../FilterContext';
+import { fetchTopKeys, fetchSeasonInfo } from '../../services/api';
 import { GroupCompositionStats } from './components/GroupCompositionStats';
+import { GroupCompositionControls } from './components/GroupCompositionControls';
+import { CompositionsSection } from './components/CompositionsSection';
 import LoadingScreen from '../LoadingScreen';
 import { FilterBar } from '../FilterBar';
-import { useFilterState } from '../../FilterContext';
 import './styles/GroupCompositionPage.css';
 
 interface Season {

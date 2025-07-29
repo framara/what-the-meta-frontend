@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { WOW_SPECIALIZATIONS, WOW_CLASS_COLORS, WOW_SPEC_TO_CLASS } from '../../wow-constants';
+import { WOW_SPECIALIZATIONS, WOW_CLASS_COLORS, WOW_SPEC_TO_CLASS } from '../../../constants/wow-constants';
 
 interface HeatmapGridProps {
   data: any[];

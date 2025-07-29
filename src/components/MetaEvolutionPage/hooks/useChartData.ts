@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { fetchSpecEvolution, fetchSeasons } from '../../../api';
+import { fetchSpecEvolution, fetchSeasons } from '../../../services/api';
 import { processSpecEvolutionData } from '../utils/dataProcessing';
 import type { ChartDataState, Season, SpecEvolutionData } from '../types';
 

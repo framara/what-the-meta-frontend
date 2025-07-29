@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_CLASS_NAMES } from './wow-constants';
+import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_CLASS_NAMES } from '../constants/wow-constants';
 import './styles/LeaderboardTable.css';
 
 interface GroupMember {

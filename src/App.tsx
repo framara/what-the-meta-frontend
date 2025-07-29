@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import LoadingScreen from './components/LoadingScreen';
 import './App.css';
-import { fetchTopKeys, fetchSeasonInfo } from './api';
+import { fetchTopKeys, fetchSeasonInfo } from './services/api';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { useFilterState } from './FilterContext';
+import { useFilterState } from './components/FilterContext';
 import { FilterBar } from './components/FilterBar';
 import { LeaderboardTable } from './components/LeaderboardTable';
 import { SummaryStats } from './components/SummaryStats';
 import { MetaEvolutionPage } from './components/MetaEvolutionPage';
 import { GroupCompositionPage } from './components/GroupCompositionPage';
+import Navigation from './components/Navigation';
 import Footer from './components/Footer';
 
 function App() {
@@ -17,7 +18,6 @@ function App() {
   const [dungeons, setDungeons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const filter = useFilterState();
-  const [navOpen, setNavOpen] = useState(false);
 
   useEffect(() => {
     if (!filter.season_id) return;
@@ -69,27 +69,7 @@ function App() {
           </Link>
           <span className="text-sm sm:text-base text-gray-300 font-medium tracking-wide leading-tight">M+ stats and charts for nerds</span>
         </div>
-          <nav className="flex items-center">
-            {/* Hamburger menu for mobile */}
-            <button
-              className="md:hidden block p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              aria-label="Open navigation menu"
-              onClick={() => setNavOpen(v => !v)}
-            >
-              {/* Hamburger icon */}
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <line x1="3" y1="12" x2="21" y2="12" />
-                <line x1="3" y1="18" x2="21" y2="18" />
-              </svg>
-            </button>
-            {/* Nav links - hidden on mobile unless menu open, always visible on md+ */}
-            <div className={`flex-col md:flex md:flex-row md:gap-6 md:static absolute top-full right-0 w-56 bg-gray-900 md:bg-transparent z-50 transition-all duration-200 ${navOpen ? 'flex' : 'hidden'} md:!flex`} style={{ boxShadow: navOpen ? '0 4px 16px 0 rgba(0,0,0,0.18)' : undefined, marginTop: navOpen ? '0.5rem' : undefined }}>
-              <Link to="/" className="font-bold text-lg hover:text-blue-400 transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap" onClick={() => setNavOpen(false)}>Dashboard</Link>
-              <Link to="/meta-evolution" className="font-bold text-lg hover:text-blue-400 transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap" onClick={() => setNavOpen(false)}>Meta Evolution</Link>
-              <Link to="/group-composition" className="font-bold text-lg hover:text-blue-400 transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap" onClick={() => setNavOpen(false)}>Group Composition</Link>
-            </div>
-          </nav>
+          <Navigation />
           </div>
         </header>
         <main className="flex-1">
@@ -116,6 +96,33 @@ function App() {
             } />
             <Route path="/meta-evolution" element={<MetaEvolutionPage />} />
             <Route path="/group-composition" element={<GroupCompositionPage />} />
+            <Route path="/ai-predictions" element={
+              <div className="max-w-7xl mx-auto px-4 py-8">
+                <h1 className="text-3xl font-bold text-gray-200 mb-6">AI Predictions</h1>
+                <div className="bg-gray-800 rounded-lg p-6">
+                  <p className="text-gray-300 mb-4">Coming soon! AI-powered predictions for Mythic+ meta trends.</p>
+                  <div className="text-6xl mb-4">🤖</div>
+                </div>
+              </div>
+            } />
+            <Route path="/ai-analysis" element={
+              <div className="max-w-7xl mx-auto px-4 py-8">
+                <h1 className="text-3xl font-bold text-gray-200 mb-6">AI Analysis</h1>
+                <div className="bg-gray-800 rounded-lg p-6">
+                  <p className="text-gray-300 mb-4">Coming soon! Deep AI analysis of Mythic+ data patterns.</p>
+                  <div className="text-6xl mb-4">🧠</div>
+                </div>
+              </div>
+            } />
+            <Route path="/ai-insights" element={
+              <div className="max-w-7xl mx-auto px-4 py-8">
+                <h1 className="text-3xl font-bold text-gray-200 mb-6">AI Insights</h1>
+                <div className="bg-gray-800 rounded-lg p-6">
+                  <p className="text-gray-300 mb-4">Coming soon! AI-generated insights and recommendations.</p>
+                  <div className="text-6xl mb-4">💡</div>
+                </div>
+              </div>
+            } />
           </Routes>
         </main>
         <Footer />

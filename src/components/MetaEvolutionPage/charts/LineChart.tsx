@@ -1,6 +1,6 @@
 import React from 'react';
 import { LineChart as RechartsLineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
-import { WOW_CLASS_COLORS, WOW_SPEC_TO_CLASS } from '../../wow-constants';
+import { WOW_CLASS_COLORS, WOW_SPEC_TO_CLASS } from '../../../constants/wow-constants';
 import { CustomTooltip } from '../components/CustomTooltip';
 
 interface LineChartProps {

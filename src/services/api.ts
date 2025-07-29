@@ -51,4 +51,4 @@ export async function fetchSpecEvolution(seasonId: number) {
       spec_counts: Record<string, number>;
     }>;
   };
-} 
+}

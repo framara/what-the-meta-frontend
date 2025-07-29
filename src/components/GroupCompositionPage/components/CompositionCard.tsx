@@ -1,5 +1,5 @@
 import React from 'react';
-import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_SPEC_ROLES } from '../../wow-constants';
+import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_SPEC_ROLES } from '../../../constants/wow-constants';
 import { ROLE_EMOJI } from '../constants/compositionConstants';
 import { getTextColor } from '../utils/compositionUtils';
 import type { Composition } from '../utils/compositionUtils';

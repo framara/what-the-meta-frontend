@@ -1,4 +1,4 @@
-import { WOW_SPEC_ROLES } from '../../wow-constants';
+import { WOW_SPEC_ROLES } from '../../../constants/wow-constants';
 
 export interface GroupMember {
   character_name: string;

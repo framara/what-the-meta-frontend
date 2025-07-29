@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_SPEC_ROLES } from './wow-constants';
+import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_SPEC_ROLES } from '../constants/wow-constants';
 import './styles/SummaryStats.css';
 
 interface GroupMember {

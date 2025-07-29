@@ -68,4 +68,4 @@ export function useFilterDispatch() {
     throw new Error('useFilterDispatch must be used within a FilterProvider');
   }
   return context;
-} 
+}

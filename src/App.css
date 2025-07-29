@@ -248,6 +248,12 @@ nav a:hover::after {
   width: 100%;
 }
 
+@media (min-width: 900px) {
+  nav {
+    padding-right: 9rem;
+  }
+}
+
 /* Enhanced cards and containers */
 .bg-gray-800 {
   min-width: 200px;
