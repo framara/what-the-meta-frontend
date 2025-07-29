@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Tooltip } from './Tooltip';
-import './styles/PredictionCard.css';
+import '../styles/PredictionCard.css';
 
 interface Prediction {
   specId: number;

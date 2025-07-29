@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import './styles/HistoricalAccuracy.css';
+import '../styles/HistoricalAccuracy.css';
 
 interface HistoricalAccuracyProps {
   seasonData: any;

@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useFilterState } from '../FilterContext';
-import { fetchTopKeys, fetchSeasonInfo } from '../../services/api';
+import { fetchTopKeys } from '../../services/api';
 import { GroupCompositionStats } from './components/GroupCompositionStats';
-import { GroupCompositionControls } from './components/GroupCompositionControls';
-import { CompositionsSection } from './components/CompositionsSection';
 import LoadingScreen from '../LoadingScreen';
 import { FilterBar } from '../FilterBar';
 import './styles/GroupCompositionPage.css';
@@ -81,10 +79,14 @@ export const GroupCompositionPage: React.FC = () => {
   return (
     <div className="group-composition-page">
       <div className="page-header">
-        <h1 className="page-title">Group Composition Overview</h1>
-        <p className="page-description">
-          Analyze the most popular group compositions, specs by role, and team dynamics across different seasons.
-        </p>
+        <div className="header-content">
+          <h1 className="page-title">
+            Group Composition Overview
+          </h1>
+          <p className="page-description">
+            Analyze the most popular group compositions, specs by role, and team dynamics across different seasons.
+          </p>
+        </div>
       </div>
 
       <FilterBar />

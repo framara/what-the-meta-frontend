@@ -1,7 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_CLASS_NAMES } from '../../../constants/wow-constants';
 import { Tooltip } from './Tooltip';
-import './styles/SpecDetailsModal.css';
+import '../styles/SpecDetailsModal.css';
 
 interface SpecDetailsModalProps {
   specId: number;

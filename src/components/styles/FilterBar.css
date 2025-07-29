@@ -203,6 +203,17 @@
   font-weight: 700 !important;
 }
 
+/* Add styles for single filter case */
+.filter-label.single-filter {
+  margin: 0 auto;
+  max-width: 300px;
+  width: 100%;
+}
+
+.filter-label.single-filter select {
+  width: 100%;
+}
+
 /* Mobile responsiveness */
 @media (max-width: 768px) {
   .filter-bar {

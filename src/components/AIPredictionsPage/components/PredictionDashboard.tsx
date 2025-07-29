@@ -1,11 +1,9 @@
 import React, { useMemo } from 'react';
 import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_CLASS_NAMES } from '../../../constants/wow-constants';
 import { PredictionCard } from './PredictionCard';
-import { TrendChart } from './TrendChart';
-import { SpecDetailsModal } from './SpecDetailsModal';
-import './styles/PredictionDashboard.css';
+import '../styles/PredictionDashboard.css';
 import { Tooltip } from './Tooltip';
-import { STABILITY_THRESHOLD, SIGNIFICANT_CHANGE, DISPLAY_COUNT } from '../constants/predictionConstants';
+import { SIGNIFICANT_CHANGE, DISPLAY_COUNT } from '../constants/predictionConstants';
 
 interface PredictionDashboardProps {
   seasonData: any;

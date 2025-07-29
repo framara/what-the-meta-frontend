@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import './styles/ConfidenceMetrics.css';
+import '../styles/ConfidenceMetrics.css';
 
 interface ConfidenceMetricsProps {
   seasonData: any;

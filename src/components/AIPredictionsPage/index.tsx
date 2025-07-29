@@ -4,9 +4,10 @@ import { fetchSeasonData, fetchSeasonInfo } from '../../services/api';
 import { PredictionDashboard } from './components/PredictionDashboard';
 import { ConfidenceMetrics } from './components/ConfidenceMetrics';
 import { HistoricalAccuracy } from './components/HistoricalAccuracy';
-import { AIFilterBar } from '../AIFilterBar';
+import { FilterBar } from '../FilterBar';
 import AILoadingScreen from '../AILoadingScreen';
 import './styles/AIPredictionsPage.css';
+import { Tooltip } from 'recharts';
 
 export const AIPredictionsPage: React.FC = () => {
   const filter = useFilterState();
@@ -72,15 +73,19 @@ export const AIPredictionsPage: React.FC = () => {
           </p>
           <div className="ai-warning-badge">
             <span>
-              <strong>Note:</strong> AI predictions are based on historical trends and statistical models. <br />
-              <span style={{color: '#b45309'}}>Actual future changes may differ due to game updates, player behavior, or unforeseen factors.</span>
+              <strong>Note:</strong> Take AI predictions with a grain (or three spoons) of salt.<br />
             </span>
           </div>
         </div>
       </div>
 
-      {/* AI Filter Controls */}
-      <AIFilterBar />
+      {/* Filter Controls */}
+      <FilterBar 
+        showPeriod={false}
+        showDungeon={false}
+        showLimit={false}
+        className="ai-predictions-filter"
+      />
 
       {/* Main Content */}
       {!filter.season_id ? (

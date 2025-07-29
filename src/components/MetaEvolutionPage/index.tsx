@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useChartData } from './hooks/useChartData';
 import { useChartState } from './hooks/useChartState';
-import { ChartControls } from './components/ChartControls';
+import { FilterBar } from '../FilterBar';
 import { ChartTypeToggle } from './components/ChartTypeToggle';
 import { MobileAlert } from './components/MobileAlert';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -10,10 +10,11 @@ import { BarChart } from './charts/BarChart';
 import { AreaChart } from './charts/AreaChart';
 import { HeatmapChart } from './charts/HeatmapChart';
 import { TreemapChart } from './charts/TreemapChart';
-import '../styles/MetaEvolutionPage.css';
+import './styles/MetaEvolutionPage.css';
+import { ChartDescriptionPopover } from './components/ChartDescriptionPopover';
 
 export const MetaEvolutionPage: React.FC = () => {
-  const { charts, seasons, selectedSeason, setSelectedSeason, loading } = useChartData();
+  const { charts, loading } = useChartData();
   const { 
     chartView, 
     setChartView, 
@@ -44,17 +45,24 @@ export const MetaEvolutionPage: React.FC = () => {
     <div className="meta-evolution-page">
 
       <div className="page-header">
-        <h1 className="page-title">Meta Evolution</h1>
-        <p className="page-description">
-          Explore how the Mythic+ meta has evolved—track spec popularity, class trends, and team compositions across every season.
-        </p>
+        <div className="header-content">
+          <h1 className="page-title">
+            Meta Evolution
+          </h1>
+          <div className="description-container" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <p className="page-description">
+              Explore how the Mythic+ meta has evolved—track spec popularity, class trends, and team compositions across every season.
+            </p>
+            <ChartDescriptionPopover />
+          </div>
+        </div>
       </div>
       
-      <ChartControls
-        seasons={seasons}
-        selectedSeason={selectedSeason}
-        setSelectedSeason={setSelectedSeason}
-        loading={loading}
+      <FilterBar 
+        showPeriod={false}
+        showDungeon={false}
+        showLimit={false}
+        className="meta-evolution-filter"
       />
 
       {/* Mobile Alert - Charts recommended for desktop */}

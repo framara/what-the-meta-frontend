@@ -1,5 +1,5 @@
 import React from 'react';
-import './styles/TrendChart.css';
+import '../styles/TrendChart.css';
 
 interface Prediction {
   specId: number;

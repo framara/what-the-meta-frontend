@@ -1,10 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { useFilterState, useFilterDispatch } from './FilterContext';
 import { fetchSeasons, fetchSeasonInfo } from '../services/api';
 import './styles/FilterBar.css';
 
-export const FilterBar: React.FC = () => {
+interface FilterBarProps {
+  showPeriod?: boolean;
+  showDungeon?: boolean;
+  showLimit?: boolean;
+  className?: string;
+}
+
+export const FilterBar: React.FC<FilterBarProps> = ({
+  showPeriod = true,
+  showDungeon = true,
+  showLimit = true,
+  className = ''
+}) => {
   const filter = useFilterState();
   const dispatch = useFilterDispatch();
 
@@ -12,11 +23,9 @@ export const FilterBar: React.FC = () => {
   const [periodOptions, setPeriodOptions] = useState<Array<{ label: string; value: number }>>([]);
   const [dungeonOptions, setDungeonOptions] = useState<Array<{ label: string; value: number }>>([]);
   const [loading, setLoading] = useState(true);
-  // Collapsible state for mobile
   const [mobileCollapsed, setMobileCollapsed] = useState(true);
-
-  // Detect mobile (below 640px)
   const [isMobile, setIsMobile] = useState(false);
+
   useEffect(() => {
     function handleResize() {
       setIsMobile(window.innerWidth <= 768);
@@ -26,11 +35,9 @@ export const FilterBar: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Fetch seasons on mount
   useEffect(() => {
     setLoading(true);
     fetchSeasons().then(seasons => {
-      // Descending order
       const sorted = [...seasons].sort((a, b) => b.season_id - a.season_id);
       setSeasonOptions(sorted
         .filter(s => s.season_id >= 9)
@@ -39,21 +46,26 @@ export const FilterBar: React.FC = () => {
     });
   }, []);
 
-  // Fetch periods and dungeons when season changes
   useEffect(() => {
-    if (!filter.season_id) return;
+    if (!filter.season_id || (!showPeriod && !showDungeon)) return;
     setLoading(true);
     fetchSeasonInfo(filter.season_id).then(info => {
-      // Descending order for periods
-      const sortedPeriods = [...info.periods].sort((a, b) => b.period_id - a.period_id);
-      setPeriodOptions(sortedPeriods.map(p => ({ label: p.period_name, value: p.period_id })));
-      setDungeonOptions(info.dungeons.map(d => ({ label: d.dungeon_name, value: d.dungeon_id })));
+      if (showPeriod) {
+        const sortedPeriods = [...info.periods].sort((a, b) => b.period_id - a.period_id);
+        setPeriodOptions(sortedPeriods.map(p => ({ label: p.period_name, value: p.period_id })));
+      }
+      if (showDungeon) {
+        setDungeonOptions(info.dungeons.map(d => ({ label: d.dungeon_name, value: d.dungeon_id })));
+      }
       setLoading(false);
     });
-  }, [filter.season_id]);
+  }, [filter.season_id, showPeriod, showDungeon]);
+
+  // Check if only season filter is shown
+  const isOnlySeasonFilter = !showPeriod && !showDungeon && !showLimit;
 
   return (
-    <div className="filter-bar">
+    <div className={`filter-bar ${className}`}>
       {/* Mobile toggle button */}
       <button
         className="filterbar-toggle-btn md:hidden"
@@ -69,7 +81,7 @@ export const FilterBar: React.FC = () => {
 
       {/* Filter controls */}
       <div className={`filterbar-controls ${mobileCollapsed ? 'collapsed' : 'expanded'} md:!flex`}>
-        <div className="filter-label">
+        <div className={`filter-label ${isOnlySeasonFilter ? 'single-filter' : ''}`}>
           <span>Season:</span>
           <select
             className="filter-select"
@@ -83,49 +95,55 @@ export const FilterBar: React.FC = () => {
           </select>
         </div>
 
-        <div className="filter-label">
-          <span>Period:</span>
-          <select
-            className="filter-select"
-            value={filter.period_id || ''}
-            onChange={e => dispatch({ type: 'SET_PERIOD', period_id: e.target.value ? Number(e.target.value) : undefined })}
-            disabled={!filter.season_id || loading}
-          >
-            <option value="">Entire Season</option>
-            {periodOptions.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
+        {showPeriod && (
+          <div className="filter-label">
+            <span>Period:</span>
+            <select
+              className="filter-select"
+              value={filter.period_id || ''}
+              onChange={e => dispatch({ type: 'SET_PERIOD', period_id: e.target.value ? Number(e.target.value) : undefined })}
+              disabled={!filter.season_id || loading}
+            >
+              <option value="">Entire Season</option>
+              {periodOptions.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+        )}
 
-        <div className="filter-label">
-          <span>Dungeon:</span>
-          <select
-            className="filter-select"
-            value={filter.dungeon_id || ''}
-            onChange={e => dispatch({ type: 'SET_DUNGEON', dungeon_id: e.target.value ? Number(e.target.value) : undefined })}
-            disabled={!filter.season_id || loading}
-          >
-            <option value="">All Dungeons</option>
-            {dungeonOptions.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
+        {showDungeon && (
+          <div className="filter-label">
+            <span>Dungeon:</span>
+            <select
+              className="filter-select"
+              value={filter.dungeon_id || ''}
+              onChange={e => dispatch({ type: 'SET_DUNGEON', dungeon_id: e.target.value ? Number(e.target.value) : undefined })}
+              disabled={!filter.season_id || loading}
+            >
+              <option value="">All Dungeons</option>
+              {dungeonOptions.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+        )}
 
-        <div className="filter-label">
-          <span>Top N:</span>
-          <select
-            className="filter-select"
-            value={filter.limit}
-            onChange={e => dispatch({ type: 'SET_LIMIT', limit: Number(e.target.value) })}
-          >
-            <option value={100}>Top 100</option>
-            <option value={250}>Top 250</option>
-            <option value={500}>Top 500</option>
-            <option value={1000}>Top 1000</option>
-          </select>
-        </div>
+        {showLimit && (
+          <div className="filter-label">
+            <span>Top N:</span>
+            <select
+              className="filter-select"
+              value={filter.limit}
+              onChange={e => dispatch({ type: 'SET_LIMIT', limit: Number(e.target.value) })}
+            >
+              <option value={100}>Top 100</option>
+              <option value={250}>Top 250</option>
+              <option value={500}>Top 500</option>
+              <option value={1000}>Top 1000</option>
+            </select>
+          </div>
+        )}
       </div>
     </div>
   );
