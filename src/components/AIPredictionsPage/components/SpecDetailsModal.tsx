@@ -115,7 +115,7 @@ export const SpecDetailsModal: React.FC<SpecDetailsModalProps> = ({
           <Chart data={successHistory} color="#3b82f6" label="Success rate (%)" />
         </div>
         <div className="spec-modal-stats">
-          <div><b>Total Runs:</b> {usageHistory.reduce((a, b) => a + b, 0)}</div>
+          <div><b>Total Runs:</b> {usageHistory.reduce((a: number, b: number) => a + b, 0)}</div>
           <div><b>Best Period:</b> {usageHistory.indexOf(Math.max(...usageHistory)) + 1}</div>
           <div>
             <b>Average Success Rate:</b>
@@ -125,7 +125,7 @@ export const SpecDetailsModal: React.FC<SpecDetailsModalProps> = ({
                 <text x="10" y="15" textAnchor="middle" fontSize="11" fill="#fff" fontWeight="bold">i</text>
               </svg>
             </Tooltip>
-            {successHistory.length > 0 ? (successHistory.reduce((a, b) => a + b, 0) / successHistory.length).toFixed(1) : '0'}%
+            {successHistory.length > 0 ? (successHistory.reduce((a: number, b: number) => a + b, 0) / successHistory.length).toFixed(1) : '0'}%
           </div>
         </div>
         <div className="spec-modal-reasoning">
