@@ -4,7 +4,7 @@ import { useChartState } from './hooks/useChartState';
 import { FilterBar } from '../FilterBar';
 import { ChartTypeToggle } from './components/ChartTypeToggle';
 import { MobileAlert } from './components/MobileAlert';
-import { LoadingScreen } from './components/LoadingScreen';
+import LoadingScreen from '../LoadingScreen';
 import { LineChart } from './charts/LineChart';
 import { BarChart } from './charts/BarChart';
 import { AreaChart } from './charts/AreaChart';

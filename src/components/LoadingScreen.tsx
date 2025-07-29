@@ -11,12 +11,14 @@ const messages = [
   'Rogue, your key',
 ];
 
+const getRandomMessage = () => messages[Math.floor(Math.random() * messages.length)];
+
 const LoadingScreen: React.FC = () => {
-  const [msgIdx, setMsgIdx] = useState(0);
+  const [message, setMessage] = useState(getRandomMessage());
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setMsgIdx(idx => (idx + 1) % messages.length);
+      setMessage(getRandomMessage());
     }, 1500);
     return () => clearInterval(interval);
   }, []);
@@ -24,7 +26,7 @@ const LoadingScreen: React.FC = () => {
   return (
     <div className="wow-loading-screen">
       <div className="wow-spinner" />
-      <div className="wow-loading-text">{messages[msgIdx]}</div>
+      <div className="wow-loading-text">{message}</div>
     </div>
   );
 };

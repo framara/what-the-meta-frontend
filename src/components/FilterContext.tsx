@@ -22,9 +22,7 @@ function filterReducer(state: FilterState, action: FilterAction): FilterState {
     case 'SET_SEASON':
       return { 
         ...state, 
-        season_id: action.season_id,
-        period_id: undefined,  // Reset period when season changes
-        dungeon_id: undefined  // Reset dungeon when season changes
+        season_id: action.season_id
       };
     case 'SET_PERIOD':
       return { ...state, period_id: action.period_id };

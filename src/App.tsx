@@ -7,8 +7,8 @@ import { useFilterState } from './components/FilterContext';
 import { FilterBar } from './components/FilterBar';
 import { LeaderboardTable } from './components/LeaderboardTable';
 import { SummaryStats } from './components/SummaryStats';
-import { MetaEvolutionPage } from './components/MetaEvolutionPage';
-import { GroupCompositionPage } from './components/GroupCompositionPage';
+import { MetaEvolutionPage } from './components/MetaEvolutionPage/index';
+import { GroupCompositionPage } from './components/GroupCompositionPage/index';
 import { AIPredictionsPage } from './components/AIPredictionsPage';
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
@@ -51,9 +51,20 @@ function App() {
         <p className="mb-2">{apiError}</p>
         <button
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          onClick={() => window.location.reload()}
+          onClick={() => {
+            setApiError(null);
+            setLoading(true);
+            const params: any = { season_id: filter.season_id };
+            if (filter.period_id) params.period_id = filter.period_id;
+            if (filter.dungeon_id) params.dungeon_id = filter.dungeon_id;
+            if (filter.limit) params.limit = filter.limit;
+            fetchTopKeys(params)
+              .then(data => setApiData(data))
+              .catch(err => setApiError(err.message || 'API error'))
+              .finally(() => setLoading(false));
+          }}
         >
-          Go again?
+          Try again
         </button>
       </div>
     );
