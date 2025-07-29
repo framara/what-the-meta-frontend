@@ -5,6 +5,7 @@ export const useChartState = () => {
   const [chartView, setChartView] = useState<ChartView>('all');
   const [activeChart, setActiveChart] = useState<ChartType>('line');
   const [chartLoading, setChartLoading] = useState(false);
+  const [viewLoading, setViewLoading] = useState(false);
   const [treemapWeek, setTreemapWeek] = useState<number | null>(null);
 
   // Helper to detect mobile
@@ -18,12 +19,21 @@ export const useChartState = () => {
     }
   };
 
+  const handleChartViewChange = (newChartView: ChartView) => {
+    if (chartView !== newChartView) {
+      setViewLoading(true);
+      setChartView(newChartView);
+      setTimeout(() => setViewLoading(false), 300);
+    }
+  };
+
   return {
     chartView,
-    setChartView,
+    setChartView: handleChartViewChange,
     activeChart,
     setActiveChart: handleChartTypeChange,
     chartLoading,
+    viewLoading,
     setChartLoading,
     treemapWeek,
     setTreemapWeek,

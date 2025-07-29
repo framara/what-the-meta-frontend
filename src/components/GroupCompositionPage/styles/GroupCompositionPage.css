@@ -303,7 +303,8 @@
   border-radius: 8px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   min-width: 200px;
-  z-index: 100000;
+  z-index: 100001;
+  pointer-events: auto;
 }
 
 .submenu-header {
@@ -335,6 +336,8 @@
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.9rem;
+  pointer-events: auto;
+  user-select: none;
 }
 
 .spec-item:hover {
@@ -344,6 +347,11 @@
 .spec-item.selected {
   background: rgba(59, 130, 246, 0.1);
   border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.spec-item:active {
+  background: #4b5563;
+  transform: scale(0.98);
 }
 
 .spec-name {

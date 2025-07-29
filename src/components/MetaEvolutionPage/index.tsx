@@ -20,6 +20,7 @@ export const MetaEvolutionPage: React.FC = () => {
     activeChart, 
     setActiveChart, 
     chartLoading, 
+    viewLoading,
     treemapWeek, 
     setTreemapWeek, 
     isMobile 
@@ -35,6 +36,9 @@ export const MetaEvolutionPage: React.FC = () => {
   }, [charts]);
 
   const currentChart = charts[chartView];
+
+  // Show loading for initial page load or when changing chart views
+  const shouldShowLoading = loading || viewLoading || chartLoading;
 
   return (
     <div className="meta-evolution-page">
@@ -63,6 +67,7 @@ export const MetaEvolutionPage: React.FC = () => {
             className={`chart-view-button ${chartView === 'all' ? 'active' : ''}`} 
             onClick={() => setChartView('all')} 
             title="All"
+            disabled={shouldShowLoading}
           >
             {isMobile ? '📚' : 'All'}
           </button>
@@ -70,6 +75,7 @@ export const MetaEvolutionPage: React.FC = () => {
             className={`chart-view-button ${chartView === 'tank' ? 'active' : ''}`} 
             onClick={() => setChartView('tank')} 
             title="Tank"
+            disabled={shouldShowLoading}
           >
             {isMobile ? '🛡️' : 'Tank'}
           </button>
@@ -77,6 +83,7 @@ export const MetaEvolutionPage: React.FC = () => {
             className={`chart-view-button ${chartView === 'healer' ? 'active' : ''}`} 
             onClick={() => setChartView('healer')} 
             title="Healer"
+            disabled={shouldShowLoading}
           >
             {isMobile ? '💚' : 'Healer'}
           </button>
@@ -84,6 +91,7 @@ export const MetaEvolutionPage: React.FC = () => {
             className={`chart-view-button ${chartView === 'dps' ? 'active' : ''}`} 
             onClick={() => setChartView('dps')} 
             title="DPS"
+            disabled={shouldShowLoading}
           >
             {isMobile ? '⚔️' : 'DPS'}
           </button>
@@ -91,6 +99,7 @@ export const MetaEvolutionPage: React.FC = () => {
             className={`chart-view-button ${chartView === 'melee' ? 'active' : ''}`} 
             onClick={() => setChartView('melee')} 
             title="Melee"
+            disabled={shouldShowLoading}
           >
             {isMobile ? '🗡️' : 'Melee'}
           </button>
@@ -98,16 +107,17 @@ export const MetaEvolutionPage: React.FC = () => {
             className={`chart-view-button ${chartView === 'ranged' ? 'active' : ''}`} 
             onClick={() => setChartView('ranged')} 
             title="Ranged"
+            disabled={shouldShowLoading}
           >
             {isMobile ? '🔥' : 'Ranged'}
           </button>
         </div>
         <div className="button-group chart-type-toggle">
-          <ChartTypeToggle activeChart={activeChart} setActiveChart={setActiveChart} />
+          <ChartTypeToggle activeChart={activeChart} setActiveChart={setActiveChart} loading={shouldShowLoading} />
         </div>
       </div>
 
-      {chartLoading ? (
+      {shouldShowLoading ? (
         <LoadingScreen />
       ) : (
         <>

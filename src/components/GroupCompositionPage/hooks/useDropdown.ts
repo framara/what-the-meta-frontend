@@ -8,9 +8,21 @@ export const useDropdown = () => {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
+      const target = event.target as Node;
+      
+      // Check if click is within the dropdown
+      if (dropdownRef.current && dropdownRef.current.contains(target)) {
+        return;
       }
+      
+      // Check if click is within a submenu (specs-submenu class)
+      const submenu = (target as Element).closest('.specs-submenu');
+      if (submenu) {
+        return;
+      }
+      
+      // If neither, close the dropdown
+      setIsDropdownOpen(false);
     };
     
     document.addEventListener('mousedown', handleClickOutside);

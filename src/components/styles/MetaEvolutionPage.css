@@ -168,18 +168,32 @@
 }
 
 .chart-view-button:hover {
-  color: #f8fafc;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(99, 102, 241, 0.2) 100%);
   border-color: rgba(59, 130, 246, 0.4);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
 }
 
 .chart-view-button.active {
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(99, 102, 241, 0.3) 100%);
+  border-color: rgba(59, 130, 246, 0.6);
   color: white;
-  border-color: rgba(59, 130, 246, 0.5);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.chart-view-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.chart-view-button:disabled:hover {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.6) 100%);
+  border-color: rgba(59, 130, 246, 0.1);
+  transform: none;
+  box-shadow: none;
 }
 
 /* Chart container */
@@ -491,9 +505,9 @@
 /* Heatmap grid */
 .meta-heatmap-header {
   display: grid;
-  gap: 4px;
-  margin-bottom: 1rem;
-  padding: 0.5rem;
+  gap: 1px;
+  margin-bottom: 0.25rem;
+  padding: 0.125rem;
   background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(51, 65, 85, 0.6) 100%);
   border-radius: 8px;
   backdrop-filter: blur(10px);
@@ -502,13 +516,11 @@
 
 .meta-heatmap-row {
   display: grid;
-  gap: 4px;
-  margin-bottom: 0.5rem;
-  padding: 0.5rem;
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.4) 0%, rgba(30, 41, 59, 0.4) 100%);
+  gap: 1px;
+  margin-bottom: 0.125rem;
+  padding: 0.125rem;
   border-radius: 8px;
   backdrop-filter: blur(5px);
-  border: 1px solid rgba(59, 130, 246, 0.05);
   transition: all 0.3s ease;
 }
 
@@ -520,9 +532,8 @@
 .meta-heatmap-spec {
   font-weight: 600;
   font-size: 0.875rem;
-  padding: 0.5rem;
+  padding: 0.125rem;
   border-radius: 6px;
-  background: rgba(15, 23, 42, 0.3);
   backdrop-filter: blur(5px);
 }
 

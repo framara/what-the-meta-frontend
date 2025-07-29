@@ -74,9 +74,31 @@ export const SpecSelector: React.FC<SpecSelectorProps> = ({
     return 'Select Class & Spec';
   };
 
+  const handleDropdownToggle = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
   const handleSpecChange = (specId: number) => {
     onSpecChange(specId);
     setIsDropdownOpen(false); // Close dropdown after selection
+  };
+
+  const handleSpecClick = (e: React.MouseEvent, specId: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleSpecChange(specId);
+  };
+
+  const handleSubmenuClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
+  const handleClassItemMouseEnter = (classId: number) => {
+    setHoveredClass(classId);
+  };
+
+  const handleClassItemMouseLeave = () => {
+    setHoveredClass(null);
   };
 
   return (
@@ -89,7 +111,7 @@ export const SpecSelector: React.FC<SpecSelectorProps> = ({
           <button
             ref={buttonRef}
             className="dropdown-button"
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            onClick={handleDropdownToggle}
             type="button"
           >
             <span className="dropdown-text">{getDisplayText()}</span>
@@ -118,8 +140,8 @@ export const SpecSelector: React.FC<SpecSelectorProps> = ({
                       <div
                         key={classOption.id}
                         className={`class-item ${selectedClass === classOption.id ? 'selected' : ''}`}
-                        onMouseEnter={() => setHoveredClass(classOption.id)}
-                        onMouseLeave={() => setHoveredClass(null)}
+                        onMouseEnter={() => handleClassItemMouseEnter(classOption.id)}
+                        onMouseLeave={handleClassItemMouseLeave}
                       >
                         <div
                           className="class-color-indicator"
@@ -129,16 +151,28 @@ export const SpecSelector: React.FC<SpecSelectorProps> = ({
                         
                         {/* Specs submenu */}
                         {hoveredClass === classOption.id && (
-                          <div className="specs-submenu">
+                          <div 
+                            className="specs-submenu" 
+                            onClick={handleSubmenuClick}
+                          >
                             <div className="spec-list">
                               {getSpecsForClass(classOption.id).map(spec => (
                                 <button
                                   key={spec.id}
                                   className={`spec-item ${selectedSpec === spec.id ? 'selected' : ''}`}
-                                  onClick={() => handleSpecChange(spec.id)}
+                                  onClick={(e) => {
+                                    handleSpecClick(e, spec.id);
+                                  }}
                                   type="button"
                                 >
-                                  <span className="spec-name">{spec.name}</span>
+                                  <span 
+                                    className="spec-name"
+                                    onClick={(e) => {
+                                      handleSpecClick(e, spec.id);
+                                    }}
+                                  >
+                                    {spec.name}
+                                  </span>
                                 </button>
                               ))}
                             </div>
