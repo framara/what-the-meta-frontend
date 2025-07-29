@@ -23,6 +23,32 @@ export async function fetchTopKeys(params: TopKeyParams) {
   return response.data;
 }
 
+// New: Fetch comprehensive season data for AI analysis
+export async function fetchSeasonData(seasonId: number) {
+  const url = `${API_BASE_URL}/meta/season-data/${seasonId}`;
+  const response = await axios.get(url);
+  return response.data as {
+    season_id: number;
+    total_periods: number;
+    total_keys: number;
+    periods: Array<{
+      period_id: number;
+      keys_count: number;
+      keys: Array<{
+        id: number;
+        keystone_level: number;
+        score: number;
+        members: Array<{
+          spec_id: number;
+          class_id: number;
+          name: string;
+        }>;
+        [key: string]: any;
+      }>;
+    }>;
+  };
+}
+
 // New: Fetch all seasons
 export async function fetchSeasons() {
   const url = `${API_BASE_URL}/wow/advanced/seasons`;

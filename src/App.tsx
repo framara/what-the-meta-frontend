@@ -9,6 +9,7 @@ import { LeaderboardTable } from './components/LeaderboardTable';
 import { SummaryStats } from './components/SummaryStats';
 import { MetaEvolutionPage } from './components/MetaEvolutionPage';
 import { GroupCompositionPage } from './components/GroupCompositionPage';
+import { AIPredictionsPage } from './components/AIPredictionsPage';
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
 
@@ -96,15 +97,7 @@ function App() {
             } />
             <Route path="/meta-evolution" element={<MetaEvolutionPage />} />
             <Route path="/group-composition" element={<GroupCompositionPage />} />
-            <Route path="/ai-predictions" element={
-              <div className="max-w-7xl mx-auto px-4 py-8">
-                <h1 className="text-3xl font-bold text-gray-200 mb-6">AI Predictions</h1>
-                <div className="bg-gray-800 rounded-lg p-6">
-                  <p className="text-gray-300 mb-4">Coming soon! AI-powered predictions for Mythic+ meta trends.</p>
-                  <div className="text-6xl mb-4">🤖</div>
-                </div>
-              </div>
-            } />
+            <Route path="/ai-predictions" element={<AIPredictionsPage />} />
             <Route path="/ai-analysis" element={
               <div className="max-w-7xl mx-auto px-4 py-8">
                 <h1 className="text-3xl font-bold text-gray-200 mb-6">AI Analysis</h1>
