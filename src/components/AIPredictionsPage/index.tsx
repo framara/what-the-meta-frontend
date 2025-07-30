@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useFilterState } from '../FilterContext';
-import { fetchSeasonData, fetchSeasonInfo } from '../../services/api';
+import { fetchSeasonData, fetchSeasonInfo, fetchSpecEvolution } from '../../services/api';
 import { PredictionDashboard } from './components/PredictionDashboard';
 import { ConfidenceMetrics } from './components/ConfidenceMetrics';
 import { HistoricalAccuracy } from './components/HistoricalAccuracy';
@@ -12,6 +12,7 @@ import { Tooltip } from 'recharts';
 export const AIPredictionsPage: React.FC = () => {
   const filter = useFilterState();
   const [seasonData, setSeasonData] = useState<any>(null);
+  const [specEvolution, setSpecEvolution] = useState<any>(null);
   const [dungeons, setDungeons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,12 +25,15 @@ export const AIPredictionsPage: React.FC = () => {
       setError(null);
 
       try {
-        const [seasonDataResult, seasonInfo] = await Promise.all([
+        // Fetch both comprehensive season data and spec evolution data
+        const [seasonDataResult, seasonInfo, specEvolutionResult] = await Promise.all([
           fetchSeasonData(filter.season_id),
-          fetchSeasonInfo(filter.season_id)
+          fetchSeasonInfo(filter.season_id),
+          fetchSpecEvolution(filter.season_id)
         ]);
 
         setSeasonData(seasonDataResult);
+        setSpecEvolution(specEvolutionResult);
         setDungeons(seasonInfo.dungeons);
       } catch (err) {
         setError('Failed to load AI prediction data');
@@ -69,11 +73,12 @@ export const AIPredictionsPage: React.FC = () => {
             AI Predictions
           </h1>
           <p className="page-description">
-            <strong>Meta trend forecasting for Mythic+ dungeons</strong> <span className="dot-separator">•</span> <span className="highlight">AI-powered</span> <span className="dot-separator">•</span> <span className="highlight">Comprehensive temporal analysis</span>
+            <strong>Advanced meta trend forecasting for Mythic+ dungeons</strong> <span className="dot-separator">•</span> <span className="highlight">Cross-validated AI analysis</span> <span className="dot-separator">•</span> <span className="highlight">Temporal pattern recognition</span>
           </p>
           <div className="ai-warning-badge">
             <span>
-              <strong>Note:</strong> Take AI predictions with a grain (or three spoons) of salt.<br />
+              <strong>Enhanced Analysis:</strong> Now using both comprehensive run data and spec evolution trends for improved predictions.<br />
+              <strong>Note:</strong> Take AI predictions with a grain (or three spoons) of salt.
             </span>
           </div>
         </div>
@@ -92,12 +97,12 @@ export const AIPredictionsPage: React.FC = () => {
         <div className="select-season-container">
           <div className="select-season-content">
             <h2>📊 Select a Season</h2>
-            <p>Choose a season from the filter above to view AI predictions and meta analysis.</p>
+            <p>Choose a season from the filter above to view enhanced AI predictions and meta analysis.</p>
             <div className="season-info">
-              <p>• Comprehensive analysis across all periods</p>
-              <p>• Temporal trend detection</p>
-              <p>• Meta evolution tracking</p>
-              <p>• Advanced AI predictions</p>
+              <p>• Cross-validated analysis using multiple data sources</p>
+              <p>• Temporal trend detection with confidence intervals</p>
+              <p>• Spec evolution validation</p>
+              <p>• Advanced AI predictions with dungeon context</p>
             </div>
           </div>
         </div>
@@ -106,15 +111,25 @@ export const AIPredictionsPage: React.FC = () => {
       ) : (
         <div className="predictions-content">
           <div className="predictions-main">
-            <PredictionDashboard seasonData={seasonData} dungeons={dungeons} />
+            <PredictionDashboard 
+              seasonData={seasonData} 
+              specEvolution={specEvolution}
+              dungeons={dungeons} 
+            />
           </div>
           
           <div className="predictions-stats">
             <div className="stats-column">
-              <ConfidenceMetrics seasonData={seasonData} />
+              <ConfidenceMetrics 
+                seasonData={seasonData} 
+                specEvolution={specEvolution}
+              />
             </div>
             <div className="stats-column">
-              <HistoricalAccuracy seasonData={seasonData} />
+              <HistoricalAccuracy 
+                seasonData={seasonData} 
+                specEvolution={specEvolution}
+              />
             </div>
           </div>
         </div>

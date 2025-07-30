@@ -7,6 +7,7 @@ import { SIGNIFICANT_CHANGE, DISPLAY_COUNT } from '../constants/predictionConsta
 
 interface PredictionDashboardProps {
   seasonData: any;
+  specEvolution: any;
   dungeons: any[];
 }
 
@@ -24,10 +25,14 @@ interface Prediction {
     appearances: number[];
     successRates: number[];
     totalRuns: number;
+    recentTrend: number;
+    trendSlope: number;
+    consistency: number;
+    crossValidationScore: number;
   };
 }
 
-export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ seasonData, dungeons }) => {
+export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ seasonData, specEvolution, dungeons }) => {
   // --- IMPROVED: Smoothing, dynamic threshold, confidence interval ---
   function movingAverage(arr: number[], windowSize: number): number[] {
     if (arr.length < windowSize) return arr;
@@ -51,8 +56,11 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ season
       recentTrend: number;
       trendSlope: number;
       consistency: number;
+      officialTrend: number; // From spec evolution API
+      crossValidationScore: number; // How well our analysis matches official data
     }> = {};
 
+    // Process season data for detailed analysis
     seasonData.periods.forEach((period: any, periodIndex: number) => {
       const periodKeys = period.keys;
       const totalLevel = periodKeys.reduce((sum: number, run: any) => sum + run.keystone_level, 0);
@@ -68,7 +76,9 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ season
               totalRuns: 0,
               recentTrend: 0,
               trendSlope: 0,
-              consistency: 0
+              consistency: 0,
+              officialTrend: 0,
+              crossValidationScore: 0
             };
           }
           specTemporalData[specId].appearances[periodIndex]++;
@@ -80,6 +90,35 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ season
         });
       });
     });
+
+    // Cross-validate with official spec evolution data
+    if (specEvolution && specEvolution.evolution) {
+      specEvolution.evolution.forEach((periodData: any, periodIndex: number) => {
+        Object.entries(periodData.spec_counts).forEach(([specId, count]) => {
+          const specIdNum = parseInt(specId);
+          if (specTemporalData[specIdNum]) {
+            // Compare our calculated appearances with official data
+            const ourCount = specTemporalData[specIdNum].appearances[periodIndex] || 0;
+            const officialCount = count as number;
+            const difference = Math.abs(ourCount - officialCount);
+            const maxCount = Math.max(ourCount, officialCount);
+            const accuracy = maxCount > 0 ? (1 - difference / maxCount) * 100 : 100;
+            
+            // Accumulate cross-validation score
+            specTemporalData[specIdNum].crossValidationScore += accuracy;
+          }
+        });
+      });
+
+      // Calculate average cross-validation score for each spec
+      Object.keys(specTemporalData).forEach(specId => {
+        const specIdNum = parseInt(specId);
+        const periodsWithData = specEvolution.evolution.length;
+        if (periodsWithData > 0) {
+          specTemporalData[specIdNum].crossValidationScore /= periodsWithData;
+        }
+      });
+    }
 
     const predictions = Object.entries(specTemporalData)
       .map(([specId, data]) => {
@@ -119,21 +158,26 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ season
         // Predicted change as percent change (smoothed)
         const predictedChange = ((recentAvg - earlyAvg) / Math.max(earlyAvg, 1)) * 100;
 
+        // --- Enhanced confidence with cross-validation ---
+        const crossValidationBonus = data.crossValidationScore > 90 ? 15 : 
+                                   data.crossValidationScore > 80 ? 10 : 
+                                   data.crossValidationScore > 70 ? 5 : 0;
+
         // --- Confidence interval (basic, for illustration) ---
-        // Standard error of the mean for recent periods
         const sem = Math.sqrt(recentPeriods.reduce((sum, val) => sum + Math.pow(val - recentAvg, 2), 0) / Math.max(recentPeriods.length - 1, 1)) / Math.sqrt(Math.max(recentPeriods.length, 1));
         const confidenceInterval = 1.96 * sem; // 95% CI
 
         // --- Dynamic significance threshold ---
         const baseSignificance = 40;
-        const dynamicSignificance = baseSignificance + Math.max(0, 10 - periods); // Lower threshold for short seasons
+        const dynamicSignificance = baseSignificance + Math.max(0, 10 - periods);
 
         const significance = (
           Math.abs(predictedChange) * 0.4 +
           Math.abs(trendSlope) * 10 +
           (consistencyScore / 100) * 20 +
           (avgSuccessRate / 100) * 20 +
-          Math.min(20, (totalAppearances / 1000) * 10)
+          Math.min(20, (totalAppearances / 1000) * 10) +
+          (crossValidationBonus / 100) * 15 // Bonus for cross-validation accuracy
         );
 
         return {
@@ -146,17 +190,20 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ season
           significance,
           confidence: 70 + (Math.abs(trendSlope) > 1.5 ? 15 : Math.abs(trendSlope) > 0.5 ? 10 : 0) +
                      (avgSuccessRate > 60 ? 15 : avgSuccessRate > 45 ? 10 : 0) +
-                     (consistencyScore > 80 ? 10 : consistencyScore > 60 ? 5 : 0),
+                     (consistencyScore > 80 ? 10 : consistencyScore > 60 ? 5 : 0) +
+                     crossValidationBonus,
           successRate: avgSuccessRate,
           confidenceInterval: confidenceInterval.toFixed(2),
-          reasoning: `${predictedChange >= 0 ? 'Positive' : 'Negative'} trend with ${predictedChange >= 0 ? 'improving' : 'declining'} performance. Usage is ${predictedChange >= 0 ? 'increasing' : 'decreasing'} (${recentAvg.toFixed(1)} avg change in recent periods). Success rate is ${avgSuccessRate.toFixed(1)}%. Consistency score: ${consistencyScore.toFixed(1)}. 95% CI for change: ±${confidenceInterval.toFixed(2)}. This spec is becoming ${predictedChange >= 0 ? 'more' : 'less'} common in the meta.`,
+          crossValidationScore: data.crossValidationScore,
+          reasoning: `${predictedChange >= 0 ? 'Positive' : 'Negative'} trend with ${predictedChange >= 0 ? 'improving' : 'declining'} performance. Usage is ${predictedChange >= 0 ? 'increasing' : 'decreasing'} (${recentAvg.toFixed(1)} avg change in recent periods). Success rate is ${avgSuccessRate.toFixed(1)}%. Consistency score: ${consistencyScore.toFixed(1)}. Cross-validation accuracy: ${data.crossValidationScore.toFixed(1)}%. 95% CI for change: ±${confidenceInterval.toFixed(2)}. This spec is becoming ${predictedChange >= 0 ? 'more' : 'less'} common in the meta.`,
           temporalData: {
             appearances: data.appearances,
             successRates: data.successRates.map((success, i) => data.appearances[i] > 0 ? (success / data.appearances[i]) * 100 : 0),
             totalRuns: data.totalRuns,
             recentTrend,
             trendSlope,
-            consistency: consistencyScore
+            consistency: consistencyScore,
+            crossValidationScore: data.crossValidationScore
           }
         };
       })
@@ -165,7 +212,7 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ season
       .slice(0, 10);
 
     return predictions;
-  }, [seasonData]);
+  }, [seasonData, specEvolution]);
 
 
   // Use dynamic significance for rising/declining instead of just predictedChange

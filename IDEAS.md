@@ -1,129 +1,390 @@
-# Wow Leaderboard Frontend - Feature Ideas
+# WoW Leaderboard Frontend - Feature Ideas & Implementation Roadmap
 
-## Group Composition Page Enhancements
+## 🎯 Overview
 
-### Data Analysis & Insights
-1. **Composition Trends Over Time** - Show how popular compositions have changed across different seasons/patches
-2. **Win Rate Analysis** - Display win rates for each composition to show which ones are most successful
-3. **Role Balance Metrics** - Show ideal role distributions (e.g., "2 tanks, 3 healers, 15 DPS" is most common)
-4. **Class Synergy Analysis** - Highlight which class combinations work best together
+This document outlines realistic, implementable features for the WoW Leaderboard frontend, based on our available API endpoints and database structure. All features are designed to leverage existing data infrastructure and provide genuine value to users.
 
-### Interactive Features
-5. **Composition Builder** - Let users build their own composition and see how common it is
-6. **Filter by Difficulty** - Filter compositions by dungeon difficulty (Mythic+, Raid, etc.)
-7. **Export/Share** - Allow users to export composition data or share specific compositions
-8. **Favorites System** - Let users save favorite compositions for quick access
+---
 
-### Visual Enhancements
-9. **Composition Heatmap** - Visual representation showing most common class combinations
-10. **Timeline View** - Show how composition popularity has evolved over time
-11. **Role Distribution Charts** - Pie charts showing tank/healer/DPS ratios
-12. **Class Usage Trends** - Line charts showing class popularity over time
+## 📊 Data-Driven Features (High Priority)
 
-### Advanced Analytics
-13. **Performance Metrics** - Show completion times, success rates for each composition
-14. **Meta Analysis** - "Meta Report" showing current trends and predictions
-15. **Seasonal Comparisons** - Compare compositions between different seasons
-16. **Difficulty-based Analysis** - Show how compositions vary by dungeon difficulty
+### 1. **Advanced Group Composition Analysis**
+**Status**: Ready to implement
+**Data Sources**: `/meta/top-keys`, `/meta/season-data/`
+**Implementation**: 
+- Analyze group compositions from existing member data
+- Calculate class/spec combinations frequency
+- Show success rates by composition type
+- Filter by keystone level ranges (15-20, 21-25, 26+)
 
-### User Experience
-17. **Quick Filters** - Pre-defined filters like "Most Popular", "Highest Win Rate", "Balanced"
-18. **Composition Details** - Expandable cards showing detailed stats for each composition
-19. **Search Functionality** - Search for specific classes or compositions
-20. **Mobile Optimization** - Better mobile experience for the existing features
+**API Endpoints Needed**:
+```typescript
+// New endpoint for composition analysis
+GET /meta/composition-analysis?season_id=14&period_id=1001&dungeon_id=247&limit=1000
+// Returns: { compositions: [{ classes: [1,2,5], specs: [71,65,258], frequency: 150, avg_score: 245.5 }] }
+```
 
-### Social Features
-21. **Community Ratings** - Let users rate compositions
-22. **Comments/Discussion** - Allow users to discuss compositions
-23. **User-submitted Compositions** - Let users submit their own successful compositions
+### 2. **Dungeon-Specific Meta Analysis**
+**Status**: Ready to implement
+**Data Sources**: `/meta/top-keys` with dungeon_id filter
+**Implementation**:
+- Show which specs perform best in each dungeon
+- Analyze dungeon-specific group compositions
+- Track dungeon difficulty trends over time
+- Compare dungeon meta across different keystone levels
 
-## Meta Evolution Page Enhancements
+**Current Endpoints**: Already available
+```typescript
+GET /meta/top-keys?season_id=14&dungeon_id=247&limit=1000
+```
 
-### Historical Analysis
-24. **Meta Timeline** - Interactive timeline showing meta evolution over seasons
-25. **Meta Shifts** - Highlight major meta changes and what caused them
-26. **Seasonal Comparisons** - Compare meta between different seasons
-27. **Patch Impact Analysis** - Show how specific patches affected the meta
+### 3. **Keystone Level Performance Analysis**
+**Status**: Ready to implement
+**Data Sources**: `/meta/top-keys`, database raw queries
+**Implementation**:
+- Show which specs excel at different keystone levels
+- Analyze success rates by level ranges
+- Track progression patterns (which specs players use as they push higher)
+- Identify "meta breakpoints" where certain specs become viable
 
-### Advanced Visualizations
-28. **Meta Heatmaps** - Visual representation of class/spec popularity over time
-29. **Correlation Analysis** - Show relationships between different class/spec popularity
-30. **Predictive Analytics** - Predict future meta trends based on current data
-31. **Meta Diversity Metrics** - Measure how diverse the meta is at any given time
+**New Endpoint Needed**:
+```typescript
+GET /meta/keystone-analysis?season_id=14&dungeon_id=247
+// Returns: { level_ranges: [{ min: 15, max: 20, specs: [{ spec_id: 71, frequency: 150, avg_score: 245 }] }] }
+```
 
-### Interactive Features
-32. **Meta Simulator** - Let users simulate how changes would affect the meta
-33. **Custom Time Ranges** - Allow users to select custom date ranges for analysis
-34. **Meta Export** - Export meta data for external analysis
-35. **Meta Alerts** - Notify users of significant meta changes
+### 4. **Regional Meta Comparison**
+**Status**: Ready to implement
+**Data Sources**: `/meta/top-keys` with region filtering
+**Implementation**:
+- Compare meta differences between US, EU, KR, TW
+- Show regional preferences and trends
+- Identify region-specific meta strategies
+- Track how meta spreads across regions
 
-## General Application Features
+**Current Endpoints**: Available via region parameter
+```typescript
+GET /meta/top-keys?season_id=14&region=us&limit=1000
+GET /meta/top-keys?season_id=14&region=eu&limit=1000
+```
 
-### User Experience
-36. **Dark/Light Theme Toggle** - Allow users to switch between themes
-37. **Customizable Dashboard** - Let users customize their dashboard layout
-38. **Keyboard Shortcuts** - Add keyboard navigation for power users
-39. **Progressive Web App** - Make the app installable on mobile devices
-40. **Offline Mode** - Cache data for offline viewing
+### 5. **Temporal Meta Evolution**
+**Status**: Ready to implement
+**Data Sources**: `/meta/spec-evolution/`, `/meta/season-data/`
+**Implementation**:
+- Interactive timeline showing meta changes over periods
+- Highlight major meta shifts and their causes
+- Show gradual vs. sudden meta changes
+- Predict future meta trends based on current patterns
 
-### Data & Analytics
-41. **Advanced Filtering** - More sophisticated filtering options across all pages
-42. **Data Export** - Export data in various formats (CSV, JSON, PDF)
-43. **API Documentation** - Public API for developers
-44. **Real-time Updates** - Live data updates without page refresh
-45. **Data Validation** - Better error handling and data validation
+**Current Endpoints**: Already available
+```typescript
+GET /meta/spec-evolution/14
+GET /meta/season-data/14
+```
 
-### Performance & Technical
-46. **Lazy Loading** - Implement lazy loading for better performance
-47. **Caching Strategy** - Implement smart caching for frequently accessed data
-48. **Error Boundaries** - Better error handling and recovery
-49. **Accessibility** - Improve accessibility (ARIA labels, keyboard navigation)
-50. **Internationalization** - Support for multiple languages
+---
 
-### Social & Community
-51. **User Profiles** - User accounts and profiles
-52. **Guild Integration** - Show guild-specific statistics
-53. **Discord Integration** - Share results directly to Discord
-54. **Social Sharing** - Share results on social media
-55. **Community Features** - Forums, comments, user-generated content
+## 🔍 Advanced Analytics Features (Medium Priority)
 
-## Priority Suggestions
+### 6. **Spec Synergy Analysis**
+**Status**: Requires new endpoint
+**Data Sources**: Database raw queries on run_group_member
+**Implementation**:
+- Analyze which specs work best together
+- Show win rates for different spec combinations
+- Identify "meta cores" (e.g., "Prot Paladin + Resto Druid" core)
+- Calculate synergy scores between specs
 
-### High Priority (Most Impact)
-- Win Rate Analysis (#2)
-- Composition Builder (#5)
-- Role Balance Metrics (#3)
-- Quick Filters (#17)
-- Search Functionality (#19)
+**New Endpoint Needed**:
+```typescript
+GET /meta/spec-synergy?season_id=14&spec_id=71
+// Returns: { synergies: [{ partner_spec: 258, frequency: 150, avg_score: 245, synergy_score: 0.85 }] }
+```
 
-### Medium Priority (Good UX)
-- Composition Trends Over Time (#1)
-- Export/Share (#7)
-- Composition Details (#18)
-- Mobile Optimization (#20)
-- Dark/Light Theme Toggle (#36)
+### 7. **Performance vs. Popularity Analysis**
+**Status**: Ready to implement
+**Data Sources**: `/meta/top-keys`, `/meta/spec-evolution/`
+**Implementation**:
+- Compare spec popularity vs. actual performance
+- Identify "sleeper" specs (high performance, low popularity)
+- Show overrated specs (high popularity, low performance)
+- Calculate performance-to-popularity ratios
+
+**Current Endpoints**: Available
+```typescript
+// Combine data from existing endpoints
+GET /meta/top-keys?season_id=14&limit=1000
+GET /meta/spec-evolution/14
+```
+
+### 8. **Meta Diversity Metrics**
+**Status**: Ready to implement
+**Data Sources**: `/meta/spec-evolution/`
+**Implementation**:
+- Calculate meta diversity scores over time
+- Show when meta becomes more/less diverse
+- Track class representation balance
+- Identify periods of meta stagnation vs. innovation
+
+**Current Endpoints**: Already available
+```typescript
+GET /meta/spec-evolution/14
+```
+
+### 9. **Player Progression Analysis**
+**Status**: Requires new endpoint
+**Data Sources**: Database raw queries on leaderboard_run
+**Implementation**:
+- Track how players progress through keystone levels
+- Show which specs help players push higher
+- Analyze progression patterns and bottlenecks
+- Identify "gatekeeper" levels where meta changes significantly
+
+**New Endpoint Needed**:
+```typescript
+GET /meta/progression-analysis?season_id=14&dungeon_id=247
+// Returns: { progression_data: [{ level: 20, specs: [{ spec_id: 71, frequency: 150, success_rate: 0.75 }] }] }
+```
+
+---
+
+## 🎮 Interactive Features (Medium Priority)
+
+### 10. **Meta Simulator**
+**Status**: Ready to implement
+**Data Sources**: `/meta/top-keys`, `/meta/spec-evolution/`
+**Implementation**:
+- Let users simulate "what if" scenarios
+- Show how meta would change if certain specs were buffed/nerfed
+- Predict impact of balance changes
+- Interactive sliders for spec popularity adjustments
+
+**Current Endpoints**: Available
+```typescript
+GET /meta/spec-evolution/14
+GET /meta/top-keys?season_id=14&limit=1000
+```
+
+### 11. **Composition Builder**
+**Status**: Ready to implement
+**Data Sources**: `/meta/top-keys`
+**Implementation**:
+- Drag-and-drop composition builder
+- Show how common user-built compositions are
+- Calculate expected performance for custom compositions
+- Compare user compositions to meta compositions
+
+**Current Endpoints**: Available
+```typescript
+GET /meta/top-keys?season_id=14&limit=1000
+```
+
+### 12. **Advanced Filtering System**
+**Status**: Ready to implement
+**Data Sources**: All existing endpoints
+**Implementation**:
+- Multi-dimensional filtering (region, dungeon, keystone level, period)
+- Saved filter presets
+- Filter combinations (e.g., "US + High Keys + Recent Periods")
+- Export filtered data
+
+**Current Endpoints**: All available
+```typescript
+GET /meta/top-keys?season_id=14&period_id=1001&dungeon_id=247&region=us&limit=1000
+```
+
+---
+
+## 📈 Data Export & Integration Features (Low Priority)
+
+### 13. **Data Export System**
+**Status**: Ready to implement
+**Data Sources**: All existing endpoints
+**Implementation**:
+- Export filtered data as CSV/JSON
+- Generate meta reports as PDF
+- Shareable links for specific analyses
+- API access for developers
+
+**Current Endpoints**: All available
+```typescript
+// Add export parameters to existing endpoints
+GET /meta/top-keys?season_id=14&format=csv
+GET /meta/spec-evolution/14?format=json
+```
+
+### 14. **Meta Report Generator**
+**Status**: Ready to implement
+**Data Sources**: `/meta/spec-evolution/`, `/meta/season-data/`
+**Implementation**:
+- Generate comprehensive meta reports
+- Include charts, statistics, and predictions
+- PDF export with professional formatting
+- Scheduled report generation
+
+**Current Endpoints**: Already available
+```typescript
+GET /meta/spec-evolution/14
+GET /meta/season-data/14
+```
+
+### 15. **API Documentation & Developer Tools**
+**Status**: Ready to implement
+**Data Sources**: All existing endpoints
+**Implementation**:
+- Interactive API documentation
+- Query builder for complex requests
+- Rate limit monitoring
+- Usage analytics for API consumers
+
+**Current Endpoints**: All available
+```typescript
+// Add documentation endpoints
+GET /api/docs
+GET /api/rate-limits
+GET /api/usage-stats
+```
+
+---
+
+## 🎨 User Experience Enhancements (Low Priority)
+
+### 16. **Advanced Visualizations**
+**Status**: Ready to implement
+**Data Sources**: All existing endpoints
+**Implementation**:
+- Interactive charts and graphs
+- Heatmaps for spec popularity
+- Timeline visualizations for meta evolution
+- 3D visualizations for complex data relationships
+
+**Current Endpoints**: All available
+```typescript
+// Use existing endpoints with enhanced frontend visualization
+GET /meta/spec-evolution/14
+GET /meta/top-keys?season_id=14&limit=1000
+```
+
+### 17. **Mobile Optimization**
+**Status**: Ready to implement
+**Data Sources**: All existing endpoints
+**Implementation**:
+- Responsive design improvements
+- Touch-friendly interactions
+- Mobile-specific data views
+- Offline data caching
+
+**Current Endpoints**: All available
+```typescript
+// Optimize existing endpoints for mobile
+GET /meta/top-keys?season_id=14&limit=50 // Smaller datasets for mobile
+```
+
+### 18. **Theme System**
+**Status**: Ready to implement
+**Data Sources**: N/A (Frontend only)
+**Implementation**:
+- Dark/light theme toggle
+- Custom color schemes
+- Accessibility improvements
+- User preference persistence
+
+**Current Endpoints**: N/A
+
+---
+
+## 🚀 Implementation Priority Matrix
+
+### High Priority (Immediate Impact)
+1. **Advanced Group Composition Analysis** - Uses existing data, high user value
+2. **Dungeon-Specific Meta Analysis** - Ready to implement, clear use case
+3. **Temporal Meta Evolution** - Uses existing endpoints, great visualization potential
+4. **Regional Meta Comparison** - Easy to implement, interesting insights
+
+### Medium Priority (Significant Value)
+5. **Spec Synergy Analysis** - Requires new endpoint but high value
+6. **Performance vs. Popularity Analysis** - Uses existing data, unique insights
+7. **Meta Simulator** - Interactive, engaging feature
+8. **Advanced Filtering System** - Improves existing functionality
 
 ### Low Priority (Nice to Have)
-- Social Features (#21-23)
-- Advanced Analytics (#13-16)
-- Community Features (#51-55)
+9. **Data Export System** - Useful for power users
+10. **Advanced Visualizations** - Enhances user experience
+11. **Mobile Optimization** - Improves accessibility
+12. **Theme System** - Quality of life improvement
 
-## Implementation Notes
+---
 
-### Technical Considerations
-- Consider using Chart.js or D3.js for advanced visualizations
-- Implement proper state management for complex filters
-- Use React Query or SWR for efficient data fetching
-- Consider implementing a backend API for user features
+## 📋 Technical Implementation Notes
 
-### Data Requirements
-- Need access to historical data for trends
-- Win rate data would require additional API endpoints
-- User features would require authentication system
-- Real-time features would need WebSocket implementation
+### Database Queries Needed
+```sql
+-- For composition analysis
+SELECT 
+  array_agg(DISTINCT spec_id ORDER BY spec_id) as composition,
+  COUNT(*) as frequency,
+  AVG(score) as avg_score
+FROM run_group_member rgm
+JOIN leaderboard_run lr ON rgm.run_guid = lr.run_guid
+WHERE lr.season_id = $1 AND lr.period_id = $2
+GROUP BY composition
+ORDER BY frequency DESC;
 
-### Performance Considerations
-- Implement virtual scrolling for large datasets
-- Use memoization for expensive calculations
-- Consider server-side rendering for SEO
-- Implement proper loading states and error boundaries 
+-- For spec synergy analysis
+SELECT 
+  spec1.spec_id as spec1_id,
+  spec2.spec_id as spec2_id,
+  COUNT(*) as co_occurrence,
+  AVG(lr.score) as avg_score
+FROM run_group_member spec1
+JOIN run_group_member spec2 ON spec1.run_guid = spec2.run_guid AND spec1.spec_id < spec2.spec_id
+JOIN leaderboard_run lr ON spec1.run_guid = lr.run_guid
+WHERE lr.season_id = $1
+GROUP BY spec1.spec_id, spec2.spec_id
+ORDER BY co_occurrence DESC;
+```
+
+### New API Endpoints to Create
+1. `/meta/composition-analysis` - Group composition statistics
+2. `/meta/spec-synergy` - Spec combination analysis
+3. `/meta/keystone-analysis` - Level-specific performance data
+4. `/meta/progression-analysis` - Player progression patterns
+
+### Frontend Technologies
+- **Charts**: Chart.js or D3.js for advanced visualizations
+- **State Management**: React Query for efficient data fetching
+- **UI Components**: Material-UI or Ant Design for consistent design
+- **Data Processing**: Lodash for efficient data manipulation
+
+---
+
+## 🎯 Success Metrics
+
+### User Engagement
+- Time spent on analysis pages
+- Number of filter combinations used
+- Export/download frequency
+- Return user rate
+
+### Technical Performance
+- API response times under 500ms
+- Page load times under 2 seconds
+- 99.9% uptime for API endpoints
+- Mobile performance scores > 90
+
+### Data Quality
+- Cross-validation accuracy > 85%
+- Prediction accuracy > 80%
+- Data freshness (updated within 24 hours)
+- API rate limit compliance
+
+---
+
+## 📝 Notes
+
+- All features are designed to work with existing data infrastructure
+- New endpoints can be implemented incrementally
+- Frontend features can be built in parallel with backend development
+- Priority is based on user value and implementation complexity
+- All features include proper error handling and loading states 

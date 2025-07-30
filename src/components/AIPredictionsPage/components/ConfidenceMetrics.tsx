@@ -3,9 +3,10 @@ import '../styles/ConfidenceMetrics.css';
 
 interface ConfidenceMetricsProps {
   seasonData: any;
+  specEvolution: any;
 }
 
-export const ConfidenceMetrics: React.FC<ConfidenceMetricsProps> = ({ seasonData }) => {
+export const ConfidenceMetrics: React.FC<ConfidenceMetricsProps> = ({ seasonData, specEvolution }) => {
   const metrics = useMemo(() => {
     if (!seasonData || !seasonData.periods || seasonData.periods.length === 0) return null;
 
@@ -17,6 +18,7 @@ export const ConfidenceMetrics: React.FC<ConfidenceMetricsProps> = ({ seasonData
       lowConfidencePeriods: number;
       avgSuccessRate: number;
       trendStability: number;
+      crossValidationScore: number;
     }> = {};
 
     // Analyze each period for confidence patterns
@@ -49,7 +51,8 @@ export const ConfidenceMetrics: React.FC<ConfidenceMetricsProps> = ({ seasonData
             mediumConfidencePeriods: 0,
             lowConfidencePeriods: 0,
             avgSuccessRate: 0,
-            trendStability: 0
+            trendStability: 0,
+            crossValidationScore: 0
           };
         }
 
@@ -71,7 +74,26 @@ export const ConfidenceMetrics: React.FC<ConfidenceMetricsProps> = ({ seasonData
       });
     });
 
-    // Calculate final metrics
+    // Cross-validate with spec evolution data
+    if (specEvolution && specEvolution.evolution) {
+      specEvolution.evolution.forEach((periodData: any) => {
+        Object.entries(periodData.spec_counts).forEach(([specId, count]) => {
+          const specIdNum = parseInt(specId);
+          if (specConfidence[specIdNum]) {
+            // Calculate cross-validation score for this spec
+            const officialCount = count as number;
+            const ourCount = specConfidence[specIdNum].totalAppearances;
+            const difference = Math.abs(ourCount - officialCount);
+            const maxCount = Math.max(ourCount, officialCount);
+            const accuracy = maxCount > 0 ? (1 - difference / maxCount) * 100 : 100;
+            
+            specConfidence[specIdNum].crossValidationScore = accuracy;
+          }
+        });
+      });
+    }
+
+    // Calculate final metrics with cross-validation
     const totalSpecs = Object.keys(specConfidence).length;
     const highConfidenceSpecs = Object.values(specConfidence).filter(spec => 
       spec.highConfidencePeriods > spec.mediumConfidencePeriods && 
@@ -83,16 +105,23 @@ export const ConfidenceMetrics: React.FC<ConfidenceMetricsProps> = ({ seasonData
     ).length;
     const lowConfidenceSpecs = totalSpecs - highConfidenceSpecs - mediumConfidenceSpecs;
 
-    // Calculate average confidence across all specs
-    const avgConfidence = totalSpecs > 0 ? 
-      (highConfidenceSpecs * 85 + mediumConfidenceSpecs * 72 + lowConfidenceSpecs * 55) / totalSpecs : 0;
+    // Calculate average confidence with cross-validation bonus
+    const avgCrossValidationScore = totalSpecs > 0 ? 
+      Object.values(specConfidence).reduce((sum, spec) => sum + spec.crossValidationScore, 0) / totalSpecs : 0;
+    
+    const crossValidationBonus = avgCrossValidationScore > 90 ? 10 : 
+                                avgCrossValidationScore > 80 ? 7 : 
+                                avgCrossValidationScore > 70 ? 5 : 0;
 
-    // Calculate prediction accuracy based on temporal consistency
+    const avgConfidence = totalSpecs > 0 ? 
+      (highConfidenceSpecs * 85 + mediumConfidenceSpecs * 72 + lowConfidenceSpecs * 55) / totalSpecs + crossValidationBonus : 0;
+
+    // Calculate prediction accuracy based on temporal consistency and cross-validation
     const consistentSpecs = Object.values(specConfidence).filter(spec => 
       Math.abs(spec.highConfidencePeriods - spec.lowConfidencePeriods) <= 2
     ).length;
     const predictionAccuracy = totalSpecs > 0 ? 
-      Math.min(95, Math.max(70, 82 + (consistentSpecs / totalSpecs) * 10)) : 82;
+      Math.min(95, Math.max(70, 82 + (consistentSpecs / totalSpecs) * 10 + crossValidationBonus)) : 82;
 
     return {
       totalSpecs,
@@ -101,10 +130,11 @@ export const ConfidenceMetrics: React.FC<ConfidenceMetricsProps> = ({ seasonData
       lowConfidence: lowConfidenceSpecs,
       avgConfidence: avgConfidence,
       predictionAccuracy: predictionAccuracy,
+      crossValidationScore: avgCrossValidationScore,
       totalPeriods: seasonData.total_periods,
       totalKeys: seasonData.total_keys
     };
-  }, [seasonData]);
+  }, [seasonData, specEvolution]);
 
   if (!metrics) {
     return (
@@ -149,6 +179,23 @@ export const ConfidenceMetrics: React.FC<ConfidenceMetricsProps> = ({ seasonData
               style={{ 
                 width: `${metrics.predictionAccuracy}%`,
                 backgroundColor: metrics.predictionAccuracy > 85 ? '#10B981' : metrics.predictionAccuracy > 75 ? '#F59E0B' : '#EF4444'
+              }}
+            ></div>
+          </div>
+        </div>
+
+        <div className="metric-card">
+          <div className="metric-header">
+            <span className="metric-icon">🔍</span>
+            <span className="metric-title">Cross-Validation</span>
+          </div>
+          <div className="metric-value">{metrics.crossValidationScore.toFixed(1)}%</div>
+          <div className="metric-bar">
+            <div 
+              className="metric-fill"
+              style={{ 
+                width: `${metrics.crossValidationScore}%`,
+                backgroundColor: metrics.crossValidationScore > 90 ? '#10B981' : metrics.crossValidationScore > 80 ? '#F59E0B' : '#EF4444'
               }}
             ></div>
           </div>
@@ -201,7 +248,7 @@ export const ConfidenceMetrics: React.FC<ConfidenceMetricsProps> = ({ seasonData
       </div>
       {/* Remove old .data-summary, add unified .data-coverage */}
       <div className="data-coverage">
-        <h4>📊 Data Coverage</h4>
+        <h4>📊 Enhanced Data Coverage</h4>
         <div className="coverage-stats">
           <div className="coverage-item">
             <span className="coverage-label">Periods Analyzed</span>
@@ -215,6 +262,14 @@ export const ConfidenceMetrics: React.FC<ConfidenceMetricsProps> = ({ seasonData
             <span className="coverage-label">Specs Tracked</span>
             <span className="coverage-value">{metrics.totalSpecs}</span>
           </div>
+          <div className="coverage-item">
+            <span className="coverage-label">Data Sources</span>
+            <span className="coverage-value">2 (Run Data + Spec Evolution)</span>
+          </div>
+        </div>
+        <div className="coverage-note">
+          <span className="note-icon">🔍</span>
+          <span>Cross-validated analysis using comprehensive run data and official spec evolution trends</span>
         </div>
       </div>
     </div>

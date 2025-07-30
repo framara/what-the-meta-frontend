@@ -3,6 +3,7 @@ import '../styles/HistoricalAccuracy.css';
 
 interface HistoricalAccuracyProps {
   seasonData: any;
+  specEvolution: any;
 }
 
 interface HistoricalWeekData {
