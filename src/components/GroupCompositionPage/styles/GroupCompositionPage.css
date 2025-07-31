@@ -619,18 +619,64 @@
   gap: 1rem;
 }
 
+/* Flip Card Styles */
 .composition-card {
-  background: rgba(59, 130, 246, 0.05);
-  border: 1px solid rgba(59, 130, 246, 0.1);
-  border-radius: 8px;
-  padding: 1rem;
-  transition: all 0.2s ease;
+  position: relative;
+  width: 100%;
+  height: 290px;
+  perspective: 1000px;
+  cursor: pointer;
+  transform-style: preserve-3d;
 }
 
-.composition-card:hover {
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.composition-card.flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+  transform: rotateY(0deg);
+  will-change: transform;
+}
+
+.card-front:hover,
+.card-back:hover {
   background: rgba(59, 130, 246, 0.1);
   border-color: rgba(59, 130, 246, 0.2);
-  transform: translateY(-1px);
+  transform: translateY(-2px) rotateY(0deg);
+}
+
+.card-back {
+  transform: rotateY(180deg);
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.card-back:hover {
+  transform: translateY(-2px) rotateY(180deg);
 }
 
 .composition-header {
@@ -658,6 +704,8 @@
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
+  flex: 1;
+  margin-bottom: 0.5rem;
 }
 
 .composition-spec {
@@ -683,6 +731,146 @@
   border: 3px solid #3b82f6;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
   transform: scale(1.1);
+}
+
+/* Mini Trend Chart Styles */
+.trend-chart-container {
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  border-radius: 8px;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mini-trend-chart {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.mini-trend-chart .chart-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  margin-top: 2rem;
+}
+
+.mini-trend-chart svg {
+  width: 100%;
+  height: 100%;
+  max-width: 200px;
+  max-height: 40px;
+  overflow: visible;
+}
+
+.mini-trend-chart .grid line {
+  stroke-dasharray: 2, 2;
+}
+
+.mini-trend-chart polyline {
+  filter: drop-shadow(0 1px 2px rgba(59, 130, 246, 0.3));
+}
+
+.mini-trend-chart circle {
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+}
+
+.flip-hint {
+  color: #9ca3af;
+  font-size: 0.75rem;
+  font-style: italic;
+  text-align: center;
+  margin-top: auto;
+  padding-top: 0.5rem;
+}
+
+/* Stats Content Styles */
+.stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.stats-title {
+  color: #f9fafb;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.stats-rank {
+  color: #3b82f6;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.stats-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow-y: auto;
+  max-height: 160px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.25rem 0;
+}
+
+.stat-label {
+  color: #9ca3af;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.stat-value {
+  color: #f9fafb;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-right: 1rem;
+}
+
+.period-performance {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.period-header {
+  color: #9ca3af;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.period-stat {
+  color: #d1d5db;
+  font-size: 0.7rem;
+  margin-bottom: 0.125rem;
+}
+
+.no-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #9ca3af;
+  font-size: 0.9rem;
+  font-style: italic;
 }
 
 /* No Compositions Message */
@@ -785,6 +973,14 @@
   .composition-specs {
     justify-content: center;
   }
+  
+  .composition-card {
+    height: 220px;
+  }
+  
+  .stats-content {
+    max-height: 120px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -821,5 +1017,28 @@
     font-size: 1.1rem;
     border-radius: 7px;
     margin: 0 0.1rem;
+  }
+  
+  .composition-card {
+    height: 200px;
+  }
+  
+  .stats-content {
+    max-height: 100px;
+  }
+  
+  .stat-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.125rem;
+  }
+  
+  .trend-chart-container {
+    min-height: 40px;
+    padding: 0.25rem;
+  }
+  
+  .mini-trend-chart {
+    height: 40px;
   }
 } 

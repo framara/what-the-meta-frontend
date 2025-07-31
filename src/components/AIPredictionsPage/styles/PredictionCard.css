@@ -144,7 +144,6 @@
   border-radius: 2px;
   overflow: hidden;
   position: relative;
-  margin: 0.75rem 0 1.25rem 0;
 }
 
 .confidence-bar::before {
@@ -289,4 +288,24 @@
 
 .prediction-card-container:hover .prediction-card.declining {
   border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* Flip hint styles */
+.flip-hint {
+  color: #9ca3af;
+  font-size: 0.75rem;
+  font-style: italic;
+  text-align: center;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.flip-hint span {
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.prediction-card-container:hover .flip-hint span {
+  opacity: 1;
 }

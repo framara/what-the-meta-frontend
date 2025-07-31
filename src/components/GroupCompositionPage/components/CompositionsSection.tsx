@@ -3,12 +3,34 @@ import type { Composition } from '../utils/compositionUtils';
 import type { TooltipState } from '../hooks/useTooltip';
 import { CompositionCard } from './CompositionCard';
 
+interface SeasonData {
+  season_id: number;
+  total_periods: number;
+  total_keys: number;
+  periods: Array<{
+    period_id: number;
+    keys_count: number;
+    keys: Array<{
+      id: number;
+      keystone_level: number;
+      score: number;
+      members: Array<{
+        spec_id: number;
+        class_id: number;
+        name: string;
+      }>;
+      [key: string]: any;
+    }>;
+  }>;
+}
+
 interface CompositionsSectionProps {
   compositions: Composition[];
   selectedSpec: number | null;
   onSpecClick: (specId: number) => void;
   specTooltip: TooltipState | null;
   setSpecTooltip: (tooltip: TooltipState | null) => void;
+  seasonData: SeasonData | null;
 }
 
 export const CompositionsSection: React.FC<CompositionsSectionProps> = ({
@@ -16,7 +38,8 @@ export const CompositionsSection: React.FC<CompositionsSectionProps> = ({
   selectedSpec,
   onSpecClick,
   specTooltip,
-  setSpecTooltip
+  setSpecTooltip,
+  seasonData
 }) => {
   return (
     <div className="compositions-section">
@@ -30,6 +53,7 @@ export const CompositionsSection: React.FC<CompositionsSectionProps> = ({
               selectedSpec={selectedSpec}
               onSpecClick={onSpecClick}
               setSpecTooltip={setSpecTooltip}
+              seasonData={seasonData}
             />
           ))
         ) : (

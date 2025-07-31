@@ -181,6 +181,9 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({ prediction, type
             </span>
             <span className="type-tag">{type}</span>
           </div>
+          <div className="flip-hint">
+            <span>Click to see charts</span>
+          </div>
         </div>
       </div>
 
@@ -229,7 +232,11 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({ prediction, type
             </span>
             <span className="stat-value">{successRate.toFixed(1)}%</span>
           </div>
-        </div> 
+        </div>
+        
+        <div className="flip-hint">
+          <span>Click to flip back</span>
+        </div>
       </div>
     </div>
   );

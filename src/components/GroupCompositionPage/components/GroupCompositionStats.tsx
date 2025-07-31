@@ -8,11 +8,33 @@ import { SpecSelector } from './SpecSelector';
 import { CompositionsSection } from './CompositionsSection';
 import { SpecTooltip } from './SpecTooltip';
 
-interface GroupCompositionStatsProps {
-  runs: Run[];
+interface SeasonData {
+  season_id: number;
+  total_periods: number;
+  total_keys: number;
+  periods: Array<{
+    period_id: number;
+    keys_count: number;
+    keys: Array<{
+      id: number;
+      keystone_level: number;
+      score: number;
+      members: Array<{
+        spec_id: number;
+        class_id: number;
+        name: string;
+      }>;
+      [key: string]: any;
+    }>;
+  }>;
 }
 
-export const GroupCompositionStats: React.FC<GroupCompositionStatsProps> = ({ runs }) => {
+interface GroupCompositionStatsProps {
+  runs: Run[];
+  seasonData: SeasonData | null;
+}
+
+export const GroupCompositionStats: React.FC<GroupCompositionStatsProps> = ({ runs, seasonData }) => {
   const { selectedClass, selectedSpec, handleClassChange, handleSpecChange, clearFilter } = useSpecFilter();
   const { isDropdownOpen, setIsDropdownOpen, hoveredClass, setHoveredClass, dropdownRef } = useDropdown();
   const { specTooltip, setSpecTooltip } = useTooltip();
@@ -46,6 +68,7 @@ export const GroupCompositionStats: React.FC<GroupCompositionStatsProps> = ({ ru
         onSpecClick={handleSpecChange}
         specTooltip={specTooltip}
         setSpecTooltip={setSpecTooltip}
+        seasonData={seasonData}
       />
 
       {/* Spec Tooltip */}

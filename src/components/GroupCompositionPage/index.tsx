@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useFilterState } from '../FilterContext';
-import { fetchTopKeys } from '../../services/api';
+import { fetchTopKeys, fetchSeasonData } from '../../services/api';
 import { GroupCompositionStats } from './components/GroupCompositionStats';
 import LoadingScreen from '../LoadingScreen';
 import { FilterBar } from '../FilterBar';
@@ -26,37 +26,65 @@ interface Run {
   members: GroupMember[];
 }
 
+interface SeasonData {
+  season_id: number;
+  total_periods: number;
+  total_keys: number;
+  periods: Array<{
+    period_id: number;
+    keys_count: number;
+    keys: Array<{
+      id: number;
+      keystone_level: number;
+      score: number;
+      members: Array<{
+        spec_id: number;
+        class_id: number;
+        name: string;
+      }>;
+      [key: string]: any;
+    }>;
+  }>;
+}
+
 export const GroupCompositionPage: React.FC = () => {
   const filter = useFilterState();
   const [runs, setRuns] = useState<Run[]>([]);
+  const [seasonData, setSeasonData] = useState<SeasonData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch runs when filter changes
   useEffect(() => {
-    const loadRuns = async () => {
+    const loadData = async () => {
       if (!filter.season_id) return;
 
       setLoading(true);
       setError(null);
 
       try {
-        const runsData = await fetchTopKeys({
-          season_id: filter.season_id,
-          period_id: filter.period_id,
-          dungeon_id: filter.dungeon_id,
-          limit: filter.limit || 1000 // Get more data for better analysis
-        });
+        // Fetch both top keys and season data in parallel
+        const [runsData, seasonDataResult] = await Promise.all([
+          fetchTopKeys({
+            season_id: filter.season_id,
+            period_id: filter.period_id,
+            dungeon_id: filter.dungeon_id,
+            limit: filter.limit || 1000 // Get more data for better analysis
+          }),
+          fetchSeasonData(filter.season_id)
+        ]);
+        
         setRuns(runsData);
+        setSeasonData(seasonDataResult);
       } catch (err) {
         setError('Failed to load group composition data');
-        console.error('Error loading runs:', err);
+        console.error('Error loading data:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    loadRuns();
+    loadData();
   }, [filter.season_id, filter.period_id, filter.dungeon_id, filter.limit]);
 
   if (error) {
@@ -94,7 +122,7 @@ export const GroupCompositionPage: React.FC = () => {
       {loading ? (
         <LoadingScreen />
       ) : (
-        <GroupCompositionStats runs={runs} />
+        <GroupCompositionStats runs={runs} seasonData={seasonData} />
       )}
     </div>
   );
