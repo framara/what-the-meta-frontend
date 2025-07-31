@@ -57,3 +57,27 @@ export const WOW_RANGED_SPECS = new Set([
   62, 63, 64, 253, 254, 258, 262, 102, 265, 266, 267, 1467, 1473
   // Add more if needed
 ]);
+
+export const WOW_SEASONS_PER_EXPANSION: Record<number, number[]> = {
+ // 8: [1, 2, 3, 4], // data not available yet
+ 9: [5,6, 7, 8],
+ 10: [9, 10, 11, 12],
+ 11: [13, 14, 15, 16],
+ 12: [17, 18, 19, 20]
+};
+
+export const WOW_EXPANSIONS = [
+  { id: 0, name: 'World of Warcraft', shortName: 'WoW', seasons: [] },
+  { id: 1, name: 'The Burning Crusade', shortName: 'TBC', seasons: [] },
+  { id: 2, name: 'Wrath of the Lich King', shortName: 'WOTLK', seasons: [] },
+  { id: 3, name: 'Cataclysm', shortName: 'Cata', seasons: [] },
+  { id: 4, name: 'Mists of Pandaria', shortName: 'MoP', seasons: [] },
+  { id: 5, name: 'Warlords of Draenor', shortName: 'WoD', seasons: [] },
+  { id: 6, name: 'Legion', shortName: 'Legion', seasons: [] },
+  { id: 7, name: 'Battle for Azeroth', shortName: 'BfA', seasons: [1, 2, 3, 4] },
+  { id: 8, name: 'Shadowlands', shortName: 'SL', seasons: [5, 6, 7, 8] },
+  { id: 9, name: 'Dragonflight', shortName: 'DF', seasons: [9, 10, 11, 12] },
+  { id: 10, name: 'The War Within', shortName: 'TWW', seasons: [13, 14, 15, 16] },
+  { id: 11, name: 'Midnight', shortName: 'MN', seasons: [17, 18, 19, 20] },
+  { id: 12, name: 'The Last Titan', shortName: 'TLT', seasons: [21, 22, 23, 24] },
+];
