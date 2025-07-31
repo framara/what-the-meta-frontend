@@ -1,4 +1,5 @@
 import { WOW_SPEC_ROLES } from '../../../constants/wow-constants';
+import { TOP_COMPOSITIONS_COUNT } from '../constants/compositionConstants';
 
 export interface GroupMember {
   character_name: string;
@@ -88,7 +89,7 @@ export const calculateGroupCompositions = (runs: Run[], selectedSpec: number | n
   
   return Object.values(groupCompositions)
     .sort((a, b) => b.count - a.count)
-    .slice(0, 3);
+    .slice(0, TOP_COMPOSITIONS_COUNT);
 };
 
 // Helper to determine text color for tooltip
