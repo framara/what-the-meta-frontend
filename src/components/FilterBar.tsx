@@ -46,6 +46,39 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     });
   }, []);
 
+  // Group seasons by expansion and create options with separators
+  const getSeasonOptionsWithSeparators = () => {
+    const options: Array<{ label: string; value: number | string; isSeparator?: boolean }> = [];
+    
+    seasonOptions.forEach((season, index) => {
+      const currentExpansion = getExpansionFromSeasonName(season.label);
+      const prevSeason = seasonOptions[index - 1];
+      const prevExpansion = prevSeason ? getExpansionFromSeasonName(prevSeason.label) : null;
+      
+      // Add separator if this is the first season or if this is a different expansion than the previous one
+      if (index === 0 || (prevExpansion && currentExpansion !== prevExpansion)) {
+        options.push({
+          label: `── ${currentExpansion} ─────────`,
+          value: `separator-${currentExpansion}`,
+          isSeparator: true
+        });
+      }
+      
+      options.push(season);
+    });
+    
+    return options;
+  };
+
+  // Helper function to extract expansion from season name
+  const getExpansionFromSeasonName = (seasonName: string): string => {
+    if (seasonName.startsWith('BfA')) return 'Battle for Azeroth';
+    if (seasonName.startsWith('SL')) return 'Shadowlands';
+    if (seasonName.startsWith('DF')) return 'Dragonflight';
+    if (seasonName.startsWith('TWW')) return 'The War Within';
+    return 'Other';
+  };
+
   useEffect(() => {
     if (!filter.season_id || (!showPeriod && !showDungeon)) return;
     setLoading(true);
@@ -86,11 +119,24 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           <select
             className="filter-select"
             value={filter.season_id}
-            onChange={e => dispatch({ type: 'SET_SEASON', season_id: Number(e.target.value) })}
+            onChange={e => {
+              const value = e.target.value;
+              if (typeof value === 'string' && value.startsWith('separator-')) {
+                return; // Don't allow selecting separators
+              }
+              dispatch({ type: 'SET_SEASON', season_id: Number(value) });
+            }}
             disabled={loading}
           >
-            {seasonOptions.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            {getSeasonOptionsWithSeparators().map(opt => (
+              <option 
+                key={opt.value} 
+                value={opt.value}
+                disabled={opt.isSeparator}
+                className={opt.isSeparator ? 'expansion-separator' : ''}
+              >
+                {opt.label}
+              </option>
             ))}
           </select>
         </div>
