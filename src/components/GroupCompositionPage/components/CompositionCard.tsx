@@ -173,6 +173,48 @@ export const CompositionCard: React.FC<CompositionCardProps> = ({
   const [isFlipped, setIsFlipped] = useState(false);
   const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
 
+  // Handle touch events for better mobile experience
+  const handleCardClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsFlipped(!isFlipped);
+  };
+
+  const handleSpecClick = (e: React.MouseEvent, specId: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onSpecClick(specId);
+  };
+
+  const handleSpecTouch = (e: React.TouchEvent, specId: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onSpecClick(specId);
+  };
+
+  const handleSpecMouseEnter = (e: React.MouseEvent, specId: number, classId: number) => {
+    e.stopPropagation();
+    setSpecTooltip({
+      x: e.clientX,
+      y: e.clientY,
+      content: WOW_SPECIALIZATIONS[specId] || '-',
+      color: WOW_CLASS_COLORS[classId] || '#23263a',
+    });
+  };
+
+  const handleSpecMouseMove = (e: React.MouseEvent, specId: number, classId: number) => {
+    e.stopPropagation();
+    setSpecTooltip({
+      x: e.clientX,
+      y: e.clientY,
+      content: WOW_SPECIALIZATIONS[specId] || '-',
+      color: WOW_CLASS_COLORS[classId] || '#23263a',
+    });
+  };
+
+  const handleSpecMouseLeave = () => {
+    setSpecTooltip(null);
+  };
+
   // Calculate detailed statistics for this composition
   const compositionStats = useMemo((): CompositionStats | null => {
     if (!seasonData) return null;
@@ -271,7 +313,16 @@ export const CompositionCard: React.FC<CompositionCardProps> = ({
   return (
     <div 
       className={`composition-card ${isFlipped ? 'flipped' : ''}`}
-      onClick={() => setIsFlipped(!isFlipped)}
+      onClick={handleCardClick}
+      role="button"
+      tabIndex={0}
+      aria-label={`Composition ${index + 1} - Click to ${isFlipped ? 'flip back' : 'see stats'}`}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          setIsFlipped(!isFlipped);
+        }
+      }}
     >
       <div className="card-inner">
         {/* Front of card */}
@@ -285,6 +336,7 @@ export const CompositionCard: React.FC<CompositionCardProps> = ({
               const classId = Number(WOW_SPEC_TO_CLASS[specId]) || 0;
               const role = WOW_SPEC_ROLES[specId] || '';
               const isSelectedSpec = selectedSpec === specId;
+              const specName = WOW_SPECIALIZATIONS[specId] || 'Unknown Spec';
               
               return (
                 <span
@@ -295,28 +347,21 @@ export const CompositionCard: React.FC<CompositionCardProps> = ({
                     border: isSelectedSpec ? '3px solid #3b82f6' : 'none',
                     boxShadow: isSelectedSpec ? '0 0 0 2px rgba(59, 130, 246, 0.3)' : '0 2px 4px rgba(0, 0, 0, 0.2)',
                   }}
-                  onMouseEnter={e => {
-                    e.stopPropagation();
-                    setSpecTooltip({
-                      x: e.clientX,
-                      y: e.clientY,
-                      content: WOW_SPECIALIZATIONS[specId] || '-',
-                      color: WOW_CLASS_COLORS[classId] || '#23263a',
-                    });
-                  }}
-                  onMouseMove={e => {
-                    e.stopPropagation();
-                    setSpecTooltip({
-                      x: e.clientX,
-                      y: e.clientY,
-                      content: WOW_SPECIALIZATIONS[specId] || '-',
-                      color: WOW_CLASS_COLORS[classId] || '#23263a',
-                    });
-                  }}
-                  onMouseLeave={() => setSpecTooltip(null)}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSpecClick(specId);
+                  onMouseEnter={(e) => handleSpecMouseEnter(e, specId, classId)}
+                  onMouseMove={(e) => handleSpecMouseMove(e, specId, classId)}
+                  onMouseLeave={handleSpecMouseLeave}
+                  onClick={(e) => handleSpecClick(e, specId)}
+                  onTouchStart={(e) => handleSpecTouch(e, specId)}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${specName} - ${role}`}
+                  aria-pressed={isSelectedSpec}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onSpecClick(specId);
+                    }
                   }}
                 >
                   {ROLE_EMOJI[role] || ''}

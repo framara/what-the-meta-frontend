@@ -1,9 +1,27 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const Navigation = () => {
   const [navOpen, setNavOpen] = useState(false);
   const [aiDropdownOpen, setAiDropdownOpen] = useState(false);
+  const location = useLocation();
+
+  // Helper function to check if a link is active
+  const isActive = (path: string) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
+
+  // Helper function to get link classes with active state
+  const getLinkClasses = (path: string) => {
+    const baseClasses = "font-bold text-lg transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap";
+    const activeClasses = isActive(path) 
+      ? "text-blue-400 border-b-2 border-blue-400 md:border-b-2" 
+      : "hover:text-blue-400";
+    return `${baseClasses} ${activeClasses}`;
+  };
 
   return (
     <nav className="flex items-center">
@@ -31,21 +49,21 @@ const Navigation = () => {
       >
         <Link 
           to="/" 
-          className="font-bold text-lg hover:text-blue-400 transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap" 
+          className={getLinkClasses('/')} 
           onClick={() => setNavOpen(false)}
         >
           Dashboard
         </Link>
         <Link 
           to="/meta-evolution" 
-          className="font-bold text-lg hover:text-blue-400 transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap" 
+          className={getLinkClasses('/meta-evolution')} 
           onClick={() => setNavOpen(false)}
         >
           Meta Evolution
         </Link>
         <Link 
           to="/group-composition" 
-          className="font-bold text-lg hover:text-blue-400 transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap" 
+          className={getLinkClasses('/group-composition')} 
           onClick={() => setNavOpen(false)}
         >
           Group Composition
@@ -54,7 +72,11 @@ const Navigation = () => {
         {/* AI going wild dropdown - desktop */}
         <div className="hidden md:block relative">
           <button
-            className="font-bold text-lg hover:text-blue-400 transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap flex items-center gap-1"
+            className={`font-bold text-lg transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap flex items-center gap-1 ${
+              isActive('/ai-predictions') || isActive('/ai-analysis') || isActive('/ai-insights')
+                ? 'text-blue-400 border-b-2 border-blue-400 md:border-b-2'
+                : 'hover:text-blue-400'
+            }`}
             onClick={() => setAiDropdownOpen(!aiDropdownOpen)}
             onMouseEnter={() => setAiDropdownOpen(true)}
           >
@@ -75,21 +97,33 @@ const Navigation = () => {
             >
               <Link 
                 to="/ai-predictions" 
-                className="block px-4 py-2 text-gray-300 hover:text-blue-400 hover:bg-gray-700 transition-colors rounded-t-lg"
+                className={`block px-4 py-2 transition-colors rounded-t-lg ${
+                  isActive('/ai-predictions')
+                    ? 'text-blue-400 bg-gray-700'
+                    : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'
+                }`}
                 onClick={() => setAiDropdownOpen(false)}
               >
                 AI Predictions
               </Link>
               <Link 
                 to="/ai-analysis" 
-                className="block px-4 py-2 text-gray-300 hover:text-blue-400 hover:bg-gray-700 transition-colors"
+                className={`block px-4 py-2 transition-colors ${
+                  isActive('/ai-analysis')
+                    ? 'text-blue-400 bg-gray-700'
+                    : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'
+                }`}
                 onClick={() => setAiDropdownOpen(false)}
               >
                 AI Analysis
               </Link>
               <Link 
                 to="/ai-insights" 
-                className="block px-4 py-2 text-gray-300 hover:text-blue-400 hover:bg-gray-700 transition-colors rounded-b-lg"
+                className={`block px-4 py-2 transition-colors rounded-b-lg ${
+                  isActive('/ai-insights')
+                    ? 'text-blue-400 bg-gray-700'
+                    : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'
+                }`}
                 onClick={() => setAiDropdownOpen(false)}
               >
                 AI Insights
@@ -101,7 +135,11 @@ const Navigation = () => {
         {/* AI going wild dropdown - mobile */}
         <div className="md:hidden">
           <button
-            className="font-bold text-lg hover:text-blue-400 transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap flex items-center justify-between w-full"
+            className={`font-bold text-lg transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap flex items-center justify-between w-full ${
+              isActive('/ai-predictions') || isActive('/ai-analysis') || isActive('/ai-insights')
+                ? 'text-blue-400 border-b-2 border-blue-400'
+                : 'hover:text-blue-400'
+            }`}
             onClick={() => setAiDropdownOpen(!aiDropdownOpen)}
           >
             <span>AI going wild</span>
@@ -118,7 +156,11 @@ const Navigation = () => {
             <div className="pl-6 bg-gray-800 border-l-2 border-blue-500">
               <Link 
                 to="/ai-predictions" 
-                className="block px-4 py-2 text-gray-300 hover:text-blue-400 transition-colors"
+                className={`block px-4 py-2 transition-colors ${
+                  isActive('/ai-predictions')
+                    ? 'text-blue-400 bg-gray-700'
+                    : 'text-gray-300 hover:text-blue-400'
+                }`}
                 onClick={() => {
                   setAiDropdownOpen(false);
                   setNavOpen(false);
@@ -128,7 +170,11 @@ const Navigation = () => {
               </Link>
               <Link 
                 to="/ai-analysis" 
-                className="block px-4 py-2 text-gray-300 hover:text-blue-400 transition-colors"
+                className={`block px-4 py-2 transition-colors ${
+                  isActive('/ai-analysis')
+                    ? 'text-blue-400 bg-gray-700'
+                    : 'text-gray-300 hover:text-blue-400'
+                }`}
                 onClick={() => {
                   setAiDropdownOpen(false);
                   setNavOpen(false);
@@ -138,7 +184,11 @@ const Navigation = () => {
               </Link>
               <Link 
                 to="/ai-insights" 
-                className="block px-4 py-2 text-gray-300 hover:text-blue-400 transition-colors"
+                className={`block px-4 py-2 transition-colors ${
+                  isActive('/ai-insights')
+                    ? 'text-blue-400 bg-gray-700'
+                    : 'text-gray-300 hover:text-blue-400'
+                }`}
                 onClick={() => {
                   setAiDropdownOpen(false);
                   setNavOpen(false);

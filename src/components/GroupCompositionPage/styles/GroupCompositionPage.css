@@ -968,18 +968,123 @@
   
   .compositions-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
   
   .composition-specs {
     justify-content: center;
+    gap: 0.5rem;
   }
   
   .composition-card {
-    height: 220px;
+    height: 280px;
+    min-height: 280px;
+    margin-bottom: 1rem;
+  }
+  
+  .composition-header {
+    padding: 0.75rem 1rem;
+  }
+  
+  .composition-rank {
+    font-size: 1.1rem;
+  }
+  
+  .composition-count {
+    font-size: 1rem;
+  }
+  
+  .composition-spec {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.2rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    touch-action: manipulation;
+  }
+  
+  .composition-spec:hover {
+    transform: scale(1.05);
+  }
+  
+  .composition-spec.selected-spec {
+    border-width: 3px;
+    transform: scale(1.1);
+  }
+  
+  .trend-chart-container {
+    margin: 0.75rem 0;
+    padding: 0.75rem;
+    min-height: 60px;
+  }
+  
+  .mini-trend-chart {
+    height: 60px;
+  }
+  
+  .mini-trend-chart svg {
+    max-width: 100%;
+    max-height: 50px;
+  }
+  
+  .flip-hint {
+    font-size: 0.8rem;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
   }
   
   .stats-content {
-    max-height: 120px;
+    max-height: 140px;
+    padding: 0.75rem;
+  }
+  
+  .stat-row {
+    margin-bottom: 0.75rem;
+    padding: 0.25rem 0;
+  }
+  
+  .stat-label {
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .stat-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  
+  .stats-header {
+    padding: 0.75rem 1rem;
+  }
+  
+  .stats-title {
+    font-size: 1.1rem;
+  }
+  
+  .stats-rank {
+    font-size: 1rem;
+  }
+  
+  /* Improve touch targets */
+  .composition-card {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  
+  .composition-card:active {
+    transform: scale(0.98);
+  }
+  
+  /* Better flip animation for mobile */
+  .card-inner {
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Improve readability on mobile */
+  .card-front,
+  .card-back {
+    padding: 1rem;
   }
 }
 
@@ -1010,35 +1115,145 @@
     overflow-x: auto;
     justify-content: flex-start;
     gap: 0.4rem;
+    padding: 0.5rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
+  
+  .composition-specs::-webkit-scrollbar {
+    display: none;
+  }
+  
   .composition-spec {
     width: 2.2rem;
     height: 2.2rem;
     font-size: 1.1rem;
     border-radius: 7px;
     margin: 0 0.1rem;
+    flex-shrink: 0;
   }
   
   .composition-card {
-    height: 200px;
+    height: 260px;
+    min-height: 260px;
+    margin-bottom: 0.75rem;
+  }
+  
+  .composition-header {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .composition-rank {
+    font-size: 1rem;
+  }
+  
+  .composition-count {
+    font-size: 0.9rem;
   }
   
   .stats-content {
-    max-height: 100px;
+    max-height: 120px;
+    padding: 0.5rem;
   }
   
   .stat-row {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.125rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .stat-label {
+    font-size: 0.8rem;
+    color: #9ca3af;
+  }
+  
+  .stat-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #f8fafc;
+  }
+  
+  .trend-chart-container {
+    min-height: 50px;
+    padding: 0.5rem;
+    margin: 0.5rem 0;
+  }
+  
+  .mini-trend-chart {
+    height: 50px;
+  }
+  
+  .mini-trend-chart svg {
+    max-width: 100%;
+    max-height: 40px;
+  }
+  
+  .flip-hint {
+    font-size: 0.75rem;
+    padding: 0.25rem;
+    margin-top: 0.25rem;
+  }
+  
+  .stats-header {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .stats-title {
+    font-size: 1rem;
+  }
+  
+  .stats-rank {
+    font-size: 0.9rem;
+  }
+  
+  /* Optimize for very small screens */
+  .card-front,
+  .card-back {
+    padding: 0.75rem;
+  }
+  
+  /* Better touch feedback */
+  .composition-card:active {
+    transform: scale(0.95);
+  }
+  
+  /* Improve flip animation timing for mobile */
+  .card-inner {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Add landscape orientation support for mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .composition-card {
+    height: 240px;
+    min-height: 240px;
+  }
+  
+  .stats-content {
+    max-height: 100px;
   }
   
   .trend-chart-container {
     min-height: 40px;
-    padding: 0.25rem;
   }
   
   .mini-trend-chart {
     height: 40px;
+  }
+}
+
+/* Improve accessibility for mobile */
+@media (max-width: 768px) {
+  .composition-card:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+  
+  .composition-spec:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 1px;
   }
 } 
