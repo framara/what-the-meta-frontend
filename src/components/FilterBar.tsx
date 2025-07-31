@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useFilterState, useFilterDispatch } from './FilterContext';
 import { fetchSeasons, fetchSeasonInfo } from '../services/api';
+import { WOW_EXPANSIONS } from '../constants/wow-constants';
 import './styles/FilterBar.css';
 
 interface FilterBarProps {
+  showExpansion?: boolean;
   showPeriod?: boolean;
   showDungeon?: boolean;
   showLimit?: boolean;
@@ -11,6 +13,7 @@ interface FilterBarProps {
 }
 
 export const FilterBar: React.FC<FilterBarProps> = ({
+  showExpansion = false,
   showPeriod = true,
   showDungeon = true,
   showLimit = true,
@@ -46,37 +49,74 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     });
   }, []);
 
-  // Group seasons by expansion and create options with separators
+  // Get expansion options for the filter
+  const getExpansionOptions = () => {
+    return WOW_EXPANSIONS
+      .filter(expansion => expansion.seasons.length > 0 && expansion.id >= 8 && expansion.id <= 10) // Only show expansions with seasons and ID 8-10
+      .sort((a, b) => b.id - a.id) // Sort by ID descending
+      .map(expansion => ({ label: expansion.name, value: expansion.id }));
+  };
+
+  // Get seasons for the selected expansion using WOW_EXPANSIONS mapping
+  const getSeasonsForExpansion = (expansionId: number) => {
+    const expansion = WOW_EXPANSIONS.find(exp => exp.id === expansionId);
+    if (!expansion) return [];
+    
+    // Map the expansion's seasons to season options
+    return seasonOptions.filter(season => 
+      expansion.seasons.includes(season.value)
+    );
+  };
+
+  // Get season options based on selected expansion using WOW_EXPANSIONS mapping
   const getSeasonOptionsWithSeparators = () => {
     const options: Array<{ label: string; value: number | string; isSeparator?: boolean }> = [];
     
-    seasonOptions.forEach((season, index) => {
-      const currentExpansion = getExpansionFromSeasonName(season.label);
-      const prevSeason = seasonOptions[index - 1];
-      const prevExpansion = prevSeason ? getExpansionFromSeasonName(prevSeason.label) : null;
-      
-      // Add separator if this is the first season or if this is a different expansion than the previous one
-      if (index === 0 || (prevExpansion && currentExpansion !== prevExpansion)) {
-        options.push({
-          label: `── ${currentExpansion} ─────────`,
-          value: `separator-${currentExpansion}`,
-          isSeparator: true
+    let seasonsToShow = seasonOptions;
+    
+    // If expansion is selected, filter seasons for that expansion using WOW_EXPANSIONS
+    if (filter.expansion_id) {
+      seasonsToShow = getSeasonsForExpansion(filter.expansion_id);
+    }
+    
+    // Group seasons by expansion using WOW_EXPANSIONS mapping
+    const expansionSeasons = new Map<number, typeof seasonOptions>();
+    
+    seasonsToShow.forEach(season => {
+      // Find which expansion this season belongs to using WOW_EXPANSIONS
+      const expansion = WOW_EXPANSIONS.find(exp => exp.seasons.includes(season.value));
+      if (expansion) {
+        if (!expansionSeasons.has(expansion.id)) {
+          expansionSeasons.set(expansion.id, []);
+        }
+        expansionSeasons.get(expansion.id)!.push(season);
+      }
+    });
+    
+    // Sort expansions by ID descending and add separators
+    const sortedExpansions = Array.from(expansionSeasons.entries())
+      .sort(([a], [b]) => b - a);
+    
+    sortedExpansions.forEach(([expansionId, seasons], index) => {
+      const expansion = WOW_EXPANSIONS.find(exp => exp.id === expansionId);
+      if (expansion) {
+        // Add separator if this is not the first expansion
+        if (index > 0) {
+          options.push({
+            label: `── ${expansion.name} ─────────`,
+            value: `separator-${expansion.name}`,
+            isSeparator: true
+          });
+        }
+        
+        // Add seasons for this expansion
+        seasons.forEach(season => {
+          options.push(season);
         });
       }
-      
-      options.push(season);
     });
     
     return options;
-  };
-
-  // Helper function to extract expansion from season name
-  const getExpansionFromSeasonName = (seasonName: string): string => {
-    if (seasonName.startsWith('BfA')) return 'Battle for Azeroth';
-    if (seasonName.startsWith('SL')) return 'Shadowlands';
-    if (seasonName.startsWith('DF')) return 'Dragonflight';
-    if (seasonName.startsWith('TWW')) return 'The War Within';
-    return 'Other';
   };
 
   useEffect(() => {
@@ -94,8 +134,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     });
   }, [filter.season_id, showPeriod, showDungeon]);
 
-  // Check if only season filter is shown
-  const isOnlySeasonFilter = !showPeriod && !showDungeon && !showLimit;
+  // Count visible filters
+  const visibleFiltersCount = [showExpansion, true, showPeriod, showDungeon, showLimit].filter(Boolean).length;
+  const shouldCenterFilters = visibleFiltersCount < 4;
 
   return (
     <div className={`filter-bar ${className}`}>
@@ -113,21 +154,51 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       </button>
 
       {/* Filter controls */}
-      <div className={`filterbar-controls ${mobileCollapsed ? 'collapsed' : 'expanded'} md:!flex`}>
-        <div className={`filter-label ${isOnlySeasonFilter ? 'single-filter' : ''}`}>
+      <div className={`filterbar-controls ${mobileCollapsed ? 'collapsed' : 'expanded'} md:!flex ${shouldCenterFilters ? 'center-filters' : ''}`}>
+        {showExpansion && (
+          <div className="filter-label">
+            <span>Expansion:</span>
+            <select
+              className="filter-select"
+              value={filter.expansion_id || ''}
+              onChange={e => {
+                const expansionId = e.target.value ? Number(e.target.value) : undefined;
+                dispatch({ type: 'SET_EXPANSION', expansion_id: expansionId });
+                
+                // If expansion is selected and expansion filter is visible, default to "All seasons" for that expansion
+                if (expansionId && showExpansion) {
+                  // Don't auto-select a specific season, let it default to "All seasons"
+                  dispatch({ type: 'SET_SEASON', season_id: undefined });
+                } else if (!expansionId) {
+                  // If "All Expansions" is selected, clear the season
+                  dispatch({ type: 'SET_SEASON', season_id: undefined });
+                }
+              }}
+              disabled={loading}
+            >
+              <option value="" className="filter-option">All Expansions</option>
+              {getExpansionOptions().map(opt => (
+                <option key={opt.value} value={opt.value} className="filter-option">{opt.label}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div className="filter-label">
           <span>Season:</span>
           <select
             className="filter-select"
-            value={filter.season_id}
+            value={showExpansion && !filter.expansion_id ? '' : (filter.season_id || '')}
             onChange={e => {
               const value = e.target.value;
               if (typeof value === 'string' && value.startsWith('separator-')) {
                 return; // Don't allow selecting separators
               }
-              dispatch({ type: 'SET_SEASON', season_id: Number(value) });
+              dispatch({ type: 'SET_SEASON', season_id: value ? Number(value) : undefined });
             }}
-            disabled={loading}
+            disabled={loading || (showExpansion && !filter.expansion_id)}
           >
+            {showExpansion && <option value="" className="filter-option">All Seasons</option>}
             {getSeasonOptionsWithSeparators().map(opt => (
               <option 
                 key={opt.value} 
@@ -148,11 +219,11 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               className="filter-select"
               value={filter.period_id || ''}
               onChange={e => dispatch({ type: 'SET_PERIOD', period_id: e.target.value ? Number(e.target.value) : undefined })}
-              disabled={!filter.season_id || loading}
+              disabled={loading || (showExpansion && !filter.season_id)}
             >
-              <option value="">Entire Season</option>
+              <option value="" className="filter-option">Entire Season</option>
               {periodOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                <option key={opt.value} value={opt.value} className="filter-option">{opt.label}</option>
               ))}
             </select>
           </div>
@@ -165,11 +236,11 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               className="filter-select"
               value={filter.dungeon_id || ''}
               onChange={e => dispatch({ type: 'SET_DUNGEON', dungeon_id: e.target.value ? Number(e.target.value) : undefined })}
-              disabled={!filter.season_id || loading}
+              disabled={loading || (showExpansion && !filter.season_id)}
             >
-              <option value="">All Dungeons</option>
+              <option value="" className="filter-option">All Dungeons</option>
               {dungeonOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                <option key={opt.value} value={opt.value} className="filter-option">{opt.label}</option>
               ))}
             </select>
           </div>
@@ -183,10 +254,10 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               value={filter.limit}
               onChange={e => dispatch({ type: 'SET_LIMIT', limit: Number(e.target.value) })}
             >
-              <option value={100}>Top 100</option>
-              <option value={250}>Top 250</option>
-              <option value={500}>Top 500</option>
-              <option value={1000}>Top 1000</option>
+              <option value={100} className="filter-option">Top 100</option>
+              <option value={250} className="filter-option">Top 250</option>
+              <option value={500} className="filter-option">Top 500</option>
+              <option value={1000} className="filter-option">Top 1000</option>
             </select>
           </div>
         )}

@@ -86,6 +86,7 @@ export const AIPredictionsPage: React.FC = () => {
 
       {/* Filter Controls */}
       <FilterBar 
+        showExpansion={false}
         showPeriod={false}
         showDungeon={false}
         showLimit={false}
@@ -98,39 +99,26 @@ export const AIPredictionsPage: React.FC = () => {
           <div className="select-season-content">
             <h2>📊 Select a Season</h2>
             <p>Choose a season from the filter above to view enhanced AI predictions and meta analysis.</p>
-            <div className="season-info">
-              <p>• Cross-validated analysis using multiple data sources</p>
-              <p>• Temporal trend detection with confidence intervals</p>
-              <p>• Spec evolution validation</p>
-              <p>• Advanced AI predictions with dungeon context</p>
-            </div>
           </div>
         </div>
       ) : loading ? (
         <AILoadingScreen />
       ) : (
-        <div className="predictions-content">
-          <div className="predictions-main">
-            <PredictionDashboard 
+        <div className="ai-predictions-content">
+          <PredictionDashboard 
+            seasonData={seasonData} 
+            specEvolution={specEvolution} 
+            dungeons={dungeons} 
+          />
+          <div className="ai-metrics-section">
+            <ConfidenceMetrics 
               seasonData={seasonData} 
-              specEvolution={specEvolution}
-              dungeons={dungeons} 
+              specEvolution={specEvolution} 
             />
-          </div>
-          
-          <div className="predictions-stats">
-            <div className="stats-column">
-              <ConfidenceMetrics 
-                seasonData={seasonData} 
-                specEvolution={specEvolution}
-              />
-            </div>
-            <div className="stats-column">
-              <HistoricalAccuracy 
-                seasonData={seasonData} 
-                specEvolution={specEvolution}
-              />
-            </div>
+            <HistoricalAccuracy 
+              seasonData={seasonData} 
+              specEvolution={specEvolution} 
+            />
           </div>
         </div>
       )}

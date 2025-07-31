@@ -3,7 +3,8 @@ import type { ReactNode, Dispatch } from 'react';
 
 // Filter state type
 export interface FilterState {
-  season_id: number;
+  expansion_id?: number;
+  season_id?: number;
   period_id?: number;
   dungeon_id?: number;
   limit: number;
@@ -11,7 +12,8 @@ export interface FilterState {
 
 // Actions
 export type FilterAction =
-  | { type: 'SET_SEASON'; season_id: number }
+  | { type: 'SET_EXPANSION'; expansion_id?: number }
+  | { type: 'SET_SEASON'; season_id?: number }
   | { type: 'SET_PERIOD'; period_id?: number }
   | { type: 'SET_DUNGEON'; dungeon_id?: number }
   | { type: 'SET_LIMIT'; limit: number };
@@ -19,6 +21,11 @@ export type FilterAction =
 // Reducer
 function filterReducer(state: FilterState, action: FilterAction): FilterState {
   switch (action.type) {
+    case 'SET_EXPANSION':
+      return { 
+        ...state, 
+        expansion_id: action.expansion_id
+      };
     case 'SET_SEASON':
       return { 
         ...state, 
@@ -41,7 +48,13 @@ const FilterDispatchContext = createContext<Dispatch<FilterAction> | undefined>(
 
 // Provider
 export const FilterProvider = ({ children }: { children: ReactNode }) => {
-  const [state, dispatch] = useReducer(filterReducer, { season_id: 14, limit: 1000 });
+  const [state, dispatch] = useReducer(filterReducer, { 
+    expansion_id: undefined,
+    season_id: 14, 
+    period_id: undefined,
+    dungeon_id: undefined,
+    limit: 1000 
+  });
   return (
     <FilterStateContext.Provider value={state}>
       <FilterDispatchContext.Provider value={dispatch}>

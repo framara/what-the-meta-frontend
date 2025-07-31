@@ -62,6 +62,7 @@ export const MetaEvolutionPage: React.FC = () => {
       </div>
       
       <FilterBar 
+        showExpansion={false}
         showPeriod={false}
         showDungeon={false}
         showLimit={false}

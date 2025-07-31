@@ -109,20 +109,28 @@ export const GroupCompositionPage: React.FC = () => {
       <div className="page-header">
         <div className="header-content">
           <h1 className="page-title">
-            Group Composition Overview
+            Group Composition
           </h1>
           <p className="page-description">
-            Analyze the most popular group compositions, specs by role, and team dynamics across different seasons.
+            Analyze successful group compositions and discover optimal team setups for Mythic+ dungeons.
           </p>
         </div>
       </div>
 
-      <FilterBar />
+      <FilterBar 
+        showExpansion={false}
+        showPeriod={true}
+        showDungeon={true}
+        showLimit={true}
+        className="group-composition-filter"
+      />
 
       {loading ? (
         <LoadingScreen />
       ) : (
-        <GroupCompositionStats runs={runs} seasonData={seasonData} />
+        <div className="group-composition-content">
+          <GroupCompositionStats runs={runs} seasonData={seasonData} />
+        </div>
       )}
     </div>
   );

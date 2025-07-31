@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 const Navigation = () => {
   const [navOpen, setNavOpen] = useState(false);
   const [aiDropdownOpen, setAiDropdownOpen] = useState(false);
+  const [metaDropdownOpen, setMetaDropdownOpen] = useState(false);
   const location = useLocation();
 
   // Helper function to check if a link is active
@@ -54,13 +55,113 @@ const Navigation = () => {
         >
           Dashboard
         </Link>
-        <Link 
-          to="/meta-evolution" 
-          className={getLinkClasses('/meta-evolution')} 
-          onClick={() => setNavOpen(false)}
-        >
-          Meta Evolution
-        </Link>
+        
+        {/* Meta Evolution dropdown - desktop */}
+        <div className="hidden md:block relative">
+          <button
+            className={`font-bold text-lg transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap flex items-center gap-1 ${
+              isActive('/meta-evolution') || isActive('/race-bars')
+                ? 'text-blue-400 border-b-2 border-blue-400 md:border-b-2'
+                : 'hover:text-blue-400'
+            }`}
+            onClick={() => setMetaDropdownOpen(!metaDropdownOpen)}
+            onMouseEnter={() => setMetaDropdownOpen(true)}
+          >
+            Meta Evolution
+            <svg 
+              className={`w-4 h-4 transition-transform ${metaDropdownOpen ? 'rotate-180' : ''}`} 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {metaDropdownOpen && (
+            <div 
+              className="absolute top-full left-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg border border-gray-700 z-50"
+              onMouseLeave={() => setMetaDropdownOpen(false)}
+            >
+              <Link 
+                to="/meta-evolution" 
+                className={`block px-4 py-2 transition-colors rounded-t-lg ${
+                  isActive('/meta-evolution')
+                    ? 'text-blue-400 bg-gray-700'
+                    : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'
+                }`}
+                onClick={() => setMetaDropdownOpen(false)}
+              >
+                Charts
+              </Link>
+              <Link 
+                to="/race-bars" 
+                className={`block px-4 py-2 transition-colors rounded-b-lg ${
+                  isActive('/race-bars')
+                    ? 'text-blue-400 bg-gray-700'
+                    : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'
+                }`}
+                onClick={() => setMetaDropdownOpen(false)}
+              >
+                Race Bars
+              </Link>
+            </div>
+          )}
+        </div>
+        
+        {/* Meta Evolution dropdown - mobile */}
+        <div className="md:hidden">
+          <button
+            className={`font-bold text-lg transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap flex items-center justify-between w-full ${
+              isActive('/meta-evolution') || isActive('/race-bars')
+                ? 'text-blue-400 border-b-2 border-blue-400'
+                : 'hover:text-blue-400'
+            }`}
+            onClick={() => setMetaDropdownOpen(!metaDropdownOpen)}
+          >
+            <span>Meta Evolution</span>
+            <svg 
+              className={`w-4 h-4 transition-transform ${metaDropdownOpen ? 'rotate-180' : ''}`} 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {metaDropdownOpen && (
+            <div className="pl-6 bg-gray-800 border-l-2 border-blue-500">
+              <Link 
+                to="/meta-evolution" 
+                className={`block px-4 py-2 transition-colors ${
+                  isActive('/meta-evolution')
+                    ? 'text-blue-400 bg-gray-700'
+                    : 'text-gray-300 hover:text-blue-400'
+                }`}
+                onClick={() => {
+                  setMetaDropdownOpen(false);
+                  setNavOpen(false);
+                }}
+              >
+                Charts
+              </Link>
+              <Link 
+                to="/race-bars" 
+                className={`block px-4 py-2 transition-colors ${
+                  isActive('/race-bars')
+                    ? 'text-blue-400 bg-gray-700'
+                    : 'text-gray-300 hover:text-blue-400'
+                }`}
+                onClick={() => {
+                  setMetaDropdownOpen(false);
+                  setNavOpen(false);
+                }}
+              >
+                Race Bars
+              </Link>
+            </div>
+          )}
+        </div>
+        
         <Link 
           to="/group-composition" 
           className={getLinkClasses('/group-composition')} 
