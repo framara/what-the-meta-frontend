@@ -2,7 +2,8 @@ import React, { useMemo } from 'react';
 import { useChartData } from './hooks/useChartData';
 import { useChartState } from './hooks/useChartState';
 import { FilterBar } from '../FilterBar';
-import { ChartTypeToggle } from './components/ChartTypeToggle';
+import { ChartTypeSelector } from './components/ChartTypeSelector';
+import { ChartViewSelector } from './components/ChartViewSelector';
 import { MobileAlert } from './components/MobileAlert';
 import LoadingScreen from '../LoadingScreen';
 import { LineChart } from './charts/LineChart';
@@ -12,8 +13,10 @@ import { HeatmapChart } from './charts/HeatmapChart';
 import { TreemapChart } from './charts/TreemapChart';
 import './styles/MetaEvolutionPage.css';
 import { ChartDescriptionPopover } from './components/ChartDescriptionPopover';
+import { useFilterState } from '../FilterContext';
 
 export const MetaEvolutionPage: React.FC = () => {
+  const filter = useFilterState();
   const { charts, loading } = useChartData();
   const { 
     chartView, 
@@ -25,7 +28,7 @@ export const MetaEvolutionPage: React.FC = () => {
     treemapWeek, 
     setTreemapWeek, 
     isMobile 
-  } = useChartState();
+  } = useChartState(filter.season_id);
 
   // Get all specs for treemap
   const allSpecs = useMemo(() => {
@@ -70,58 +73,14 @@ export const MetaEvolutionPage: React.FC = () => {
 
       {/* Chart View Selector and Chart Type Toggle in one row */}
       <div className="chart-controls-row" style={{ display: 'flex', gap: '2rem', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <div className="button-group chart-view-selector">
-          <button 
-            className={`chart-view-button ${chartView === 'all' ? 'active' : ''}`} 
-            onClick={() => setChartView('all')} 
-            title="All"
-            disabled={shouldShowLoading}
-          >
-            {isMobile ? '📚' : 'All'}
-          </button>
-          <button 
-            className={`chart-view-button ${chartView === 'tank' ? 'active' : ''}`} 
-            onClick={() => setChartView('tank')} 
-            title="Tank"
-            disabled={shouldShowLoading}
-          >
-            {isMobile ? '🛡️' : 'Tank'}
-          </button>
-          <button 
-            className={`chart-view-button ${chartView === 'healer' ? 'active' : ''}`} 
-            onClick={() => setChartView('healer')} 
-            title="Healer"
-            disabled={shouldShowLoading}
-          >
-            {isMobile ? '💚' : 'Healer'}
-          </button>
-          <button 
-            className={`chart-view-button ${chartView === 'dps' ? 'active' : ''}`} 
-            onClick={() => setChartView('dps')} 
-            title="DPS"
-            disabled={shouldShowLoading}
-          >
-            {isMobile ? '⚔️' : 'DPS'}
-          </button>
-          <button 
-            className={`chart-view-button ${chartView === 'melee' ? 'active' : ''}`} 
-            onClick={() => setChartView('melee')} 
-            title="Melee"
-            disabled={shouldShowLoading}
-          >
-            {isMobile ? '🗡️' : 'Melee'}
-          </button>
-          <button 
-            className={`chart-view-button ${chartView === 'ranged' ? 'active' : ''}`} 
-            onClick={() => setChartView('ranged')} 
-            title="Ranged"
-            disabled={shouldShowLoading}
-          >
-            {isMobile ? '🔥' : 'Ranged'}
-          </button>
-        </div>
+        <ChartViewSelector
+          chartView={chartView}
+          setChartView={setChartView}
+          isMobile={isMobile}
+          loading={shouldShowLoading}
+        />
         <div className="button-group chart-type-toggle">
-          <ChartTypeToggle activeChart={activeChart} setActiveChart={setActiveChart} loading={shouldShowLoading} />
+          <ChartTypeSelector activeChart={activeChart} setActiveChart={setActiveChart} loading={shouldShowLoading} />
         </div>
       </div>
 

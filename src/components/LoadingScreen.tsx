@@ -3,12 +3,15 @@ import React, { useEffect, useState } from 'react';
 import './styles/LoadingScreen.css';
 
 const messages = [
-  'Getting consumables ready',
+  'Checking group buffs',
   'Tank is preparing route',
   'Someone forgot to repair',
   'Ready check in progress',
   'Pull 10 and go',
   'Rogue, your key',
+  'Leeeeeroy Jenkins!',
+  'Oh shit, raid talents',
+  'PI on me, please',
 ];
 
 const getRandomMessage = () => messages[Math.floor(Math.random() * messages.length)];

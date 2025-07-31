@@ -1,13 +1,13 @@
 import React from 'react';
 import type { ChartType } from '../types';
 
-interface ChartTypeToggleProps {
+interface ChartTypeSelectorProps {
   activeChart: ChartType;
   setActiveChart: (chartType: ChartType) => void;
   loading?: boolean;
 }
 
-export const ChartTypeToggle: React.FC<ChartTypeToggleProps> = ({ activeChart, setActiveChart, loading = false }) => {
+export const ChartTypeSelector: React.FC<ChartTypeSelectorProps> = ({ activeChart, setActiveChart, loading = false }) => {
   return (
     <div className="chart-controls-row" style={{ justifyContent: 'flex-end' }}>
       <div className="button-group chart-type-toggle">
