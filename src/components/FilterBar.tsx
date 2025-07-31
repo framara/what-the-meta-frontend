@@ -40,7 +40,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     fetchSeasons().then(seasons => {
       const sorted = [...seasons].sort((a, b) => b.season_id - a.season_id);
       setSeasonOptions(sorted
-        .filter(s => s.season_id >= 7)
+        .filter(s => s.season_id >= 5)
         .map(s => ({ label: s.season_name, value: s.season_id })));
       setLoading(false);
     });
