@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useFilterState } from '../FilterContext';
 import { fetchSeasonData, fetchSeasonInfo, fetchSpecEvolution } from '../../services/api';
+import { getAIPredictions, getAIAnalysis } from '../../services/aiService';
+import type { AIAnalysisResponse } from '../../services/aiService';
 import { PredictionDashboard } from './components/PredictionDashboard';
-import { ConfidenceMetrics } from './components/ConfidenceMetrics';
-import { HistoricalAccuracy } from './components/HistoricalAccuracy';
+import { AIAnalysisInsights } from './components/AIAnalysisInsights';
 import { FilterBar } from '../FilterBar';
 import AILoadingScreen from '../AILoadingScreen';
 import './styles/AIPredictionsPage.css';
@@ -14,10 +15,23 @@ export const AIPredictionsPage: React.FC = () => {
   const [seasonData, setSeasonData] = useState<any>(null);
   const [specEvolution, setSpecEvolution] = useState<any>(null);
   const [dungeons, setDungeons] = useState<any[]>([]);
+  const [aiAnalysis, setAiAnalysis] = useState<AIAnalysisResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [usingCache, setUsingCache] = useState(false);
+  const [cacheMetadata, setCacheMetadata] = useState<{ created_at: string; age_hours: number; max_age_hours: number } | null>(null);
+  const [forceRefresh, setForceRefresh] = useState(false);
+
+  // Check if testing features should be enabled
+  const isTestingEnabled = import.meta.env.VITE_ENABLE_TESTING_FEATURES === 'true';
 
   useEffect(() => {
+    // Check for force refresh parameter in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const shouldForceRefresh = urlParams.get('force_refresh') === 'true';
+    setForceRefresh(shouldForceRefresh);
+
     const loadData = async () => {
       if (!filter.season_id) return;
 
@@ -35,6 +49,58 @@ export const AIPredictionsPage: React.FC = () => {
         setSeasonData(seasonDataResult);
         setSpecEvolution(specEvolutionResult);
         setDungeons(seasonInfo.dungeons);
+
+        // Check cache first, then trigger AI analysis if needed
+        setAiLoading(true);
+        try {
+          let aiResponse: AIAnalysisResponse;
+          
+          // Skip cache if force refresh is enabled
+          if (shouldForceRefresh) {
+            aiResponse = await getAIPredictions({
+              seasonData: seasonDataResult,
+              specEvolution: specEvolutionResult,
+              dungeons: seasonInfo.dungeons,
+              seasonId: filter.season_id
+            });
+            setUsingCache(false);
+            setCacheMetadata(null);
+          } else {
+            // First, try to get cached analysis
+            try {
+              aiResponse = await getAIAnalysis(filter.season_id);
+              setUsingCache(true);
+              // Extract cache metadata if available
+              if (aiResponse._cache) {
+                setCacheMetadata(aiResponse._cache);
+              }
+            } catch (cacheError: any) {
+              // Check if it's a cache miss vs actual error
+              if (cacheError.message === 'CACHE_MISS') {
+                // Cache miss - this is expected, generate new analysis
+                aiResponse = await getAIPredictions({
+                  seasonData: seasonDataResult,
+                  specEvolution: specEvolutionResult,
+                  dungeons: seasonInfo.dungeons,
+                  seasonId: filter.season_id
+                });
+                setUsingCache(false);
+                setCacheMetadata(null);
+              } else {
+                // Actual error - rethrow
+                throw cacheError;
+              }
+            }
+          }
+          setAiAnalysis(aiResponse);
+        } catch (aiError) {
+          console.error('AI analysis failed:', aiError);
+          // Don't fail the entire page if AI fails, just show a warning
+          setError('Data loaded successfully, but AI analysis failed. Showing fallback analysis.');
+        } finally {
+          setAiLoading(false);
+        }
+
       } catch (err) {
         setError('Failed to load AI prediction data');
         console.error('Error loading data:', err);
@@ -73,12 +139,28 @@ export const AIPredictionsPage: React.FC = () => {
             AI Predictions
           </h1>
           <p className="page-description">
-            <strong>Advanced meta trend forecasting for Mythic+ dungeons</strong> <span className="dot-separator">•</span> <span className="highlight">Cross-validated AI analysis</span> <span className="dot-separator">•</span> <span className="highlight">Temporal pattern recognition</span>
+            <strong>Real AI-powered meta trend forecasting for Mythic+ dungeons</strong> <span className="dot-separator">•</span> <span className="highlight">OpenAI GPT-4 analysis</span> <span className="dot-separator">•</span> <span className="highlight">Advanced pattern recognition</span>
           </p>
           <div className="ai-warning-badge">
             <span>
-              <strong>Enhanced Analysis:</strong> Now using both comprehensive run data and spec evolution trends for improved predictions.<br />
-              <strong>Note:</strong> Take AI predictions with a grain (or three spoons) of salt.
+              <strong>AI-Powered Analysis:</strong> Using OpenAI GPT-4 to analyze comprehensive run data and spec evolution trends.<br />
+              <strong>Note:</strong> AI predictions are based on historical data patterns and should be used as guidance, not absolute truth.
+              {usingCache && (
+                <span className="cache-indicator">
+                  <br />💾 <strong>Using cached analysis</strong>
+                  {cacheMetadata && (
+                    <span className="cache-timestamp">
+                      <br />📅 Last updated: {new Date(cacheMetadata.created_at).toLocaleString()} 
+                      ({cacheMetadata.age_hours}h old, expires in {cacheMetadata.max_age_hours - cacheMetadata.age_hours}h)
+                    </span>
+                  )}
+                </span>
+              )}
+              {forceRefresh && isTestingEnabled && (
+                <span className="force-refresh-indicator">
+                  <br />🔄 <strong>Force refresh enabled</strong> - Bypassing cache for fresh AI analysis
+                </span>
+              )}
             </span>
           </div>
         </div>
@@ -93,33 +175,86 @@ export const AIPredictionsPage: React.FC = () => {
         className="ai-predictions-filter"
       />
 
+      {/* Force Refresh Controls */}
+      {filter.season_id && isTestingEnabled && (
+        <div className="force-refresh-controls">
+          <div className="force-refresh-info">
+            <span className="force-refresh-label">🔄 Force AI Refresh:</span>
+            <span className="force-refresh-description">
+              Bypass cache and generate fresh AI analysis (useful for testing)
+            </span>
+          </div>
+          <div className="force-refresh-buttons">
+            <button
+              className={`force-refresh-btn ${forceRefresh ? 'active' : ''}`}
+              onClick={() => {
+                const url = new URL(window.location.href);
+                if (forceRefresh) {
+                  url.searchParams.delete('force_refresh');
+                } else {
+                  url.searchParams.set('force_refresh', 'true');
+                }
+                window.location.href = url.toString();
+              }}
+            >
+              {forceRefresh ? '🔄 Disable Force Refresh' : '🔄 Enable Force Refresh'}
+            </button>
+            {forceRefresh && (
+              <button
+                className="refresh-now-btn"
+                onClick={() => window.location.reload()}
+              >
+                🔄 Refresh Now
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
       {!filter.season_id ? (
         <div className="select-season-container">
           <div className="select-season-content">
             <h2>📊 Select a Season</h2>
-            <p>Choose a season from the filter above to view enhanced AI predictions and meta analysis.</p>
+            <p>Choose a season from the filter above to view AI-powered predictions and meta analysis.</p>
           </div>
         </div>
       ) : loading ? (
         <AILoadingScreen />
       ) : (
         <div className="ai-predictions-content">
-          <PredictionDashboard 
-            seasonData={seasonData} 
-            specEvolution={specEvolution} 
-            dungeons={dungeons} 
-          />
-          <div className="ai-metrics-section">
-            <ConfidenceMetrics 
-              seasonData={seasonData} 
-              specEvolution={specEvolution} 
-            />
-            <HistoricalAccuracy 
-              seasonData={seasonData} 
-              specEvolution={specEvolution} 
-            />
-          </div>
+          {aiLoading ? (
+            <div className="ai-analysis-loading">
+              <div className="ai-loading-content">
+                <div className="ai-loading-spinner"></div>
+                <h3>🤖 AI Analysis in Progress</h3>
+                <p>Analyzing {seasonData?.total_keys || 0} keys across {seasonData?.total_periods || 0} periods...</p>
+                <p className="ai-loading-note">This may take a few moments as we process the data with OpenAI GPT-4</p>
+              </div>
+            </div>
+          ) : aiAnalysis ? (
+            <>
+              <PredictionDashboard 
+                seasonData={seasonData} 
+                specEvolution={specEvolution} 
+                dungeons={dungeons}
+                aiAnalysis={aiAnalysis}
+              />
+              <AIAnalysisInsights analysis={aiAnalysis.analysis} />
+            </>
+          ) : (
+            <div className="ai-fallback-container">
+              <div className="ai-fallback-content">
+                <h3>📊 Fallback Analysis</h3>
+                <p>AI analysis is not available. Showing statistical analysis based on the data.</p>
+                <PredictionDashboard 
+                  seasonData={seasonData} 
+                  specEvolution={specEvolution} 
+                  dungeons={dungeons}
+                />
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

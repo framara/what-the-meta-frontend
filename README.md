@@ -34,7 +34,20 @@ npm run dev
 - By default, the frontend expects the backend at `http://localhost:3000`.
 - You can change the API base URL in your environment or config if needed.
 
-### 4. Expose your local frontend to the internet (for demos/testing)
+### 4. Environment Configuration
+Create a `.env` file in the frontend directory to configure the application:
+
+```bash
+# AI Predictions Testing Features
+# Set to 'true' to enable testing features like force refresh controls
+# Set to 'false' or remove to disable testing features (production mode)
+VITE_ENABLE_TESTING_FEATURES=true
+
+# API Configuration (optional, defaults to http://localhost:3000)
+VITE_API_BASE_URL=http://localhost:3000
+```
+
+### 5. Expose your local frontend to the internet (for demos/testing)
 - **LocalTunnel:**
   ```sh
   npx localtunnel --port 5173
