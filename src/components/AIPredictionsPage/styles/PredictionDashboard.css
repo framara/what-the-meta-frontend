@@ -29,7 +29,6 @@
   display: flex;
   justify-content: center;
   gap: 1.5rem;
-  margin-bottom: 2rem;
 }
 
 .summary-badge {
@@ -48,12 +47,18 @@
   background: rgba(16, 185, 129, 0.1);
   border-color: rgba(16, 185, 129, 0.3);
   color: #34d399;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
 }
 
 .summary-badge.declining {
   background: rgba(239, 68, 68, 0.1);
   border-color: rgba(239, 68, 68, 0.3);
   color: #f87171;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
 }
 
 .predictions-columns {
@@ -99,14 +104,68 @@
 }
 
 @media (max-width: 768px) {
+  .prediction-dashboard {
+    gap: 1.5rem; /* Reduced from 2rem */
+  }
+
+  .dashboard-header {
+    margin-bottom: 0.75rem; /* Reduced from 1rem */
+  }
+
+  .dashboard-title {
+    font-size: 1.5rem; /* Reduced from 1.75rem */
+  }
+
+  .section-title {
+    font-size: 1.125rem; /* Reduced from 1.25rem */
+    margin-bottom: 1.25rem; /* Reduced from 1.5rem */
+  }
+
+  .predictions-column {
+    padding: 1.25rem; /* Reduced from 1.5rem */
+  }
+
+  .predictions-list {
+    gap: 0.75rem; /* Reduced from 1rem */
+  }
+
   .predictions-summary-row {
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
+    gap: 0.75rem; /* Reduced from 1rem */
   }
 
   .summary-badge {
     width: 100%;
     justify-content: center;
+    padding: 0.625rem 1rem; /* Reduced from 0.75rem 1.25rem */
+  }
+}
+
+@media (max-width: 480px) {
+  .prediction-dashboard {
+    gap: 1rem; /* Further reduced */
+  }
+
+  .dashboard-title {
+    font-size: 1.25rem; /* Further reduced */
+  }
+
+  .section-title {
+    font-size: 1rem; /* Further reduced */
+    margin-bottom: 1rem; /* Further reduced */
+  }
+
+  .predictions-column {
+    padding: 1rem; /* Further reduced */
+  }
+
+  .predictions-list {
+    gap: 0.5rem; /* Further reduced */
+  }
+
+  .summary-badge {
+    padding: 0.5rem 0.75rem; /* Further reduced */
+    font-size: 0.8rem; /* Reduced from 0.875rem */
   }
 }

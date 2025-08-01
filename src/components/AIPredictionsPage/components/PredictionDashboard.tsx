@@ -256,13 +256,8 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ season
           </Tooltip>
         </h2>
         <p className="dashboard-subtitle">
-          AI analysis using {seasonData?.total_periods || 0} periods and {seasonData?.total_keys || 0} keys for comprehensive temporal analysis
+          AI analysis using {seasonData?.total_periods || 0} weeks and {seasonData?.total_keys.toLocaleString() || 0} keys for comprehensive temporal analysis
         </p>
-      </div>
-
-      <div className="predictions-summary-row">
-        <div className="summary-badge rising">Rising Specs <span>{risingCount}</span></div>
-        <div className="summary-badge declining">Declining Specs <span>{decliningCount}</span></div>
       </div>
 
       <div className="predictions-columns">
@@ -276,6 +271,7 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ season
               </svg>
             </Tooltip>
           </h3>
+          <div className="summary-badge rising">Rising Specs <span>{displayRisers.length || 0}</span></div> 
           <div className="predictions-list">
             {displayRisers.map((prediction: any) => (
               <PredictionCard
@@ -298,6 +294,7 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ season
               </svg>
             </Tooltip>
           </h3>
+          <div className="summary-badge declining">Declining Specs <span>{displayDecliners.length || 0}</span></div>
           <div className="predictions-list">
             {displayDecliners.map((prediction: any) => (
               <PredictionCard

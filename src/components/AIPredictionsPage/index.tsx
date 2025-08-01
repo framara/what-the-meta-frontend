@@ -146,15 +146,17 @@ export const AIPredictionsPage: React.FC = () => {
               <strong>AI-Powered Analysis:</strong> Using OpenAI GPT-4 to analyze comprehensive run data and spec evolution trends.<br />
               <strong>Note:</strong> AI predictions are based on historical data patterns and should be used as guidance, not absolute truth.
               {usingCache && (
-                <span className="cache-indicator">
-                  <br />💾 <strong>Using cached analysis</strong>
+                <>
+                  <div className="cache-indicator">
+                    💾 <strong>Using cached analysis</strong>
+                  </div>
                   {cacheMetadata && (
-                    <span className="cache-timestamp">
-                      <br />📅 Last updated: {new Date(cacheMetadata.created_at).toLocaleString()} 
+                    <div className="cache-timestamp">
+                      📅 Last updated: {new Date(cacheMetadata.created_at).toLocaleString()} 
                       ({cacheMetadata.age_hours}h old, expires in {cacheMetadata.max_age_hours - cacheMetadata.age_hours}h)
-                    </span>
+                    </div>
                   )}
-                </span>
+                </>
               )}
               {forceRefresh && isTestingEnabled && (
                 <span className="force-refresh-indicator">
