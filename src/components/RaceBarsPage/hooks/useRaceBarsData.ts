@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { fetchSpecEvolution } from '../../../services/api';
-import { WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_CLASS_COLORS, WOW_CLASS_NAMES, WOW_EXPANSIONS, WOW_SPEC_ROLES, WOW_MELEE_SPECS, WOW_RANGED_SPECS } from '../../../constants/wow-constants';
+import { WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_CLASS_COLORS, WOW_CLASS_NAMES, WOW_EXPANSIONS, WOW_SPEC_ROLES, WOW_MELEE_SPECS, WOW_RANGED_SPECS, WOW_SEASONS_PER_EXPANSION, WOW_SPEC_COLORS } from '../../../constants/wow-constants';
 import type { SpecData, PeriodData, RaceBarsData } from '../types';
 
 interface FilterParams {
@@ -11,23 +11,21 @@ interface FilterParams {
 type ChartView = 'all' | 'tank' | 'healer' | 'dps' | 'melee' | 'ranged';
 
 // Helper function to get season IDs based on filters
-const getSeasonIdsFromFilters = (expansion_id?: number, season_id?: number): number[] => {
-  // If expansion is "all" (undefined), include all seasons
+const getSeasonIdsFromFilters = (expansion_id?: number, season_id?: number, availableSeasons?: number[]): number[] => {
+  // If expansion is "all" (undefined), include all available seasons
   if (!expansion_id) {
-    return WOW_EXPANSIONS
-      .filter(expansion => expansion.seasons.length > 0)
-      .flatMap(expansion => expansion.seasons);
+    return availableSeasons || [];
   }
 
-  // If expansion is specific but season is "all" (undefined), get all seasons for that expansion
+  // If expansion is specific but season is "all" (undefined), get all seasons for that expansion that exist in data
   if (expansion_id && !season_id) {
-    const expansion = WOW_EXPANSIONS.find(exp => exp.id === expansion_id);
-    return expansion?.seasons || [];
+    const expectedSeasons = WOW_SEASONS_PER_EXPANSION[expansion_id] || [];
+    return expectedSeasons.filter(seasonId => availableSeasons?.includes(seasonId) || false);
   }
 
-  // If both expansion and season are specific, return just that season
+  // If both expansion and season are specific, return just that season if it exists
   if (expansion_id && season_id) {
-    return [season_id];
+    return availableSeasons?.includes(season_id) ? [season_id] : [];
   }
 
   return [];
@@ -97,7 +95,17 @@ export const useRaceBarsData = (expansion_id?: number, season_id?: number, chart
   useEffect(() => {
     if (!allData) return;
 
-    const seasonIds = getSeasonIdsFromFilters(expansion_id, season_id);
+    const availableSeasonIds = allData.seasons.map((s: any) => s.season_id);
+    const seasonIds = getSeasonIdsFromFilters(expansion_id, season_id, availableSeasonIds);
+    
+    console.log('🔍 Data filtering debug:', {
+      expansion_id,
+      season_id,
+      seasonIds,
+      totalSeasonsInData: allData.seasons.length,
+      availableSeasonIds,
+      expectedSeasonsForExpansion: expansion_id ? WOW_SEASONS_PER_EXPANSION[expansion_id] : 'N/A'
+    });
     
     if (seasonIds.length === 0) {
       setData(prev => ({ ...prev, periods: [], error: 'No seasons selected' }));
@@ -127,7 +135,7 @@ export const useRaceBarsData = (expansion_id?: number, season_id?: number, chart
                   spec_name: WOW_SPECIALIZATIONS[spec_id] || `Spec ${spec_id}`,
                   class_id,
                   class_name: WOW_CLASS_NAMES[class_id] || `Class ${class_id}`,
-                  class_color: WOW_CLASS_COLORS[class_id] || '#666666',
+                  class_color: WOW_SPEC_COLORS[spec_id] || WOW_CLASS_COLORS[class_id] || '#666666',
                   count: count as number,
                   percentage: totalCount > 0 ? ((count as number) / totalCount) * 100 : 0
                 };
@@ -161,6 +169,13 @@ export const useRaceBarsData = (expansion_id?: number, season_id?: number, chart
 
       // Sort periods by period_id to maintain chronological order
       filteredPeriods.sort((a, b) => a.period_id - b.period_id);
+
+      console.log('📊 Filtered periods debug:', {
+        totalFilteredPeriods: filteredPeriods.length,
+        periodIds: filteredPeriods.map(p => p.period_id),
+        seasonIds: [...new Set(filteredPeriods.map(p => p.season_id))],
+        expansionIds: [...new Set(filteredPeriods.map(p => p.expansion_id))]
+      });
 
       // Determine the actual season_id for the current data
       let actualSeasonId = 0;

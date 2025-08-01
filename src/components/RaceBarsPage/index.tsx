@@ -31,42 +31,49 @@ export const RaceBarsPage: React.FC = () => {
   // Race bars specific state
   const [currentPeriodIndex, setCurrentPeriodIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [racerInstance, setRacerInstance] = useState<any>(null);
 
   // Fetch race bars data
   const raceBarsData = useRaceBarsData(filter.expansion_id, filter.season_id, chartView);
 
-  // Auto-play functionality
-  useEffect(() => {
-    if (!isPlaying || raceBarsData.periods.length === 0) return;
+  // Auto-play functionality - DISABLED since we're using racing-bars library
+  // useEffect(() => {
+  //   if (!isPlaying || raceBarsData.periods.length === 0) return;
 
-    const interval = setInterval(() => {
-      setCurrentPeriodIndex(prev => {
-        if (prev >= raceBarsData.periods.length - 1) {
-          setIsPlaying(false);
-          return prev;
-        }
-        return prev + 1;
-      });
-      setIsAnimating(true);
-      
-             // Reset animation flag after animation completes
-       setTimeout(() => setIsAnimating(false), 1500);
-     }, 2000); // Change period every 2 seconds for smooth flow
+  //   const interval = setInterval(() => {
+  //     setCurrentPeriodIndex(prev => {
+  //       if (prev >= raceBarsData.periods.length - 1) {
+  //         setIsPlaying(false);
+  //         return prev;
+  //       }
+  //       return prev + 1;
+  //     });
+  //   }, 2000); // Change period every 2 seconds for smooth flow
 
-    return () => clearInterval(interval);
-  }, [isPlaying, raceBarsData.periods.length]);
+  //   return () => clearInterval(interval);
+  // }, [isPlaying, raceBarsData.periods.length]);
 
   // Reset to first period when data changes
   useEffect(() => {
     setCurrentPeriodIndex(0);
-    setIsPlaying(false);
+    setIsPlaying(false); // Ensure it starts paused
   }, [raceBarsData.season_id]);
 
   const handlePeriodChange = (index: number) => {
     setCurrentPeriodIndex(index);
-    setIsAnimating(true);
-    setTimeout(() => setIsAnimating(false), 600);
+    
+    // Also control the racing-bars library
+    if (racerInstance) {
+      try {
+        console.log('🎮 Manual navigation to index:', index);
+        const allDates = racerInstance.getAllDates();
+        if (allDates && allDates[index]) {
+          racerInstance.setDate(allDates[index]);
+        }
+      } catch (error) {
+        console.error('Error navigating racing-bars:', error);
+      }
+    }
   };
 
   const handlePlayPause = () => {
@@ -143,20 +150,20 @@ export const RaceBarsPage: React.FC = () => {
         </div>
                    ) : (
                <div className="race-bars-content">
-                                   <RaceBars
-                    periods={raceBarsData.periods}
-                    currentPeriodIndex={currentPeriodIndex}
-                    isAnimating={isAnimating}
-                    chartView={chartView}
-                    onPeriodChange={handlePeriodChange}
-                    onPlayPause={handlePlayPause}
-                    isPlaying={isPlaying}
-                    setChartView={setChartView}
-                    isMobile={isMobile}
-                    expansionId={filter.expansion_id}
-                    seasonId={filter.season_id}
-                    actualSeasonId={raceBarsData.season_id}
-                  />
+                                           <RaceBars
+          periods={raceBarsData.periods}
+          currentPeriodIndex={currentPeriodIndex}
+          chartView={chartView}
+          onPeriodChange={handlePeriodChange}
+          onPlayPause={handlePlayPause}
+          isPlaying={isPlaying}
+          setChartView={setChartView}
+          isMobile={isMobile}
+          expansionId={filter.expansion_id}
+          seasonId={filter.season_id}
+          actualSeasonId={raceBarsData.season_id}
+          onRacerReady={setRacerInstance}
+        />
                </div>
              )}
     </div>

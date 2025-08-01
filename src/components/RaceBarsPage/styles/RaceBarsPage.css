@@ -48,7 +48,10 @@
   max-width: 80rem;
   transition: all 0.4s ease;
   position: relative;
-  overflow: hidden;
+  overflow-y: visible;
+  overflow-x: hidden;
+  height: auto; /* Dynamic height */
+  min-height: 600px; /* Minimum height to accommodate content */
 }
 
 .race-bars-page::before {
@@ -224,10 +227,12 @@
 
 /* Race bars content */
 .race-bars-content {
-  min-height: 400px;
+  min-height: 500px; /* Increased to match the taller bars */
   display: flex;
   align-items: center;
   justify-content: center;
+  height: auto; /* Allow dynamic height */
+  width: 100%; /* Ensure full width */
 }
 
 .coming-soon-container {
@@ -315,6 +320,7 @@
     padding: 1.5rem;
     border-radius: 16px;
     margin: 0.5rem 0.5rem 0.5rem 0.5rem;
+    min-height: 500px; /* Ensure minimum height on mobile */
   }
   
   .controls-section {
