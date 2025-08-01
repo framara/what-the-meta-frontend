@@ -1,0 +1,1 @@
+export { RaceBarsPage } from './RaceBarsPage'; 

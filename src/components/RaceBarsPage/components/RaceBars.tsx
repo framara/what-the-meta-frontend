@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useRef, useCallback } from 'react';
 import { race } from 'racing-bars';
-import type { PeriodData } from '../types';
+import type { PeriodData } from '../types/types';
 import type { ChartView } from '../../MetaEvolutionPage/types';
 import { PeriodNavigation } from './PeriodNavigation';
 import { ChartViewSelector } from '../../MetaEvolutionPage/components/ChartViewSelector';
-import './RaceBars.css';
+import '../styles/RaceBars.css';
 import { WOW_HEALER_SPECS, WOW_MELEE_SPECS, WOW_RANGED_SPECS, WOW_TANK_SPECS } from '../../../constants/wow-constants';
 
 interface RaceBarsProps {
@@ -59,11 +59,7 @@ export const RaceBars: React.FC<RaceBarsProps> = ({
       });
     });
     
-    console.log('🔍 Racing bars data sample:', {
-      totalEntries: transformedData.length,
-      uniqueDates: [...new Set(transformedData.map(d => d.date))].length,
-      sampleEntries: transformedData.slice(0, 6)
-    });
+
     
     return transformedData;
   }, [periods]);
@@ -136,28 +132,27 @@ export const RaceBars: React.FC<RaceBarsProps> = ({
           const racerWithEvents = racer as { on: (event: string, callback: (details: unknown) => void) => void };
           
           racerWithEvents.on('dateChange', (details: unknown) => {
-            console.log('🔄 Date changed to:', details);
+            // Date changed event
           });
           
           racerWithEvents.on('play', (details: unknown) => {
-            console.log('▶️ Play started:', details);
+            // Play started event
           });
           
           racerWithEvents.on('pause', (details: unknown) => {
-            console.log('⏸️ Pause triggered:', details);
+            // Pause triggered event
           });
           
           racerWithEvents.on('firstDate', (details: unknown) => {
-            console.log('🏁 Reached first date:', details);
+            // Reached first date event
           });
           
           racerWithEvents.on('lastDate', (details: unknown) => {
-            console.log('🏁 Reached last date:', details);
+            // Reached last date event
           });
         }
         
         // Immediately pause after initialization
-        console.log('⏸️ Immediately pausing after initialization');
         if (racer && typeof racer === 'object' && 'pause' in racer) {
           (racer as { pause: () => void }).pause();
         }
@@ -167,7 +162,6 @@ export const RaceBars: React.FC<RaceBarsProps> = ({
           if (racerRef.current && typeof racerRef.current === 'object' && racerRef.current !== null && 'isRunning' in racerRef.current) {
             const racerInstance = racerRef.current as { isRunning: () => boolean; pause: () => void };
             if (racerInstance.isRunning()) {
-              console.log('🔄 Force pausing again');
               racerInstance.pause();
             }
           }
@@ -179,24 +173,16 @@ export const RaceBars: React.FC<RaceBarsProps> = ({
 
     // Destroy existing racer if it exists
     if (racerRef.current && typeof racerRef.current === 'object' && racerRef.current !== null && 'destroy' in racerRef.current) {
-      console.log('🗑️ Destroying existing racer');
       (racerRef.current as { destroy: () => void }).destroy();
       racerRef.current = null;
     }
-
-    console.log('🚀 Initializing racing bars with data:', {
-      totalPeriods: periods.length,
-      racingBarsDataLength: racingBarsData.length,
-      sampleData: racingBarsData.slice(0, 3),
-      chartView
-    });
     initRacingBars();
   }, [racingBarsData, chartView, isMobile, handleRacerReady]);
 
   // Handle play/pause from external controls
   useEffect(() => {
     if (racerRef.current && typeof racerRef.current === 'object' && racerRef.current !== null) {
-      console.log('🎮 External control - isPlaying:', isPlaying);
+
       
       const racerInstance = racerRef.current as { 
         play: () => void; 
@@ -206,7 +192,7 @@ export const RaceBars: React.FC<RaceBarsProps> = ({
       };
       
       if (isPlaying) {
-        console.log('▶️ Calling racer.play()');
+
         racerInstance.play();
         
         // Set up interval to sync React state with racing-bars progress
@@ -218,7 +204,7 @@ export const RaceBars: React.FC<RaceBarsProps> = ({
               const currentIndex = allDates.indexOf(currentDate);
               
               if (currentIndex !== -1 && currentIndex !== currentPeriodIndex) {
-                console.log('🔄 Syncing index from racing-bars:', currentIndex);
+
                 onPeriodChange(currentIndex);
               }
             } catch (error) {
@@ -229,7 +215,7 @@ export const RaceBars: React.FC<RaceBarsProps> = ({
         
         return () => clearInterval(syncInterval);
       } else {
-        console.log('⏸️ Calling racer.pause()');
+
         racerInstance.pause();
       }
     }

@@ -8,7 +8,7 @@ import { FilterBar } from './components/FilterBar';
 import { LeaderboardTable } from './components/LeaderboardTable';
 import { SummaryStats } from './components/SummaryStats';
 import { MetaEvolutionPage } from './components/MetaEvolutionPage/index';
-import { RaceBarsPage } from './components/RaceBarsPage/index';
+import { RaceBarsPage } from './components/RaceBarsPage';
 import { GroupCompositionPage } from './components/GroupCompositionPage/index';
 import { AIPredictionsPage } from './components/AIPredictionsPage';
 import Navigation from './components/Navigation';

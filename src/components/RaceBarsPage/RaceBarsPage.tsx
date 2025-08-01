@@ -36,7 +36,7 @@ export const RaceBarsPage: React.FC = () => {
     // Control the racing-bars library
     if (racerInstance && typeof racerInstance === 'object' && racerInstance !== null) {
       try {
-        console.log('🎮 Manual navigation to index:', index);
+
         const racerWithMethods = racerInstance as { getAllDates: () => string[]; setDate: (date: string) => void };
         const allDates = racerWithMethods.getAllDates();
         if (allDates && allDates[index]) {

@@ -1,5 +1,5 @@
 import React from 'react';
-import './PeriodNavigation.css';
+import '../styles/PeriodNavigation.css';
 
 interface PeriodNavigationProps {
   currentPeriodIndex: number;

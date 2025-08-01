@@ -11,7 +11,7 @@ import {
   WOW_SEASONS_PER_EXPANSION, 
   WOW_SPEC_COLORS 
 } from '../../../constants/wow-constants';
-import type { SpecData, PeriodData, RaceBarsData } from '../types';
+import type { SpecData, PeriodData, RaceBarsData } from '../types/types';
 
 type ChartView = 'all' | 'tank' | 'healer' | 'dps' | 'melee' | 'ranged';
 
@@ -128,14 +128,7 @@ export const useRaceBarsData = (
     const availableSeasonIds = allData.seasons.map((s: SeasonData) => s.season_id);
     const seasonIds = getSeasonIdsFromFilters(expansion_id, season_id, availableSeasonIds);
     
-    console.log('🔍 Data filtering debug:', {
-      expansion_id,
-      season_id,
-      seasonIds,
-      totalSeasonsInData: allData.seasons.length,
-      availableSeasonIds,
-      expectedSeasonsForExpansion: expansion_id ? WOW_SEASONS_PER_EXPANSION[expansion_id] : 'N/A'
-    });
+
     
     if (seasonIds.length === 0) {
       setData(prev => ({ ...prev, periods: [], error: 'No seasons selected' }));
@@ -200,12 +193,7 @@ export const useRaceBarsData = (
       // Sort periods by period_id to maintain chronological order
       filteredPeriods.sort((a, b) => a.period_id - b.period_id);
 
-      console.log('📊 Filtered periods debug:', {
-        totalFilteredPeriods: filteredPeriods.length,
-        periodIds: filteredPeriods.map(p => p.period_id),
-        seasonIds: [...new Set(filteredPeriods.map(p => p.season_id))],
-        expansionIds: [...new Set(filteredPeriods.map(p => p.expansion_id))]
-      });
+
 
       // Determine the actual season_id for the current data
       let actualSeasonId = 0;
