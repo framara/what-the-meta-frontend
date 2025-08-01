@@ -8,6 +8,7 @@ import { FilterBar } from './components/FilterBar';
 import { LeaderboardTable } from './components/LeaderboardTable';
 import { SummaryStats } from './components/SummaryStats';
 import { MetaEvolutionPage } from './components/MetaEvolutionPage/index';
+import { RaceBarsPage } from './components/RaceBarsPage';
 import { GroupCompositionPage } from './components/GroupCompositionPage/index';
 import { AIPredictionsPage } from './components/AIPredictionsPage';
 import Navigation from './components/Navigation';
@@ -88,7 +89,12 @@ function App() {
           <Routes>
             <Route path="/" element={
               <div className="max-w-7xl mx-auto px-4">
-                <FilterBar />
+                <FilterBar 
+                  showExpansion={false}
+                  showPeriod={true}
+                  showDungeon={true}
+                  showLimit={true}
+                />
                 {apiData && apiData.length > 0 ? (
                   <>
                     <SummaryStats runs={apiData} dungeons={dungeons} />
@@ -107,6 +113,7 @@ function App() {
               </div>
             } />
             <Route path="/meta-evolution" element={<MetaEvolutionPage />} />
+            <Route path="/race-bars" element={<RaceBarsPage />} />
             <Route path="/group-composition" element={<GroupCompositionPage />} />
             <Route path="/ai-predictions" element={<AIPredictionsPage />} />
             <Route path="/ai-analysis" element={

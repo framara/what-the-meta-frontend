@@ -66,8 +66,10 @@ export async function fetchSeasonInfo(seasonId: number) {
   };
 }
 
-export async function fetchSpecEvolution(seasonId: number) {
-  const url = `${API_BASE_URL}/meta/spec-evolution/${seasonId}`;
+export async function fetchSpecEvolution(seasonId?: number) {
+  const url = seasonId 
+    ? `${API_BASE_URL}/meta/spec-evolution/${seasonId}`
+    : `${API_BASE_URL}/meta/spec-evolution`;
   const response = await axios.get(url);
   return response.data as {
     season_id: number;

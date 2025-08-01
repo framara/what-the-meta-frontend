@@ -15,6 +15,62 @@ export const WOW_CLASS_COLORS: Record<number, string> = {
   13: '#33937F', // Evoker
 };
 
+// WoW spec colors (official Blizzard spec colors)
+export const WOW_SPEC_COLORS: Record<number, string> = {
+  // Warrior
+  71: '#C79C6E', // Arms
+  72: '#C79C6E', // Fury  
+  73: '#C79C6E', // Protection
+  // Paladin
+  65: '#F58CBA', // Holy
+  66: '#F58CBA', // Protection
+  70: '#F58CBA', // Retribution
+  // Hunter
+  253: '#ABD473', // Beast Mastery
+  254: '#ABD473', // Marksmanship
+  255: '#ABD473', // Survival
+  // Rogue
+  259: '#FFF569', // Assassination
+  260: '#FFF569', // Outlaw
+  261: '#FFF569', // Subtlety
+  // Priest
+  256: '#FFFFFF', // Discipline
+  257: '#FFFFFF', // Holy
+  258: '#FFFFFF', // Shadow
+  // Death Knight
+  250: '#C41F3B', // Blood
+  251: '#C41F3B', // Frost
+  252: '#C41F3B', // Unholy
+  // Shaman
+  262: '#0070DE', // Elemental
+  263: '#0070DE', // Enhancement
+  264: '#0070DE', // Restoration
+  // Mage
+  62: '#69CCF0', // Arcane
+  63: '#69CCF0', // Fire
+  64: '#69CCF0', // Frost
+  // Warlock
+  265: '#9482C9', // Affliction
+  266: '#9482C9', // Demonology
+  267: '#9482C9', // Destruction
+  // Monk
+  268: '#00FF96', // Brewmaster
+  269: '#00FF96', // Windwalker
+  270: '#00FF96', // Mistweaver
+  // Druid
+  102: '#FF7D0A', // Balance
+  103: '#FF7D0A', // Feral
+  104: '#FF7D0A', // Guardian
+  105: '#FF7D0A', // Restoration
+  // Demon Hunter
+  577: '#A330C9', // Havoc
+  581: '#A330C9', // Vengeance
+  // Evoker
+  1467: '#33937F', // Devastation
+  1468: '#33937F', // Preservation
+  1473: '#33937F', // Augmentation
+};
+
 // WoW spec names (id -> name)
 export const WOW_SPECIALIZATIONS: Record<number, string> = {
   71: 'Arms', 72: 'Fury', 73: 'Protection', 65: 'Holy', 66: 'Protection', 70: 'Retribution',
@@ -47,23 +103,33 @@ export const WOW_SPEC_ROLES: Record<number, string> = {
   1467: 'dps', 1468: 'healer', 1473: 'dps',
 };
 
+// Tank spec IDs
+export const WOW_TANK_SPECS = new Set([
+  73, 66, 250, 268, 104, 581
+]);
+
+// Healer spec IDs
+export const WOW_HEALER_SPECS = new Set([
+  65, 256, 257, 264, 270, 105, 1468
+]);
+
 // Melee DPS spec IDs
 export const WOW_MELEE_SPECS = new Set([
   71, 72, 70, 255, 259, 260, 261, 251, 252, 263, 269, 103, 577,
-  // Add more if needed
 ]);
+
 // Ranged DPS spec IDs
 export const WOW_RANGED_SPECS = new Set([
   62, 63, 64, 253, 254, 258, 262, 102, 265, 266, 267, 1467, 1473
-  // Add more if needed
 ]);
 
 export const WOW_SEASONS_PER_EXPANSION: Record<number, number[]> = {
- // 8: [1, 2, 3, 4], // data not available yet
- 9: [5,6, 7, 8],
- 10: [9, 10, 11, 12],
- 11: [13, 14, 15, 16],
- 12: [17, 18, 19, 20]
+ 7: [1, 2, 3, 4], // Battle for Azeroth
+ 8: [5, 6, 7, 8], // Shadowlands
+ 9: [9, 10, 11, 12], // Dragonflight
+ 10: [13, 14, 15, 16], // The War Within
+ 11: [17, 18, 19, 20], // Midnight
+ 12: [21, 22, 23, 24] // The Last Titan
 };
 
 export const WOW_EXPANSIONS = [
