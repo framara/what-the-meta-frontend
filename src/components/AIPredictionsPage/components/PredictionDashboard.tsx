@@ -9,6 +9,7 @@ interface PredictionDashboardProps {
   seasonData: any;
   specEvolution: any;
   dungeons: any[];
+  aiAnalysis?: any;
 }
 
 interface Prediction {
@@ -32,7 +33,7 @@ interface Prediction {
   };
 }
 
-export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ seasonData, specEvolution, dungeons }) => {
+export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ seasonData, specEvolution, dungeons, aiAnalysis }) => {
   // --- IMPROVED: Smoothing, dynamic threshold, confidence interval ---
   function movingAverage(arr: number[], windowSize: number): number[] {
     if (arr.length < windowSize) return arr;
@@ -46,6 +47,12 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ season
   }
 
   const predictions = useMemo(() => {
+    // If we have AI analysis, use it directly
+    if (aiAnalysis && aiAnalysis.predictions && aiAnalysis.predictions.length > 0) {
+      return aiAnalysis.predictions;
+    }
+
+    // Fallback to statistical analysis
     if (!seasonData || !seasonData.periods || seasonData.periods.length === 0) return [];
 
     const specTemporalData: Record<number, {
@@ -221,24 +228,27 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ season
   const dynamicSignificance = baseSignificance + Math.max(0, 10 - periods); // Lower threshold for short seasons
 
   const displayRisers = predictions
-    .filter(p => p.predictedChange > 0 && p.significance > dynamicSignificance)
-    .sort((a, b) => b.significance - a.significance)
+    .filter((p: any) => p.predictedChange > 0 && (p.significance || p.confidence) > dynamicSignificance)
+    .sort((a: any, b: any) => (b.significance || b.confidence) - (a.significance || a.confidence))
     .slice(0, DISPLAY_COUNT);
 
   const displayDecliners = predictions
-    .filter(p => p.predictedChange < 0 && p.significance > dynamicSignificance)
-    .sort((a, b) => b.significance - a.significance)
+    .filter((p: any) => p.predictedChange < 0 && (p.significance || p.confidence) > dynamicSignificance)
+    .sort((a: any, b: any) => (b.significance || b.confidence) - (a.significance || a.confidence))
     .slice(0, DISPLAY_COUNT);
 
-  const risingCount = predictions.filter(p => p.predictedChange > SIGNIFICANT_CHANGE).length;
-  const decliningCount = predictions.filter(p => p.predictedChange < -SIGNIFICANT_CHANGE).length;
+  const risingCount = predictions.filter((p: any) => p.predictedChange > SIGNIFICANT_CHANGE).length;
+  const decliningCount = predictions.filter((p: any) => p.predictedChange < -SIGNIFICANT_CHANGE).length;
 
   return (
     <div className="prediction-dashboard dashboard-refactored">
       <div className="dashboard-header">
         <h2 className="dashboard-title">
-          🤖 Advanced AI Predictions
-          <Tooltip content="This section uses AI to analyze all dungeon runs for the season and predict which specializations are rising, declining, or stable in the meta. It looks at trends, success rates, and consistency over time to forecast future performance.">
+          {aiAnalysis ? '🤖 AI-Powered Predictions' : '📊 Statistical Predictions'}
+          <Tooltip content={aiAnalysis ? 
+            "This section uses OpenAI GPT-4 to analyze all dungeon runs for the season and predict which specializations are rising, declining, or stable in the meta. The AI considers trends, success rates, consistency, and cross-validation accuracy to forecast future performance." :
+            "This section uses statistical analysis to predict which specializations are rising, declining, or stable in the meta. It looks at trends, success rates, and consistency over time to forecast future performance."
+          }>
             <svg className="ai-tooltip-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-label="Info" role="img" style={{marginLeft: '0.5rem', verticalAlign: 'middle'}}>
               <circle cx="10" cy="10" r="10" fill="#3b82f6" />
               <text x="10" y="15" textAnchor="middle" fontSize="13" fill="#fff" fontWeight="bold">i</text>
@@ -267,7 +277,7 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ season
             </Tooltip>
           </h3>
           <div className="predictions-list">
-            {displayRisers.map(prediction => (
+            {displayRisers.map((prediction: any) => (
               <PredictionCard
                 key={prediction.specId}
                 prediction={prediction}
@@ -289,7 +299,7 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ season
             </Tooltip>
           </h3>
           <div className="predictions-list">
-            {displayDecliners.map(prediction => (
+            {displayDecliners.map((prediction: any) => (
               <PredictionCard
                 key={prediction.specId}
                 prediction={prediction}
