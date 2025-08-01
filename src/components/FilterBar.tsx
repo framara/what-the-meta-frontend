@@ -27,16 +27,13 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   const [dungeonOptions, setDungeonOptions] = useState<Array<{ label: string; value: number }>>([]);
   const [loading, setLoading] = useState(true);
   const [mobileCollapsed, setMobileCollapsed] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
 
+  // Reset expansion-related state when expansion filter becomes hidden
   useEffect(() => {
-    function handleResize() {
-      setIsMobile(window.innerWidth <= 768);
+    if (!showExpansion && filter.expansion_id) {
+      dispatch({ type: 'SET_EXPANSION', expansion_id: undefined });
     }
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [showExpansion, filter.expansion_id, dispatch]);
 
   useEffect(() => {
     setLoading(true);
@@ -74,47 +71,53 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     
     let seasonsToShow = seasonOptions;
     
-    // If expansion is selected, filter seasons for that expansion using WOW_EXPANSIONS
-    if (filter.expansion_id) {
+    // If expansion filter is visible and expansion is selected, filter seasons for that expansion
+    if (showExpansion && filter.expansion_id) {
       seasonsToShow = getSeasonsForExpansion(filter.expansion_id);
     }
     
-    // Group seasons by expansion using WOW_EXPANSIONS mapping
-    const expansionSeasons = new Map<number, typeof seasonOptions>();
-    
-    seasonsToShow.forEach(season => {
-      // Find which expansion this season belongs to using WOW_EXPANSIONS
-      const expansion = WOW_EXPANSIONS.find(exp => exp.seasons.includes(season.value));
-      if (expansion) {
-        if (!expansionSeasons.has(expansion.id)) {
-          expansionSeasons.set(expansion.id, []);
+    // Only add separators and grouping when expansion filter is visible
+    if (showExpansion) {
+      // Group seasons by expansion using WOW_EXPANSIONS mapping
+      const expansionSeasons = new Map<number, typeof seasonOptions>();
+      
+      seasonsToShow.forEach(season => {
+        // Find which expansion this season belongs to using WOW_EXPANSIONS
+        const expansion = WOW_EXPANSIONS.find(exp => exp.seasons.includes(season.value));
+        if (expansion) {
+          if (!expansionSeasons.has(expansion.id)) {
+            expansionSeasons.set(expansion.id, []);
+          }
+          expansionSeasons.get(expansion.id)!.push(season);
         }
-        expansionSeasons.get(expansion.id)!.push(season);
-      }
-    });
-    
-    // Sort expansions by ID descending and add separators
-    const sortedExpansions = Array.from(expansionSeasons.entries())
-      .sort(([a], [b]) => b - a);
-    
-    sortedExpansions.forEach(([expansionId, seasons], index) => {
-      const expansion = WOW_EXPANSIONS.find(exp => exp.id === expansionId);
-      if (expansion) {
-        // Add separator if this is not the first expansion
-        if (index > 0) {
-          options.push({
-            label: `── ${expansion.name} ─────────`,
-            value: `separator-${expansion.name}`,
-            isSeparator: true
+      });
+      
+      // Sort expansions by ID descending and add separators
+      const sortedExpansions = Array.from(expansionSeasons.entries())
+        .sort(([a], [b]) => b - a);
+      
+      sortedExpansions.forEach(([expansionId, seasons], index) => {
+        const expansion = WOW_EXPANSIONS.find(exp => exp.id === expansionId);
+        if (expansion) {
+          // Add separator if this is not the first expansion
+          if (index > 0) {
+            options.push({
+              label: `── ${expansion.name} ─────────`,
+              value: `separator-${expansion.name}`,
+              isSeparator: true
+            });
+          }
+          
+          // Add seasons for this expansion
+          seasons.forEach(season => {
+            options.push(season);
           });
         }
-        
-        // Add seasons for this expansion
-        seasons.forEach(season => {
-          options.push(season);
-        });
-      }
-    });
+      });
+    } else {
+      // When expansion filter is not visible, just return all seasons without grouping
+      options.push(...seasonsToShow);
+    }
     
     return options;
   };
@@ -188,7 +191,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           <span>Season:</span>
           <select
             className="filter-select"
-            value={showExpansion && !filter.expansion_id ? '' : (filter.season_id || '')}
+            value={filter.season_id || ''}
             onChange={e => {
               const value = e.target.value;
               if (typeof value === 'string' && value.startsWith('separator-')) {
@@ -219,7 +222,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               className="filter-select"
               value={filter.period_id || ''}
               onChange={e => dispatch({ type: 'SET_PERIOD', period_id: e.target.value ? Number(e.target.value) : undefined })}
-              disabled={loading || (showExpansion && !filter.season_id)}
+              disabled={loading || !filter.season_id}
             >
               <option value="" className="filter-option">Entire Season</option>
               {periodOptions.map(opt => (
@@ -236,7 +239,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               className="filter-select"
               value={filter.dungeon_id || ''}
               onChange={e => dispatch({ type: 'SET_DUNGEON', dungeon_id: e.target.value ? Number(e.target.value) : undefined })}
-              disabled={loading || (showExpansion && !filter.season_id)}
+              disabled={loading || !filter.season_id}
             >
               <option value="" className="filter-option">All Dungeons</option>
               {dungeonOptions.map(opt => (
