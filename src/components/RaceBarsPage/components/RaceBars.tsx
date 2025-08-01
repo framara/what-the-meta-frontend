@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useCallback } from 'react';
 import { race } from 'racing-bars';
-import type { SpecData, PeriodData } from '../types';
+import type { PeriodData } from '../types';
 import type { ChartView } from '../../MetaEvolutionPage/types';
 import { PeriodNavigation } from './PeriodNavigation';
 import { ChartViewSelector } from '../../MetaEvolutionPage/components/ChartViewSelector';
@@ -10,48 +10,44 @@ import { WOW_HEALER_SPECS, WOW_MELEE_SPECS, WOW_RANGED_SPECS, WOW_TANK_SPECS } f
 interface RaceBarsProps {
   periods: PeriodData[];
   currentPeriodIndex: number;
-  isAnimating?: boolean;
   chartView?: ChartView;
   onPeriodChange: (index: number) => void;
   onPlayPause: () => void;
   isPlaying: boolean;
   setChartView: (view: ChartView) => void;
   isMobile: boolean;
-  expansionId?: number;
-  seasonId?: number;
-  actualSeasonId?: number;
-  onRacerReady?: (racer: any) => void;
+  onRacerReady?: (racer: unknown) => void;
 }
 
 export const RaceBars: React.FC<RaceBarsProps> = ({ 
   periods, 
   currentPeriodIndex, 
-  isAnimating,
   chartView = 'all' as ChartView,
   onPeriodChange,
   onPlayPause,
   isPlaying,
   setChartView,
   isMobile,
-  expansionId,
-  seasonId,
-  actualSeasonId,
   onRacerReady
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const racerRef = useRef<any>(null);
+  const racerRef = useRef<unknown>(null);
 
   // Transform data for racing-bars library
   const racingBarsData = useMemo(() => {
     if (periods.length === 0) return [];
     
-    const transformedData: any[] = [];
+    const transformedData: Array<{
+      date: string;
+      value: number;
+      name: string;
+      color: string;
+    }> = [];
     
     periods.forEach((period, periodIndex) => {
       // Create a dummy date that increments for each period
-      // Start from 2020-01-01 and add periodIndex days
       const dummyDate = new Date(2020, 0, 1 + periodIndex);
-      const dateString = dummyDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+      const dateString = dummyDate.toISOString().split('T')[0];
       
       period.specs.forEach(spec => {
         transformedData.push({
@@ -63,7 +59,6 @@ export const RaceBars: React.FC<RaceBarsProps> = ({
       });
     });
     
-    // Debug: Log the first few entries to verify data format
     console.log('🔍 Racing bars data sample:', {
       totalEntries: transformedData.length,
       uniqueDates: [...new Set(transformedData.map(d => d.date))].length,
@@ -72,6 +67,13 @@ export const RaceBars: React.FC<RaceBarsProps> = ({
     
     return transformedData;
   }, [periods]);
+
+  // Stable callback for racer ready
+  const handleRacerReady = useCallback((racer: unknown) => {
+    if (onRacerReady) {
+      onRacerReady(racer);
+    }
+  }, [onRacerReady]);
 
   // Initialize racing bars when data changes
   useEffect(() => {
@@ -82,6 +84,7 @@ export const RaceBars: React.FC<RaceBarsProps> = ({
       
       try {
         const containerWidth = containerRef.current.offsetWidth;
+        
         // Calculate topN based on chartView
         const getTopN = () => {
           switch (chartView) {
@@ -102,68 +105,71 @@ export const RaceBars: React.FC<RaceBarsProps> = ({
 
         const racer = await race(racingBarsData, containerRef.current, {
           currentIndex: 0,
-          height: getTopN() * 40, // Increased height calculation
+          height: getTopN() * 40,
           width: containerWidth,
-          barHeight: 40, // Increased bar height from 40 to 50
-          barGap: 10, // Increased gap from 8 to 12
+          barHeight: 40,
+          barGap: 10,
           duration: 300,
           easing: "easeOutCubic",
           showValue: true,
           valueFormatter: (value: number) => value.toLocaleString(),
-          // onIndexChange: (index: number) => {
-          //   console.log('📊 Racing bars index changed to:', index);
-          //   onPeriodChange(index);
-          // },
-          labelsPosition: 'outside',
-          labelsWidth: 200, // Increased width for labels
-          topN: getTopN(), // Show all specs for the current chart view
+          labelsPosition: isMobile ? undefined : 'outside',
+          labelsWidth: isMobile ? 0 : 200,
+          topN: getTopN(),
           controlButtons: 'none',
           autorun: false,
           autoplay: true,
           autoplaySpeed: 2000,
           dateCounter: '',
           fixedScale: false,
-          fixedOrder: true, // Keep specs visible even when value is 0
+          fixedOrder: true,
           injectStyles: true
         });
         
         racerRef.current = racer;
         
         // Notify parent that racer is ready
-        if (onRacerReady) {
-          onRacerReady(racer);
+        handleRacerReady(racer);
+        
+        // Set up event listeners for debugging
+        if (racer && typeof racer === 'object' && 'on' in racer) {
+          const racerWithEvents = racer as { on: (event: string, callback: (details: unknown) => void) => void };
+          
+          racerWithEvents.on('dateChange', (details: unknown) => {
+            console.log('🔄 Date changed to:', details);
+          });
+          
+          racerWithEvents.on('play', (details: unknown) => {
+            console.log('▶️ Play started:', details);
+          });
+          
+          racerWithEvents.on('pause', (details: unknown) => {
+            console.log('⏸️ Pause triggered:', details);
+          });
+          
+          racerWithEvents.on('firstDate', (details: unknown) => {
+            console.log('🏁 Reached first date:', details);
+          });
+          
+          racerWithEvents.on('lastDate', (details: unknown) => {
+            console.log('🏁 Reached last date:', details);
+          });
         }
         
-        // Set up comprehensive event listeners for debugging
-        racerRef.current.on('dateChange', (details: any) => {
-          console.log('🔄 Date changed to:', details.date, 'Details:', details);
-        });
-        
-        racerRef.current.on('play', (details: any) => {
-          console.log('▶️ Play started:', details);
-        });
-        
-        racerRef.current.on('pause', (details: any) => {
-          console.log('⏸️ Pause triggered:', details);
-        });
-        
-        racerRef.current.on('firstDate', (details: any) => {
-          console.log('🏁 Reached first date:', details);
-        });
-        
-        racerRef.current.on('lastDate', (details: any) => {
-          console.log('🏁 Reached last date:', details);
-        });
-        
-        // Immediately pause after initialization to prevent auto-start
+        // Immediately pause after initialization
         console.log('⏸️ Immediately pausing after initialization');
-        racerRef.current.pause();
+        if (racer && typeof racer === 'object' && 'pause' in racer) {
+          (racer as { pause: () => void }).pause();
+        }
         
         // Double-check it's paused
         setTimeout(() => {
-          if (racerRef.current && racerRef.current.isRunning()) {
-            console.log('🔄 Force pausing again');
-            racerRef.current.pause();
+          if (racerRef.current && typeof racerRef.current === 'object' && racerRef.current !== null && 'isRunning' in racerRef.current) {
+            const racerInstance = racerRef.current as { isRunning: () => boolean; pause: () => void };
+            if (racerInstance.isRunning()) {
+              console.log('🔄 Force pausing again');
+              racerInstance.pause();
+            }
           }
         }, 100);
       } catch (error) {
@@ -171,34 +177,44 @@ export const RaceBars: React.FC<RaceBarsProps> = ({
       }
     };
 
-    // Only initialize if racerRef.current is null
-    if (!racerRef.current) {
-      console.log('🚀 Initializing racing bars with data:', {
-        totalPeriods: periods.length,
-        racingBarsDataLength: racingBarsData.length,
-        sampleData: racingBarsData.slice(0, 3)
-      });
-      initRacingBars();
-    } else {
-      console.log('⚠️ Skipping initialization - racer already exists');
+    // Destroy existing racer if it exists
+    if (racerRef.current && typeof racerRef.current === 'object' && racerRef.current !== null && 'destroy' in racerRef.current) {
+      console.log('🗑️ Destroying existing racer');
+      (racerRef.current as { destroy: () => void }).destroy();
+      racerRef.current = null;
     }
-  }, [racingBarsData, onPeriodChange]);
+
+    console.log('🚀 Initializing racing bars with data:', {
+      totalPeriods: periods.length,
+      racingBarsDataLength: racingBarsData.length,
+      sampleData: racingBarsData.slice(0, 3),
+      chartView
+    });
+    initRacingBars();
+  }, [racingBarsData, chartView, isMobile, handleRacerReady]);
 
   // Handle play/pause from external controls
-  // Control play/pause based on isPlaying prop and sync state
   useEffect(() => {
-    if (racerRef.current) {
+    if (racerRef.current && typeof racerRef.current === 'object' && racerRef.current !== null) {
       console.log('🎮 External control - isPlaying:', isPlaying);
+      
+      const racerInstance = racerRef.current as { 
+        play: () => void; 
+        pause: () => void; 
+        getDate: () => string; 
+        getAllDates: () => string[] 
+      };
+      
       if (isPlaying) {
         console.log('▶️ Calling racer.play()');
-        racerRef.current.play();
+        racerInstance.play();
         
         // Set up interval to sync React state with racing-bars progress
         const syncInterval = setInterval(() => {
           if (racerRef.current && isPlaying) {
             try {
-              const currentDate = racerRef.current.getDate();
-              const allDates = racerRef.current.getAllDates();
+              const currentDate = racerInstance.getDate();
+              const allDates = racerInstance.getAllDates();
               const currentIndex = allDates.indexOf(currentDate);
               
               if (currentIndex !== -1 && currentIndex !== currentPeriodIndex) {
@@ -209,12 +225,12 @@ export const RaceBars: React.FC<RaceBarsProps> = ({
               console.error('Error syncing racing-bars state:', error);
             }
           }
-        }, 100); // Check every 100ms for smooth updates
+        }, 100);
         
         return () => clearInterval(syncInterval);
       } else {
         console.log('⏸️ Calling racer.pause()');
-        racerRef.current.pause();
+        racerInstance.pause();
       }
     }
   }, [isPlaying, currentPeriodIndex, onPeriodChange]);
@@ -222,8 +238,8 @@ export const RaceBars: React.FC<RaceBarsProps> = ({
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (racerRef.current) {
-        racerRef.current.destroy();
+      if (racerRef.current && typeof racerRef.current === 'object' && racerRef.current !== null && 'destroy' in racerRef.current) {
+        (racerRef.current as { destroy: () => void }).destroy();
         racerRef.current = null;
       }
     };
@@ -238,7 +254,6 @@ export const RaceBars: React.FC<RaceBarsProps> = ({
       return 'No data available';
     }
     
-    // Use the period_label which contains the exact format we want
     return currentPeriod.period_label || `Period ${currentPeriod.period_id}`;
   };
 

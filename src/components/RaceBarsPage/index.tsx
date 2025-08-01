@@ -1,74 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { useChartData } from '../MetaEvolutionPage/hooks/useChartData';
-import { useChartState } from '../MetaEvolutionPage/hooks/useChartState';
 import { FilterBar } from '../FilterBar';
-import { ChartViewSelector } from '../MetaEvolutionPage/components/ChartViewSelector';
 import { MobileAlert } from '../MetaEvolutionPage/components/MobileAlert';
 import LoadingScreen from '../LoadingScreen';
 import { ChartDescriptionPopover } from '../MetaEvolutionPage/components/ChartDescriptionPopover';
 import { useFilterState } from '../FilterContext';
 import { useRaceBarsData } from './hooks/useRaceBarsData';
-import type { RaceBarsData } from './types';
 import { RaceBars } from './components/RaceBars';
-import { PeriodNavigation } from './components/PeriodNavigation';
+import type { ChartView } from '../MetaEvolutionPage/types';
 import './styles/RaceBarsPage.css';
 
 export const RaceBarsPage: React.FC = () => {
   const filter = useFilterState();
-  const { charts, loading } = useChartData();
-  const { 
-    chartView, 
-    setChartView, 
-    activeChart, 
-    setActiveChart, 
-    chartLoading, 
-    viewLoading,
-    treemapWeek, 
-    setTreemapWeek, 
-    isMobile 
-  } = useChartState(filter.season_id);
-
+  
   // Race bars specific state
   const [currentPeriodIndex, setCurrentPeriodIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [racerInstance, setRacerInstance] = useState<any>(null);
+  const [racerInstance, setRacerInstance] = useState<unknown>(null);
+  const [chartView, setChartView] = useState<ChartView>('all');
+
+  // Mobile detection
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
 
   // Fetch race bars data
   const raceBarsData = useRaceBarsData(filter.expansion_id, filter.season_id, chartView);
 
-  // Auto-play functionality - DISABLED since we're using racing-bars library
-  // useEffect(() => {
-  //   if (!isPlaying || raceBarsData.periods.length === 0) return;
-
-  //   const interval = setInterval(() => {
-  //     setCurrentPeriodIndex(prev => {
-  //       if (prev >= raceBarsData.periods.length - 1) {
-  //         setIsPlaying(false);
-  //         return prev;
-  //       }
-  //       return prev + 1;
-  //     });
-  //   }, 2000); // Change period every 2 seconds for smooth flow
-
-  //   return () => clearInterval(interval);
-  // }, [isPlaying, raceBarsData.periods.length]);
-
   // Reset to first period when data changes
   useEffect(() => {
     setCurrentPeriodIndex(0);
-    setIsPlaying(false); // Ensure it starts paused
+    setIsPlaying(false);
   }, [raceBarsData.season_id]);
 
   const handlePeriodChange = (index: number) => {
     setCurrentPeriodIndex(index);
     
-    // Also control the racing-bars library
-    if (racerInstance) {
+    // Control the racing-bars library
+    if (racerInstance && typeof racerInstance === 'object' && racerInstance !== null) {
       try {
         console.log('🎮 Manual navigation to index:', index);
-        const allDates = racerInstance.getAllDates();
+        const racerWithMethods = racerInstance as { getAllDates: () => string[]; setDate: (date: string) => void };
+        const allDates = racerWithMethods.getAllDates();
         if (allDates && allDates[index]) {
-          racerInstance.setDate(allDates[index]);
+          racerWithMethods.setDate(allDates[index]);
         }
       } catch (error) {
         console.error('Error navigating racing-bars:', error);
@@ -80,12 +52,15 @@ export const RaceBarsPage: React.FC = () => {
     setIsPlaying(!isPlaying);
   };
 
-  // Show loading for initial page load or when changing chart views
-  const shouldShowLoading = loading || viewLoading || chartLoading || raceBarsData.loading;
+  const handleChartViewChange = (newChartView: ChartView) => {
+    setChartView(newChartView);
+  };
+
+  // Show loading for initial page load
+  const shouldShowLoading = raceBarsData.loading;
 
   return (
     <div className="race-bars-page">
-
       <div className="page-header">
         <div className="header-content">
           <h1 className="page-title">
@@ -110,8 +85,6 @@ export const RaceBarsPage: React.FC = () => {
 
       {/* Mobile Alert - Charts recommended for desktop */}
       {isMobile && <MobileAlert />}
-
-      
 
       {shouldShowLoading ? (
         <LoadingScreen />
@@ -148,24 +121,21 @@ export const RaceBarsPage: React.FC = () => {
             </div>
           </div>
         </div>
-                   ) : (
-               <div className="race-bars-content">
-                                           <RaceBars
-          periods={raceBarsData.periods}
-          currentPeriodIndex={currentPeriodIndex}
-          chartView={chartView}
-          onPeriodChange={handlePeriodChange}
-          onPlayPause={handlePlayPause}
-          isPlaying={isPlaying}
-          setChartView={setChartView}
-          isMobile={isMobile}
-          expansionId={filter.expansion_id}
-          seasonId={filter.season_id}
-          actualSeasonId={raceBarsData.season_id}
-          onRacerReady={setRacerInstance}
-        />
-               </div>
-             )}
+      ) : (
+        <div className="race-bars-content">
+          <RaceBars
+            periods={raceBarsData.periods}
+            currentPeriodIndex={currentPeriodIndex}
+            chartView={chartView}
+            onPeriodChange={handlePeriodChange}
+            onPlayPause={handlePlayPause}
+            isPlaying={isPlaying}
+            setChartView={handleChartViewChange}
+            isMobile={isMobile}
+            onRacerReady={setRacerInstance}
+          />
+        </div>
+      )}
     </div>
   );
 }; 

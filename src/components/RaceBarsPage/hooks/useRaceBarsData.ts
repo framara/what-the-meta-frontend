@@ -1,23 +1,49 @@
 import { useState, useEffect } from 'react';
 import { fetchSpecEvolution } from '../../../services/api';
-import { WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_CLASS_COLORS, WOW_CLASS_NAMES, WOW_EXPANSIONS, WOW_SPEC_ROLES, WOW_MELEE_SPECS, WOW_RANGED_SPECS, WOW_SEASONS_PER_EXPANSION, WOW_SPEC_COLORS } from '../../../constants/wow-constants';
+import { 
+  WOW_SPECIALIZATIONS, 
+  WOW_SPEC_TO_CLASS, 
+  WOW_CLASS_COLORS, 
+  WOW_CLASS_NAMES, 
+  WOW_SPEC_ROLES, 
+  WOW_MELEE_SPECS, 
+  WOW_RANGED_SPECS, 
+  WOW_SEASONS_PER_EXPANSION, 
+  WOW_SPEC_COLORS 
+} from '../../../constants/wow-constants';
 import type { SpecData, PeriodData, RaceBarsData } from '../types';
-
-interface FilterParams {
-  expansion_id?: number;
-  season_id?: number;
-}
 
 type ChartView = 'all' | 'tank' | 'healer' | 'dps' | 'melee' | 'ranged';
 
+interface SeasonData {
+  season_id: number;
+  expansion_id: number;
+  expansion_name: string;
+  season_name: string;
+  evolution: Array<{
+    period_id: number;
+    period_name: string;
+    period_label: string;
+    spec_counts: Record<string, number>;
+  }>;
+}
+
+interface ApiResponse {
+  seasons: SeasonData[];
+}
+
 // Helper function to get season IDs based on filters
-const getSeasonIdsFromFilters = (expansion_id?: number, season_id?: number, availableSeasons?: number[]): number[] => {
+const getSeasonIdsFromFilters = (
+  expansion_id?: number, 
+  season_id?: number, 
+  availableSeasons?: number[]
+): number[] => {
   // If expansion is "all" (undefined), include all available seasons
   if (!expansion_id) {
     return availableSeasons || [];
   }
 
-  // If expansion is specific but season is "all" (undefined), get all seasons for that expansion that exist in data
+  // If expansion is specific but season is "all" (undefined), get all seasons for that expansion
   if (expansion_id && !season_id) {
     const expectedSeasons = WOW_SEASONS_PER_EXPANSION[expansion_id] || [];
     return expectedSeasons.filter(seasonId => availableSeasons?.includes(seasonId) || false);
@@ -57,8 +83,12 @@ const filterSpecsByChartView = (specs: SpecData[], chartView: ChartView): SpecDa
   });
 };
 
-export const useRaceBarsData = (expansion_id?: number, season_id?: number, chartView: ChartView = 'all'): RaceBarsData => {
-  const [allData, setAllData] = useState<any>(null);
+export const useRaceBarsData = (
+  expansion_id?: number, 
+  season_id?: number, 
+  chartView: ChartView = 'all'
+): RaceBarsData => {
+  const [allData, setAllData] = useState<ApiResponse | null>(null);
   
   const [data, setData] = useState<RaceBarsData>({
     season_id: 0,
@@ -74,8 +104,8 @@ export const useRaceBarsData = (expansion_id?: number, season_id?: number, chart
         setData(prev => ({ ...prev, loading: true, error: null }));
         
         // Fetch all spec evolution data
-        const response = await fetchSpecEvolution(); // No seasonId = all data
-        setAllData(response);
+        const response = await fetchSpecEvolution();
+        setAllData(response as unknown as ApiResponse);
         
         setData(prev => ({ ...prev, loading: false }));
       } catch (error) {
@@ -89,13 +119,13 @@ export const useRaceBarsData = (expansion_id?: number, season_id?: number, chart
     };
 
     fetchAllData();
-  }, []); // Only fetch once on mount
+  }, []);
 
   // Process and filter data based on current filters
   useEffect(() => {
     if (!allData) return;
 
-    const availableSeasonIds = allData.seasons.map((s: any) => s.season_id);
+    const availableSeasonIds = allData.seasons.map((s: SeasonData) => s.season_id);
     const seasonIds = getSeasonIdsFromFilters(expansion_id, season_id, availableSeasonIds);
     
     console.log('🔍 Data filtering debug:', {
@@ -117,13 +147,13 @@ export const useRaceBarsData = (expansion_id?: number, season_id?: number, chart
       const filteredPeriods: PeriodData[] = [];
       
       // Process each season that matches our filter criteria
-      allData.seasons.forEach((season: any) => {
+      allData.seasons.forEach((season: SeasonData) => {
         // Check if this season is in our selected season IDs
         if (seasonIds.includes(season.season_id)) {
           // Process each period in this season
-          season.evolution.forEach((period: any) => {
+          season.evolution.forEach((period) => {
             const specEntries = Object.entries(period.spec_counts);
-            const totalCount = specEntries.reduce((sum, [_, count]) => sum + (count as number), 0);
+            const totalCount = specEntries.reduce((sum, [, count]) => sum + count, 0);
             
             const specs: SpecData[] = specEntries
               .map(([specId, count]) => {
@@ -136,11 +166,11 @@ export const useRaceBarsData = (expansion_id?: number, season_id?: number, chart
                   class_id,
                   class_name: WOW_CLASS_NAMES[class_id] || `Class ${class_id}`,
                   class_color: WOW_SPEC_COLORS[spec_id] || WOW_CLASS_COLORS[class_id] || '#666666',
-                  count: count as number,
-                  percentage: totalCount > 0 ? ((count as number) / totalCount) * 100 : 0
+                  count,
+                  percentage: totalCount > 0 ? (count / totalCount) * 100 : 0
                 };
               })
-              .sort((a, b) => (b.count as number) - (a.count as number)); // Sort by count descending
+              .sort((a, b) => b.count - a.count);
             
             // Filter specs based on chart view
             const filteredSpecs = filterSpecsByChartView(specs, chartView);
@@ -187,7 +217,7 @@ export const useRaceBarsData = (expansion_id?: number, season_id?: number, chart
         
         // Find which season contains this period
         for (const season of allData.seasons) {
-          const periodExists = season.evolution.some((period: any) => period.period_id === firstPeriodId);
+          const periodExists = season.evolution.some((period) => period.period_id === firstPeriodId);
           if (periodExists) {
             actualSeasonId = season.season_id;
             break;
