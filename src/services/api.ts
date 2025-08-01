@@ -23,6 +23,25 @@ export async function fetchTopKeys(params: TopKeyParams) {
   return response.data;
 }
 
+export interface AllSeasonsParams {
+  period_id?: number;
+  dungeon_id?: number;
+  limit?: number;
+  offset?: number;
+}
+
+export async function fetchTopKeysAllSeasons(params: AllSeasonsParams) {
+  const searchParams = new URLSearchParams();
+  if (params.period_id) searchParams.append('period_id', params.period_id.toString());
+  if (params.dungeon_id) searchParams.append('dungeon_id', params.dungeon_id.toString());
+  if (params.limit) searchParams.append('limit', params.limit.toString());
+  if (params.offset) searchParams.append('offset', params.offset.toString());
+
+  const url = `${API_BASE_URL}/meta/top-keys-all-seasons?${searchParams.toString()}`;
+  const response = await axios.get(url);
+  return response.data;
+}
+
 // New: Fetch comprehensive season data for AI analysis
 export async function fetchSeasonData(seasonId: number) {
   const url = `${API_BASE_URL}/meta/season-data/${seasonId}`;

@@ -10,6 +10,7 @@ import { SummaryStats } from './components/SummaryStats';
 import { MetaEvolutionPage } from './components/MetaEvolutionPage/index';
 import { RaceBarsPage } from './components/RaceBarsPage';
 import { GroupCompositionPage } from './components/GroupCompositionPage/index';
+import { CompAllSeasonsPage } from './components/CompAllSeasonsPage/index';
 import { AIPredictionsPage } from './components/AIPredictionsPage';
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
@@ -115,6 +116,7 @@ function App() {
             <Route path="/meta-evolution" element={<MetaEvolutionPage />} />
             <Route path="/race-bars" element={<RaceBarsPage />} />
             <Route path="/group-composition" element={<GroupCompositionPage />} />
+            <Route path="/all-seasons" element={<CompAllSeasonsPage />} />
             <Route path="/ai-predictions" element={<AIPredictionsPage />} />
             <Route path="/ai-analysis" element={
               <div className="max-w-7xl mx-auto px-4 py-8">

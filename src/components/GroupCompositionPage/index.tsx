@@ -109,10 +109,10 @@ export const GroupCompositionPage: React.FC = () => {
       <div className="page-header">
         <div className="header-content">
           <h1 className="page-title">
-            Group Composition
+            Group Composition - Details per Season
           </h1>
           <p className="page-description">
-            Analyze successful group compositions and discover optimal team setups for Mythic+ dungeons.
+            Analyze successful group compositions and discover optimal team setups for the current season.
           </p>
         </div>
       </div>
