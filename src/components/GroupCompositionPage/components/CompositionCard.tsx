@@ -71,7 +71,9 @@ const MiniTrendChart: React.FC<{ trendData: CompositionTrendData[] }> = ({ trend
     return (
       <div className="mini-trend-chart">
         <div className="chart-container">
-          <span style={{ color: '#9ca3af', fontSize: '0.8rem' }}>Insufficient data</span>
+          <span style={{ color: '#9ca3af', fontSize: '0.8rem' }}>
+            {trendData.length === 0 ? 'Loading trend...' : 'Single period data'}
+          </span>
         </div>
       </div>
     );

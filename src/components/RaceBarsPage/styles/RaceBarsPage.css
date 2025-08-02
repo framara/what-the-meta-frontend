@@ -197,6 +197,7 @@
 .button-group {
   display: flex;
   gap: 0;
+  padding-top: 0.37rem;
 }
 
 .button-group .chart-view-button {

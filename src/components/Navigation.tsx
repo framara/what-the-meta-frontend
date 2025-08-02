@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 const Navigation = () => {
@@ -7,6 +7,11 @@ const Navigation = () => {
   const [metaDropdownOpen, setMetaDropdownOpen] = useState(false);
   const [groupCompositionDropdownOpen, setGroupCompositionDropdownOpen] = useState(false);
   const location = useLocation();
+  
+  // Refs to track timeout IDs for each dropdown
+  const metaTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const groupCompositionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const aiTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Helper function to check if a link is active
   const isActive = (path: string) => {
@@ -23,6 +28,23 @@ const Navigation = () => {
       ? "text-blue-400 border-b-2 border-blue-400 md:border-b-2" 
       : "hover:text-blue-400";
     return `${baseClasses} ${activeClasses}`;
+  };
+
+  // Helper functions to manage dropdown timeouts
+  const startDropdownTimeout = (timeoutRef: React.MutableRefObject<NodeJS.Timeout | null>, setDropdownOpen: (open: boolean) => void) => {
+    // Clear any existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    // Start new timeout
+    timeoutRef.current = setTimeout(() => setDropdownOpen(false), 300);
+  };
+
+  const clearDropdownTimeout = (timeoutRef: React.MutableRefObject<NodeJS.Timeout | null>) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
   };
 
   return (
@@ -58,7 +80,16 @@ const Navigation = () => {
         </Link>
         
         {/* Meta Evolution dropdown - desktop */}
-        <div className="hidden md:block relative">
+        <div 
+          className="hidden md:block relative"
+          onMouseEnter={() => {
+            clearDropdownTimeout(metaTimeoutRef);
+            setMetaDropdownOpen(true);
+          }}
+          onMouseLeave={() => {
+            startDropdownTimeout(metaTimeoutRef, setMetaDropdownOpen);
+          }}
+        >
           <button
             className={`font-bold text-lg transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap flex items-center gap-1 ${
               isActive('/meta-evolution') || isActive('/race-bars')
@@ -66,7 +97,6 @@ const Navigation = () => {
                 : 'hover:text-blue-400'
             }`}
             onClick={() => setMetaDropdownOpen(!metaDropdownOpen)}
-            onMouseEnter={() => setMetaDropdownOpen(true)}
           >
             Meta Evolution
             <svg 
@@ -81,7 +111,13 @@ const Navigation = () => {
           {metaDropdownOpen && (
             <div 
               className="absolute top-full left-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg border border-gray-700 z-50"
-              onMouseLeave={() => setMetaDropdownOpen(false)}
+              onMouseEnter={() => {
+                clearDropdownTimeout(metaTimeoutRef);
+                setMetaDropdownOpen(true);
+              }}
+              onMouseLeave={() => {
+                startDropdownTimeout(metaTimeoutRef, setMetaDropdownOpen);
+              }}
             >
               <Link 
                 to="/meta-evolution" 
@@ -164,15 +200,23 @@ const Navigation = () => {
         </div>
         
         {/* Group Composition dropdown - desktop */}
-        <div className="hidden md:block relative">
+        <div 
+          className="hidden md:block relative"
+          onMouseEnter={() => {
+            clearDropdownTimeout(groupCompositionTimeoutRef);
+            setGroupCompositionDropdownOpen(true);
+          }}
+          onMouseLeave={() => {
+            startDropdownTimeout(groupCompositionTimeoutRef, setGroupCompositionDropdownOpen);
+          }}
+        >
           <button
             className={`font-bold text-lg transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap flex items-center gap-1 ${
-              isActive('/group-composition') || isActive('/all-seasons')
+              isActive('/group-composition') || isActive('//historical-composition')
                 ? 'text-blue-400 border-b-2 border-blue-400 md:border-b-2'
                 : 'hover:text-blue-400'
             }`}
             onClick={() => setGroupCompositionDropdownOpen(!groupCompositionDropdownOpen)}
-            onMouseEnter={() => setGroupCompositionDropdownOpen(true)}
           >
             Group Composition
             <svg 
@@ -187,7 +231,13 @@ const Navigation = () => {
           {groupCompositionDropdownOpen && (
             <div 
               className="absolute top-full left-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg border border-gray-700 z-50"
-              onMouseLeave={() => setGroupCompositionDropdownOpen(false)}
+              onMouseEnter={() => {
+                clearDropdownTimeout(groupCompositionTimeoutRef);
+                setGroupCompositionDropdownOpen(true);
+              }}
+              onMouseLeave={() => {
+                startDropdownTimeout(groupCompositionTimeoutRef, setGroupCompositionDropdownOpen);
+              }}
             >
               <Link 
                 to="/group-composition" 
@@ -201,9 +251,9 @@ const Navigation = () => {
                 Details per season
               </Link>
               <Link 
-                to="/all-seasons" 
+                to="/historical-composition" 
                 className={`block px-4 py-2 transition-colors rounded-b-lg ${
-                  isActive('/all-seasons')
+                  isActive('/historical-composition')
                     ? 'text-blue-400 bg-gray-700'
                     : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'
                 }`}
@@ -219,7 +269,7 @@ const Navigation = () => {
         <div className="md:hidden">
           <button
             className={`font-bold text-lg transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap flex items-center justify-between w-full ${
-              isActive('/group-composition') || isActive('/all-seasons')
+              isActive('/group-composition') || isActive('/historical-composition')
                 ? 'text-blue-400 border-b-2 border-blue-400'
                 : 'hover:text-blue-400'
             }`}
@@ -252,9 +302,9 @@ const Navigation = () => {
                 Details per season
               </Link>
               <Link 
-                to="/all-seasons" 
+                to="/historical-composition"     
                 className={`block px-4 py-2 transition-colors ${
-                  isActive('/all-seasons')
+                  isActive('/historical-composition')
                     ? 'text-blue-400 bg-gray-700'
                     : 'text-gray-300 hover:text-blue-400'
                 }`}
@@ -270,7 +320,16 @@ const Navigation = () => {
         </div>
         
         {/* AI going wild dropdown - desktop */}
-        <div className="hidden md:block relative">
+        <div 
+          className="hidden md:block relative"
+          onMouseEnter={() => {
+            clearDropdownTimeout(aiTimeoutRef);
+            setAiDropdownOpen(true);
+          }}
+          onMouseLeave={() => {
+            startDropdownTimeout(aiTimeoutRef, setAiDropdownOpen);
+          }}
+        >
           <button
             className={`font-bold text-lg transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap flex items-center gap-1 ${
               isActive('/ai-predictions') || isActive('/ai-analysis') || isActive('/ai-insights')
@@ -278,7 +337,6 @@ const Navigation = () => {
                 : 'hover:text-blue-400'
             }`}
             onClick={() => setAiDropdownOpen(!aiDropdownOpen)}
-            onMouseEnter={() => setAiDropdownOpen(true)}
           >
             AI going wild
             <svg 
@@ -293,7 +351,13 @@ const Navigation = () => {
           {aiDropdownOpen && (
             <div 
               className="absolute top-full left-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg border border-gray-700 z-50"
-              onMouseLeave={() => setAiDropdownOpen(false)}
+              onMouseEnter={() => {
+                clearDropdownTimeout(aiTimeoutRef);
+                setAiDropdownOpen(true);
+              }}
+              onMouseLeave={() => {
+                startDropdownTimeout(aiTimeoutRef, setAiDropdownOpen);
+              }}
             >
               <Link 
                 to="/ai-predictions" 

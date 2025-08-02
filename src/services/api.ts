@@ -19,7 +19,7 @@ export async function fetchTopKeys(params: TopKeyParams) {
   if (params.offset) searchParams.append('offset', params.offset.toString());
 
   const url = `${API_BASE_URL}/meta/top-keys?${searchParams.toString()}`;
-  const response = await axios.get(url);
+  const response = await axios.get(url, { timeout: 10000 }); // 10 second timeout
   return response.data;
 }
 
@@ -118,9 +118,13 @@ export async function fetchSpecEvolution(seasonId?: number) {
   const response = await axios.get(url);
   return response.data as {
     season_id: number;
+    expansion_id: number;
+    expansion_name: string;
+    season_name: string;
     evolution: Array<{
       period_id: number;
-      period_name?: string;
+      week: number;
+      period_label: string;
       spec_counts: Record<string, number>;
     }>;
   };

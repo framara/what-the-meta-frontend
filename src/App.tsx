@@ -116,7 +116,7 @@ function App() {
             <Route path="/meta-evolution" element={<MetaEvolutionPage />} />
             <Route path="/race-bars" element={<RaceBarsPage />} />
             <Route path="/group-composition" element={<GroupCompositionPage />} />
-            <Route path="/all-seasons" element={<CompAllSeasonsPage />} />
+            <Route path="/historical-composition" element={<CompAllSeasonsPage />} />
             <Route path="/ai-predictions" element={<AIPredictionsPage />} />
             <Route path="/ai-analysis" element={
               <div className="max-w-7xl mx-auto px-4 py-8">

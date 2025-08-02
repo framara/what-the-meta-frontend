@@ -41,8 +41,11 @@ export const MetaEvolutionPage: React.FC = () => {
 
   const currentChart = charts[chartView];
 
-  // Show loading for initial page load or when changing chart views
-  const shouldShowLoading = loading || viewLoading || chartLoading;
+  // Only show full loading screen for initial load, not for data updates
+  const shouldShowLoading = loading && !currentChart.data.length;
+  
+  // Show skeleton loading for data updates
+  const shouldShowSkeleton = loading && currentChart.data.length > 0;
 
   return (
     <div className="meta-evolution-page">
@@ -78,42 +81,66 @@ export const MetaEvolutionPage: React.FC = () => {
           chartView={chartView}
           setChartView={setChartView}
           isMobile={isMobile}
-          loading={shouldShowLoading}
+          loading={loading}
         />
         <div className="button-group chart-type-toggle">
-          <ChartTypeSelector activeChart={activeChart} setActiveChart={setActiveChart} loading={shouldShowLoading} />
+          <ChartTypeSelector activeChart={activeChart} setActiveChart={setActiveChart} loading={loading} />
         </div>
       </div>
 
       {shouldShowLoading ? (
         <LoadingScreen />
       ) : (
-        <>
+        <div className="chart-container-wrapper" style={{ position: 'relative' }}>
+          {/* Skeleton loading overlay */}
+          {shouldShowSkeleton && (
+            <div 
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 10,
+                borderRadius: '8px'
+              }}
+            >
+              <div style={{ textAlign: 'center' }}>
+                <div className="loading-spinner" style={{ margin: '0 auto 1rem' }}></div>
+                <p style={{ color: '#666', fontSize: '0.9rem' }}>Updating chart data...</p>
+              </div>
+            </div>
+          )}
+          
           {activeChart === 'line' && (
             <LineChart 
               data={currentChart.data} 
               topSpecs={currentChart.topSpecs} 
-              isMobile={isMobile} 
+              isMobile={isMobile}
             />
           )}
           {activeChart === 'bar' && (
             <BarChart 
               data={currentChart.data} 
               topSpecs={currentChart.topSpecs} 
-              isMobile={isMobile} 
+              isMobile={isMobile}
             />
           )}
           {activeChart === 'area' && (
             <AreaChart 
               data={currentChart.data} 
               topSpecs={currentChart.topSpecs} 
-              isMobile={isMobile} 
+              isMobile={isMobile}
             />
           )}
           {activeChart === 'heatmap' && (
             <HeatmapChart 
               data={currentChart.data} 
-              topSpecs={currentChart.topSpecs} 
+              topSpecs={currentChart.topSpecs}
             />
           )}
           {activeChart === 'treemap' && (
@@ -126,7 +153,7 @@ export const MetaEvolutionPage: React.FC = () => {
               allSpecs={allSpecs}
             />
           )}
-        </>
+        </div>
       )}
     </div>
   );

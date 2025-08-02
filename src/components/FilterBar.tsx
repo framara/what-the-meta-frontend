@@ -26,7 +26,33 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   const [periodOptions, setPeriodOptions] = useState<Array<{ label: string; value: number }>>([]);
   const [dungeonOptions, setDungeonOptions] = useState<Array<{ label: string; value: number }>>([]);
   const [loading, setLoading] = useState(true);
+  const [periodLoading, setPeriodLoading] = useState(false);
+  const [dungeonLoading, setDungeonLoading] = useState(false);
   const [mobileCollapsed, setMobileCollapsed] = useState(true);
+
+  // Get the latest expansion and season
+  const getLatestExpansionAndSeason = () => {
+    // Find the latest expansion with seasons (filter out expansions with empty seasons array)
+    const expansionsWithSeasons = WOW_EXPANSIONS.filter(exp => exp.seasons.length > 0);
+    const latestExpansion = expansionsWithSeasons[expansionsWithSeasons.length - 1];
+    
+    if (latestExpansion && latestExpansion.seasons.length > 0) {
+      const latestSeason = Math.max(...latestExpansion.seasons);
+      return { expansionId: latestExpansion.id, seasonId: latestSeason };
+    }
+    
+    // Fallback to The War Within (id: 10) and season 14 if no valid expansion found
+    return { expansionId: 10, seasonId: 14 };
+  };
+
+  // Set default expansion and season when expansion filter becomes visible
+  useEffect(() => {
+    if (showExpansion && !filter.expansion_id && !filter.season_id) {
+      const { expansionId, seasonId } = getLatestExpansionAndSeason();
+      dispatch({ type: 'SET_EXPANSION', expansion_id: expansionId });
+      dispatch({ type: 'SET_SEASON', season_id: seasonId });
+    }
+  }, [showExpansion, filter.expansion_id, filter.season_id, dispatch]);
 
   // Reset expansion-related state when expansion filter becomes hidden
   useEffect(() => {
@@ -121,18 +147,28 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     return options;
   };
 
+  // Optimized season info fetching with granular loading states
   useEffect(() => {
     if (!filter.season_id || (!showPeriod && !showDungeon)) return;
-    setLoading(true);
+    
+    // Set loading states only for the specific filters that need data
+    if (showPeriod) setPeriodLoading(true);
+    if (showDungeon) setDungeonLoading(true);
+    
     fetchSeasonInfo(filter.season_id).then(info => {
       if (showPeriod) {
         const sortedPeriods = [...info.periods].sort((a, b) => b.period_id - a.period_id);
         setPeriodOptions(sortedPeriods.map(p => ({ label: p.period_name, value: p.period_id })));
+        setPeriodLoading(false);
       }
       if (showDungeon) {
         setDungeonOptions(info.dungeons.map(d => ({ label: d.dungeon_name, value: d.dungeon_id })));
+        setDungeonLoading(false);
       }
-      setLoading(false);
+    }).catch(error => {
+      console.error('Error fetching season info:', error);
+      if (showPeriod) setPeriodLoading(false);
+      if (showDungeon) setDungeonLoading(false);
     });
   }, [filter.season_id, showPeriod, showDungeon]);
 
@@ -221,7 +257,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               className="filter-select"
               value={filter.period_id || ''}
               onChange={e => dispatch({ type: 'SET_PERIOD', period_id: e.target.value ? Number(e.target.value) : undefined })}
-              disabled={loading || !filter.season_id}
+              disabled={loading || periodLoading || !filter.season_id}
             >
               <option value="" className="filter-option">Entire Season</option>
               {periodOptions.map(opt => (
@@ -238,7 +274,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               className="filter-select"
               value={filter.dungeon_id || ''}
               onChange={e => dispatch({ type: 'SET_DUNGEON', dungeon_id: e.target.value ? Number(e.target.value) : undefined })}
-              disabled={loading || !filter.season_id}
+              disabled={loading || dungeonLoading || !filter.season_id}
             >
               <option value="" className="filter-option">All Dungeons</option>
               {dungeonOptions.map(opt => (
