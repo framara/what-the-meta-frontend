@@ -147,3 +147,21 @@ export const WOW_EXPANSIONS = [
   { id: 11, name: 'Midnight', shortName: 'MN', seasons: [17, 18, 19, 20] },
   { id: 12, name: 'The Last Titan', shortName: 'TLT', seasons: [21, 22, 23, 24] },
 ];
+
+// Season metadata (id -> metadata)
+export const SEASON_METADATA: Record<number, { expansion: string; patch: string; name: string }> = {
+  1: { expansion: 'Battle for Azeroth', patch: '8.0', name: 'BFA S1' },
+  2: { expansion: 'Battle for Azeroth', patch: '8.1', name: 'BFA S2' },
+  3: { expansion: 'Battle for Azeroth', patch: '8.2', name: 'BFA S3' },
+  4: { expansion: 'Battle for Azeroth', patch: '8.3', name: 'BFA S4' },
+  5: { expansion: 'Shadowlands', patch: '9.0', name: 'SL S1' },
+  6: { expansion: 'Shadowlands', patch: '9.1', name: 'SL S2' },
+  7: { expansion: 'Shadowlands', patch: '9.2', name: 'SL S3' },
+  8: { expansion: 'Shadowlands', patch: '9.2.5', name: 'SL S4' },
+  9: { expansion: 'Dragonflight', patch: '10.0', name: 'DF S1' },
+  10: { expansion: 'Dragonflight', patch: '10.1', name: 'DF S2' },
+  11: { expansion: 'Dragonflight', patch: '10.2', name: 'DF S3' },
+  12: { expansion: 'Dragonflight', patch: '10.2.6', name: 'DF S4' },
+  13: { expansion: 'The War Within', patch: '11.0', name: 'TWW S1' },
+  14: { expansion: 'The War Within', patch: '11.1', name: 'TWW S2' }
+};

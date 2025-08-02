@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_CLASS_NAMES } from '../../../constants/wow-constants';
+import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_CLASS_NAMES, SEASON_METADATA } from '../../../constants/wow-constants';
 import { PredictionCard } from './PredictionCard';
 import '../styles/PredictionDashboard.css';
 import { Tooltip } from './Tooltip';
@@ -37,6 +37,10 @@ interface Prediction {
 }
 
 export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ seasonData, specEvolution, dungeons, aiAnalysis, usingCache, cacheMetadata, forceRefresh }) => {
+  // Function to convert season ID to user-friendly name
+  const getSeasonName = (seasonId: number): string => {
+    return SEASON_METADATA[seasonId]?.name || `Season ${seasonId}`;
+  };
   // --- IMPROVED: Smoothing, dynamic threshold, confidence interval ---
   function movingAverage(arr: number[], windowSize: number): number[] {
     if (arr.length < windowSize) return arr;
@@ -263,7 +267,7 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ season
           AI-powered meta trend forecasting using OpenAI GPT-4 analysis
         </p>
         <p className="dashboard-data-info">
-          Season {seasonData?.season_id || 'Unknown'} • {seasonData?.total_periods || 0} weeks • {seasonData?.total_keys.toLocaleString() || 0} keys analyzed
+          {getSeasonName(seasonData?.season_id)} • {seasonData?.total_periods || 0} weeks • {seasonData?.total_keys.toLocaleString() || 0} keys analyzed
         </p>
         {usingCache && (
           <div className="cache-indicator">
