@@ -208,15 +208,26 @@ export const CompAllSeasonsPage: React.FC = () => {
                    return (
                      <div key={season.season_id} className="season-card">
                        <div className="season-header">
-                         <h3 className="season-name">{season.season_name}</h3>
-                         <div className="season-info">
-                           <span className="patch">{season.patch}</span>
+                         <div className="season-header-top">
+                           <h3 className="season-name">{season.season_name}</h3>
+                           <div className="season-info">
+                             <span className="patch">{season.patch}</span>
+                             <span className="expansion-badge">{season.expansion}</span>
+                           </div>
                          </div>
                          <div className="season-stats">
-                           <span className="keys-count">Data: Top {season.keys_count} keys</span>
-                           <span className="composition-usage">
-                             {season.top_composition.percentage.toFixed(1)}% usage
-                           </span>
+                           <div className="popularity-bar">
+                             <div className="popularity-header">
+                               <span className="popularity-label">Popularity</span>
+                               <span className="popularity-percentage">{season.top_composition.percentage.toFixed(1)}%</span>
+                             </div>
+                             <div className="popularity-progress">
+                               <div 
+                                 className="popularity-fill" 
+                                 style={{ width: `${season.top_composition.percentage}%` }}
+                               />
+                             </div>
+                           </div>
                          </div>
                        </div>
                        
@@ -226,24 +237,29 @@ export const CompAllSeasonsPage: React.FC = () => {
                            {specIds.map((specId, index) => {
                              // Find the member with this spec_id from the first run
                              const member = season.top_composition.runs[0]?.members.find(m => m.spec_id === specId);
+                             const classColor = member ? getClassColor(member.class_id) : '#FFFFFF';
+                             // Check if color is light (white or yellow)
+                             const isLightColor = classColor === '#FFFFFF' || classColor === '#FFF569';
                              
                              return (
-                               <div key={index} className="spec-item">
-                                 <div 
-                                   className="spec-color-indicator"
-                                   style={{ backgroundColor: member ? getClassColor(member.class_id) : '#FFFFFF' }}
-                                 />
-                                 <span className="spec-name">
+                               <div 
+                                 key={index} 
+                                 className="spec-item"
+                                 style={{ 
+                                   backgroundColor: classColor
+                                 }}
+                               >
+                                 <span 
+                                   className="spec-name"
+                                   style={{ 
+                                     color: isLightColor ? '#000000' : '#ffffff'
+                                   }}
+                                 >
                                    {getSpecName(specId)}
                                  </span>
                                </div>
                              );
                            })}
-                         </div>
-                         <div className="composition-stats">
-                           <span className="usage-count">
-                             Used in {season.top_composition.count} runs
-                           </span>
                          </div>
                        </div>
                      </div>

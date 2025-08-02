@@ -151,46 +151,116 @@
   margin-bottom: 1.5rem;
 }
 
+.season-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
 .season-name {
   font-size: 1.5rem;
   font-weight: 700;
   color: #f3f4f6;
-  margin-bottom: 0.5rem;
   background: linear-gradient(135deg, #3b82f6, #8b5cf6);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  margin: 0;
 }
 
 .season-info {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
+  flex-direction: row;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-.expansion, .patch {
-  font-size: 0.875rem;
+.expansion, .patch, .expansion-badge {
+  font-size: 0.75rem;
   color: #9ca3af;
-  padding: 0.25rem 0.75rem;
+  padding: 0.25rem 0.5rem;
   background: rgba(59, 130, 246, 0.1);
   border-radius: 0.375rem;
   border: 1px solid rgba(59, 130, 246, 0.2);
+  font-weight: 500;
+}
+
+.expansion-badge {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.2);
+  color: #a78bfa;
 }
 
 .season-stats {
+  margin-top: 1rem;
+}
+
+.popularity-bar {
+  background: rgba(31, 41, 55, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.popularity-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 0.75rem;
 }
 
-.keys-count, .composition-usage {
+.popularity-label {
   font-size: 0.875rem;
-  color: #d1d5db;
   font-weight: 600;
+  color: #e5e7eb;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.composition-usage {
+.popularity-percentage {
+  font-size: 1.25rem;
+  font-weight: 700;
   color: #10b981;
+}
+
+.popularity-progress {
+  width: 100%;
+  height: 8px;
+  background: rgba(31, 41, 55, 0.5);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.popularity-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #34d399);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.popularity-details {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.detail-icon {
+  font-size: 0.875rem;
+  opacity: 0.8;
 }
 
 .composition-display {
@@ -218,30 +288,22 @@
 .spec-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem;
-  background: rgba(31, 41, 55, 0.5);
+  padding: 0.5rem 0.75rem;
   border-radius: 8px;
-  border: 1px solid rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .spec-item:hover {
-  background: rgba(31, 41, 55, 0.8);
-  border-color: rgba(59, 130, 246, 0.3);
-}
-
-.spec-color-indicator {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  flex-shrink: 0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .spec-name {
   font-size: 0.875rem;
-  color: #e5e7eb;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .composition-stats {
@@ -332,10 +394,17 @@
     gap: 0.5rem;
   }
   
-  .season-stats {
+  .popularity-bar {
+    padding: 0.75rem;
+  }
+  
+  .popularity-percentage {
+    font-size: 1.125rem;
+  }
+  
+  .popularity-details {
     flex-direction: column;
     gap: 0.5rem;
-    align-items: flex-start;
   }
 }
 
