@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useFilterState } from '../FilterContext';
-import { fetchTopKeys, fetchSeasonData } from '../../services/api';
+import { fetchTopKeys, fetchCompositionData } from '../../services/api';
 import { GroupCompositionStats } from './components/GroupCompositionStats';
 import LoadingScreen from '../LoadingScreen';
 import { FilterBar } from '../FilterBar';
@@ -12,7 +12,6 @@ interface Season {
 }
 
 interface GroupMember {
-  character_name: string;
   class_id: number;
   spec_id: number;
   role: string;
@@ -38,9 +37,9 @@ interface SeasonData {
       keystone_level: number;
       score: number;
       members: Array<{
-        spec_id: number;
-        class_id: number;
-        name: string;
+        spec_id: string;
+        class_id: string;
+        role: string;
       }>;
       [key: string]: any;
     }>;
@@ -71,7 +70,7 @@ export const GroupCompositionPage: React.FC = () => {
             dungeon_id: filter.dungeon_id,
             limit: filter.limit || 1000 // Get more data for better analysis
           }),
-          fetchSeasonData(filter.season_id)
+          fetchCompositionData(filter.season_id)
         ]);
         
         setRuns(runsData);

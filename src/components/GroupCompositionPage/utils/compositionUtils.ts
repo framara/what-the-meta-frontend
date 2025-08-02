@@ -2,7 +2,6 @@ import { WOW_SPEC_ROLES } from '../../../constants/wow-constants';
 import { TOP_COMPOSITIONS_COUNT } from '../constants/compositionConstants';
 
 export interface GroupMember {
-  character_name: string;
   class_id: number;
   spec_id: number;
   role: string;

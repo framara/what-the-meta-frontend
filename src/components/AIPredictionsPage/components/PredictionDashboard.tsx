@@ -10,6 +10,9 @@ interface PredictionDashboardProps {
   specEvolution: any;
   dungeons: any[];
   aiAnalysis?: any;
+  usingCache?: boolean;
+  cacheMetadata?: { created_at: string; age_hours: number; max_age_hours: number } | null;
+  forceRefresh?: boolean;
 }
 
 interface Prediction {
@@ -33,7 +36,7 @@ interface Prediction {
   };
 }
 
-export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ seasonData, specEvolution, dungeons, aiAnalysis }) => {
+export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ seasonData, specEvolution, dungeons, aiAnalysis, usingCache, cacheMetadata, forceRefresh }) => {
   // --- IMPROVED: Smoothing, dynamic threshold, confidence interval ---
   function movingAverage(arr: number[], windowSize: number): number[] {
     if (arr.length < windowSize) return arr;
@@ -243,8 +246,9 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ season
   return (
     <div className="prediction-dashboard dashboard-refactored">
       <div className="dashboard-header">
-        <h2 className="dashboard-title">
-          {aiAnalysis ? '🤖 AI-Powered Predictions' : '📊 Statistical Predictions'}
+        <h1 className="dashboard-title">
+          <span className="ai-icon" role="img" aria-label="AI" style={{ color: 'inherit', fontSize: '2rem', filter: 'none', textShadow: '0 1px 2px #fff' }}>🤖</span>
+          {aiAnalysis ? 'AI-Powered Predictions' : 'Statistical Predictions'}
           <Tooltip content={aiAnalysis ? 
             "This section uses OpenAI GPT-4 to analyze all dungeon runs for the season and predict which specializations are rising, declining, or stable in the meta. The AI considers trends, success rates, consistency, and cross-validation accuracy to forecast future performance." :
             "This section uses statistical analysis to predict which specializations are rising, declining, or stable in the meta. It looks at trends, success rates, and consistency over time to forecast future performance."
@@ -254,10 +258,23 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ season
               <text x="10" y="15" textAnchor="middle" fontSize="13" fill="#fff" fontWeight="bold">i</text>
             </svg>
           </Tooltip>
-        </h2>
+        </h1>
         <p className="dashboard-subtitle">
-          AI analysis using {seasonData?.total_periods || 0} weeks and {seasonData?.total_keys.toLocaleString() || 0} keys for comprehensive temporal analysis
+          AI-powered meta trend forecasting using OpenAI GPT-4 analysis
         </p>
+        <p className="dashboard-data-info">
+          Season {seasonData?.season_id || 'Unknown'} • {seasonData?.total_periods || 0} weeks • {seasonData?.total_keys.toLocaleString() || 0} keys analyzed
+        </p>
+        {usingCache && (
+          <div className="cache-indicator">
+            💾 Using cached analysis • Last updated: {cacheMetadata ? new Date(cacheMetadata.created_at).toLocaleString() : 'Unknown'}
+          </div>
+        )}
+        {forceRefresh && (
+          <div className="force-refresh-indicator">
+            🔄 Force refresh enabled - Bypassing cache
+          </div>
+        )}
       </div>
 
       <div className="predictions-columns">

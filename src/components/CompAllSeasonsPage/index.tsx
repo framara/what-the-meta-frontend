@@ -5,9 +5,8 @@ import { WOW_SPECIALIZATIONS, WOW_CLASS_COLORS, WOW_SPEC_ROLES } from '../../con
 import './styles/CompAllSeasonsPage.css';
 
 interface GroupMember {
-  character_name: string;
-  class_id: number;
-  spec_id: number;
+  class_id: string;
+  spec_id: string;
   role: string;
 }
 
@@ -73,7 +72,7 @@ export const CompAllSeasonsPage: React.FC = () => {
           // Count compositions
           season.data.forEach((run: Run) => {
             const specCombo = run.members
-              .sort((a: GroupMember, b: GroupMember) => getRoleOrder(a.spec_id) - getRoleOrder(b.spec_id) || a.spec_id - b.spec_id) // Sort by role first, then spec_id
+              .sort((a: GroupMember, b: GroupMember) => getRoleOrder(Number(a.spec_id)) - getRoleOrder(Number(b.spec_id)) || Number(a.spec_id) - Number(b.spec_id)) // Sort by role first, then spec_id
               .map((member: GroupMember) => member.spec_id)
               .join('-');
             
@@ -236,8 +235,8 @@ export const CompAllSeasonsPage: React.FC = () => {
                          <div className="specs-grid">
                            {specIds.map((specId, index) => {
                              // Find the member with this spec_id from the first run
-                             const member = season.top_composition.runs[0]?.members.find(m => m.spec_id === specId);
-                             const classColor = member ? getClassColor(member.class_id) : '#FFFFFF';
+                             const member = season.top_composition.runs[0]?.members.find(m => Number(m.spec_id) === specId);
+                             const classColor = member ? getClassColor(Number(member.class_id)) : '#FFFFFF';
                              // Check if color is light (white or yellow)
                              const isLightColor = classColor === '#FFFFFF' || classColor === '#FFF569';
                              

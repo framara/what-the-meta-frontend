@@ -68,6 +68,32 @@ export async function fetchSeasonData(seasonId: number) {
   };
 }
 
+// New: Fetch composition data optimized for group composition analysis
+export async function fetchCompositionData(seasonId: number) {
+  const url = `${API_BASE_URL}/meta/composition-data/${seasonId}`;
+  const response = await axios.get(url);
+  return response.data as {
+    season_id: number;
+    total_periods: number;
+    total_keys: number;
+    periods: Array<{
+      period_id: number;
+      keys_count: number;
+      keys: Array<{
+        id: number;
+        keystone_level: number;
+        score: number;
+        members: Array<{
+          spec_id: string;
+          class_id: string;
+          role: string;
+        }>;
+        [key: string]: any;
+      }>;
+    }>;
+  };
+}
+
 // New: Fetch all seasons
 export async function fetchSeasons() {
   const url = `${API_BASE_URL}/wow/advanced/seasons`;

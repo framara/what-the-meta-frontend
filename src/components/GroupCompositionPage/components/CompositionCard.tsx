@@ -17,9 +17,9 @@ interface SeasonData {
       keystone_level: number;
       score: number;
       members: Array<{
-        spec_id: number;
-        class_id: number;
-        name: string;
+        spec_id: string;
+        class_id: string;
+        role: string;
       }>;
       [key: string]: any;
     }>;
@@ -230,11 +230,17 @@ export const CompositionCard: React.FC<CompositionCardProps> = ({
     // Analyze all periods
     seasonData.periods.forEach(period => {
       period.keys.forEach(key => {
-        const keySpecs = key.members.map(m => m.spec_id);
-        const hasAllSpecs = compositionSpecs.size === keySpecs.length && 
-          compositionSpecs.size === new Set([...compositionSpecs, ...keySpecs]).size;
+        const keySpecs = key.members.map(m => Number(m.spec_id));
+        
+        // Check if this key has the exact composition (all specs match)
+        // Convert both to sorted arrays for comparison
+        const sortedCompositionSpecs = Array.from(compositionSpecs).sort((a, b) => a - b);
+        const sortedKeySpecs = keySpecs.sort((a, b) => a - b);
+        
+        const hasExactComposition = sortedCompositionSpecs.length === sortedKeySpecs.length && 
+          sortedCompositionSpecs.every((spec, index) => spec === sortedKeySpecs[index]);
 
-        if (hasAllSpecs) {
+        if (hasExactComposition) {
           totalRuns++;
           highestKey = Math.max(highestKey, key.keystone_level);
           totalKeyLevel += key.keystone_level;
@@ -280,12 +286,14 @@ export const CompositionCard: React.FC<CompositionCardProps> = ({
     };
   }, [composition, seasonData]);
 
-  // Calculate trend data for the mini chart
+    // Calculate trend data for the mini chart
   const trendData = useMemo((): CompositionTrendData[] => {
     if (!seasonData) return [];
 
     const compositionSpecs = new Set(composition.specs);
     const sortedPeriods = seasonData.periods.map(p => p.period_id).sort((a, b) => a - b);
+    
+    
     
     return sortedPeriods.map((periodId, index) => {
       const period = seasonData.periods.find(p => p.period_id === periodId);
@@ -293,11 +301,17 @@ export const CompositionCard: React.FC<CompositionCardProps> = ({
 
       let usage = 0;
       period.keys.forEach(key => {
-        const keySpecs = key.members.map(m => m.spec_id);
-        const hasAllSpecs = compositionSpecs.size === keySpecs.length && 
-          compositionSpecs.size === new Set([...compositionSpecs, ...keySpecs]).size;
+        const keySpecs = key.members.map(m => Number(m.spec_id));
         
-        if (hasAllSpecs) {
+        // Check if this key has the exact composition (all specs match)
+        // Convert both to sorted arrays for comparison
+        const sortedCompositionSpecs = Array.from(compositionSpecs).sort((a, b) => a - b);
+        const sortedKeySpecs = keySpecs.sort((a, b) => a - b);
+        
+        const hasExactComposition = sortedCompositionSpecs.length === sortedKeySpecs.length && 
+          sortedCompositionSpecs.every((spec, index) => spec === sortedKeySpecs[index]);
+        
+        if (hasExactComposition) {
           usage++;
         }
       });

@@ -2,25 +2,26 @@ import React from 'react';
 import './styles/AILoadingScreen.css';
 
 const robotMessages = [
-  'Bip bop... crunching meta-data!',
-  'Calculating the future... please wait!',
-  'Bzzzt! Analyzing dungeons...',
-  '01001000 01101000! (Hi!)',
-  'Charging AI batteries...',
-  'Bip bop beep... fetching predictions!',
-  'Synthesizing meta trends...',
-  'Beep beep! Downloading more RAM...',
-  'Loading up some spicy affixes...',
-  'Bop! Did you know robots love statistics?',
-  'Bip bop... calibrating funniness sensors!',
-  'Bzzzt! Please do not feed the robot.',
-  'Bip bop... looking for the meta cheese!',
-  'One moment, my circuits are stretching...',
-  'Bip bop... is this thing on?',
-  'Bip bop... 42% more fun guaranteed!',
-  'Bip bop... running on coffee and code!',
-  'Bop bip! I see you, human!',
-  'Bip bop... almost there, don’t panic!'
+  '🔮 Predicting the meta with quantum precision...',
+  '⚡ Processing 10,000+ dungeon runs in parallel...',
+  '🧠 Neural networks analyzing spec evolution patterns...',
+  '📊 Cross-validating predictions across all seasons...',
+  '🎯 Identifying rising stars in the meta...',
+  '📈 Detecting subtle trend shifts in real-time...',
+  '🔍 Deep-diving into class performance analytics...',
+  '⚔️ Mapping the competitive landscape...',
+  '🎮 Analyzing player behavior patterns...',
+  '📋 Synthesizing comprehensive meta insights...',
+  '🚀 Optimizing prediction algorithms...',
+  '🎲 Running Monte Carlo simulations...',
+  '📊 Validating statistical significance...',
+  '🔬 Conducting meta analysis research...',
+  '⚡ Charging prediction engines to full capacity...',
+  '🎯 Fine-tuning accuracy parameters...',
+  '📈 Processing temporal trend data...',
+  '🧮 Calculating confidence intervals...',
+  '🎮 Mining competitive intelligence...',
+  '🔮 Unveiling the future of Mythic+ meta...'
 ];
 
 export const AILoadingScreen: React.FC = () => {
