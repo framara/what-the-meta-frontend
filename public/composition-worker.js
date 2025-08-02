@@ -7,9 +7,12 @@ self.onmessage = async (event) => {
   try {
     console.log(`🔄 [WORKER] Starting composition data fetch for season ${season_id}`);
     
-    // Build the API URL
-    const baseUrl = apiBaseUrl || 'http://localhost:3000';
-    let url = `${baseUrl}/meta/composition-data/${season_id}`;
+    // Build the API URL - require apiBaseUrl to be provided
+    if (!apiBaseUrl) {
+      throw new Error('API base URL is required');
+    }
+    
+    let url = `${apiBaseUrl}/meta/composition-data/${season_id}`;
     
     // Add query parameters if provided
     const params = new URLSearchParams();
