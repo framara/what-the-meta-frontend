@@ -250,7 +250,7 @@ nav a:hover::after {
 
 @media (min-width: 900px) {
   nav {
-    padding-right: 12rem;
+    padding-right: 8rem;
   }
 }
 

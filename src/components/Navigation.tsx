@@ -65,7 +65,7 @@ const Navigation = () => {
       
       {/* Nav links - hidden on mobile unless menu open, always visible on md+ */}
       <div 
-        className={`flex-col md:flex md:flex-row md:gap-6 md:static absolute top-full right-0 w-56 bg-gray-900 md:bg-transparent z-50 transition-all duration-200 ${navOpen ? 'flex' : 'hidden'} md:!flex`} 
+        className={`flex-col md:flex md:flex-row md:gap-6 md:static absolute top-full right-0 w-72 bg-gray-900 md:bg-transparent z-50 transition-all duration-200 ${navOpen ? 'flex' : 'hidden'} md:!flex`} 
         style={{ 
           boxShadow: navOpen ? '0 4px 16px 0 rgba(0,0,0,0.18)' : undefined, 
           marginTop: navOpen ? '0.5rem' : undefined 
@@ -79,7 +79,7 @@ const Navigation = () => {
           Dashboard
         </Link>
         
-        {/* Meta Evolution dropdown - desktop */}
+        {/* Spec Evolution dropdown - desktop */}
         <div 
           className="hidden md:block relative"
           onMouseEnter={() => {
@@ -98,7 +98,7 @@ const Navigation = () => {
             }`}
             onClick={() => setMetaDropdownOpen(!metaDropdownOpen)}
           >
-            Meta Evolution
+            Spec Evolution
             <svg 
               className={`w-4 h-4 transition-transform ${metaDropdownOpen ? 'rotate-180' : ''}`} 
               fill="none" 
@@ -145,7 +145,7 @@ const Navigation = () => {
           )}
         </div>
         
-        {/* Meta Evolution dropdown - mobile */}
+        {/* Spec Evolution dropdown - mobile */}
         <div className="md:hidden">
           <button
             className={`font-bold text-lg transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap flex items-center justify-between w-full ${
@@ -155,7 +155,7 @@ const Navigation = () => {
             }`}
             onClick={() => setMetaDropdownOpen(!metaDropdownOpen)}
           >
-            <span>Meta Evolution</span>
+            <span>Spec Evolution</span>
             <svg 
               className={`w-4 h-4 transition-transform ${metaDropdownOpen ? 'rotate-180' : ''}`} 
               fill="none" 
@@ -248,7 +248,7 @@ const Navigation = () => {
                 }`}
                 onClick={() => setGroupCompositionDropdownOpen(false)}
               >
-                Details per season
+                Composition Details
               </Link>
               <Link 
                 to="/historical-composition" 
@@ -259,7 +259,7 @@ const Navigation = () => {
                 }`}
                 onClick={() => setGroupCompositionDropdownOpen(false)}
               >
-                Historical
+                Historical Overview
               </Link>
             </div>
           )}
@@ -299,7 +299,7 @@ const Navigation = () => {
                   setNavOpen(false);
                 }}
               >
-                Details per season
+                Composition Details
               </Link>
               <Link 
                 to="/historical-composition"     
@@ -313,13 +313,13 @@ const Navigation = () => {
                   setNavOpen(false);
                 }}
               >
-                All seasons
+                Historical Overview
               </Link>
             </div>
           )}
         </div>
         
-        {/* AI going wild dropdown - desktop */}
+        {/* AI Analysis dropdown - desktop */}
         <div 
           className="hidden md:block relative"
           onMouseEnter={() => {
@@ -338,7 +338,7 @@ const Navigation = () => {
             }`}
             onClick={() => setAiDropdownOpen(!aiDropdownOpen)}
           >
-            AI going wild
+            AI Analysis
             <svg 
               className={`w-4 h-4 transition-transform ${aiDropdownOpen ? 'rotate-180' : ''}`} 
               fill="none" 
@@ -370,33 +370,14 @@ const Navigation = () => {
               >
                 AI Predictions
               </Link>
-              <Link 
-                to="/ai-analysis" 
-                className={`block px-4 py-2 transition-colors ${
-                  isActive('/ai-analysis')
-                    ? 'text-blue-400 bg-gray-700'
-                    : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'
-                }`}
-                onClick={() => setAiDropdownOpen(false)}
-              >
-                AI Analysis
-              </Link>
-              <Link 
-                to="/ai-insights" 
-                className={`block px-4 py-2 transition-colors rounded-b-lg ${
-                  isActive('/ai-insights')
-                    ? 'text-blue-400 bg-gray-700'
-                    : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'
-                }`}
-                onClick={() => setAiDropdownOpen(false)}
-              >
-                AI Insights
-              </Link>
+              <div className="px-4 py-2 text-gray-500 text-sm italic">
+                More coming soon...
+              </div>
             </div>
           )}
         </div>
         
-        {/* AI going wild dropdown - mobile */}
+        {/* AI Analysis dropdown - mobile */}
         <div className="md:hidden">
           <button
             className={`font-bold text-lg transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap flex items-center justify-between w-full ${
@@ -406,7 +387,7 @@ const Navigation = () => {
             }`}
             onClick={() => setAiDropdownOpen(!aiDropdownOpen)}
           >
-            <span>AI going wild</span>
+            <span>AI Analysis</span>
             <svg 
               className={`w-4 h-4 transition-transform ${aiDropdownOpen ? 'rotate-180' : ''}`} 
               fill="none" 
@@ -432,34 +413,9 @@ const Navigation = () => {
               >
                 AI Predictions
               </Link>
-              <Link 
-                to="/ai-analysis" 
-                className={`block px-4 py-2 transition-colors ${
-                  isActive('/ai-analysis')
-                    ? 'text-blue-400 bg-gray-700'
-                    : 'text-gray-300 hover:text-blue-400'
-                }`}
-                onClick={() => {
-                  setAiDropdownOpen(false);
-                  setNavOpen(false);
-                }}
-              >
-                AI Analysis
-              </Link>
-              <Link 
-                to="/ai-insights" 
-                className={`block px-4 py-2 transition-colors ${
-                  isActive('/ai-insights')
-                    ? 'text-blue-400 bg-gray-700'
-                    : 'text-gray-300 hover:text-blue-400'
-                }`}
-                onClick={() => {
-                  setAiDropdownOpen(false);
-                  setNavOpen(false);
-                }}
-              >
-                AI Insights
-              </Link>
+              <div className="px-4 py-2 text-gray-500 text-sm italic">
+                More coming soon...
+              </div>
             </div>
           )}
         </div>
