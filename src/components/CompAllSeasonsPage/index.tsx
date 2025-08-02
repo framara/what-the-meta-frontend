@@ -73,12 +73,10 @@ export const CompAllSeasonsPage: React.FC = () => {
   // Progressive loading function
   const loadData = useCallback(async () => {
     const startTime = performance.now();
-    console.log(`🚀 [${new Date().toISOString()}] Starting CompAllSeasonsPage load`);
     
     // Check cache first
     const cached = dataCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-      console.log(`⚡ [${new Date().toISOString()}] Cache HIT! Returning cached data in ${(performance.now() - startTime).toFixed(2)}ms`);
       setSeasonsData(cached.seasonsData);
       setSeasonCompositions(cached.compositions);
       setGroupedCompositions(cached.groupedCompositions);
@@ -88,11 +86,9 @@ export const CompAllSeasonsPage: React.FC = () => {
 
     // Prevent duplicate calls
     if (isFetchingRef.current) {
-      console.log(`⏳ [${new Date().toISOString()}] Already loading, skipping duplicate call`);
       return;
     }
 
-    console.log(`💾 [${new Date().toISOString()}] Cache MISS - fetching fresh data`);
     isFetchingRef.current = true;
     setLoading(true);
     setError(null);
@@ -101,14 +97,12 @@ export const CompAllSeasonsPage: React.FC = () => {
     try {
       // Phase 1: Fetch data
       setLoadingProgress(10);
-      console.log(`🔍 [${new Date().toISOString()}] Fetching all seasons data...`);
       
       const allSeasonsResponse = await fetchTopKeysAllSeasons({
         limit: 1000
       });
       
       setLoadingProgress(30);
-      console.log(`✅ [${new Date().toISOString()}] Data fetched, starting processing...`);
       
       // Show basic data immediately
       setSeasonsData(allSeasonsResponse);
@@ -131,7 +125,6 @@ export const CompAllSeasonsPage: React.FC = () => {
 
   // Start processing worker for heavy computation
   const startProcessingWorker = useCallback((allSeasonsResponse: AllSeasonsResponse) => {
-    console.log(`🔄 [${new Date().toISOString()}] Starting processing worker...`);
     setProcessingLoading(true);
     
     // Create worker if it doesn't exist
@@ -143,10 +136,6 @@ export const CompAllSeasonsPage: React.FC = () => {
         const { success, compositions, groupedCompositions, error } = event.data;
         
         if (success && compositions && groupedCompositions) {
-          console.log(`✅ [${new Date().toISOString()}] Processing completed:`, {
-            total_compositions: compositions.length,
-            total_expansions: Object.keys(groupedCompositions).length
-          });
           
           // Update with processed data
           setSeasonCompositions(compositions);

@@ -66,11 +66,8 @@ export const calculateRoleSpecCounts = (runs: Run[]) => {
   const cacheKey = runs.map(r => r.id).sort().join('|');
   
   if (roleSpecCountsCache.has(cacheKey)) {
-    console.log(`⚡ [${new Date().toISOString()}] Cache HIT for calculateRoleSpecCounts`);
     return roleSpecCountsCache.get(cacheKey)!;
   }
-  
-  console.log(`🧮 [${new Date().toISOString()}] Cache MISS for calculateRoleSpecCounts - processing ${runs.length} runs`);
   
   const roleSpecCounts: Record<string, Record<number, number>> = { 
     tank: {}, 
@@ -124,11 +121,8 @@ export const calculateGroupCompositions = (runs: Run[], selectedSpec: number | n
   const cacheKey = `${selectedSpec}-${runs.map(r => r.id).sort().join('|')}`;
   
   if (compositionsCache.has(cacheKey)) {
-    console.log(`⚡ [${new Date().toISOString()}] Cache HIT for calculateGroupCompositions`);
     return compositionsCache.get(cacheKey)!;
   }
-  
-  console.log(`🎯 [${new Date().toISOString()}] Cache MISS for calculateGroupCompositions - processing ${runs.length} runs`);
   
   const groupCompositions = new Map<string, { specs: number[], count: number }>();
   

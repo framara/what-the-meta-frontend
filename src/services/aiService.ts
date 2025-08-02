@@ -66,7 +66,6 @@ export async function getAIAnalysis(seasonId: number): Promise<AIAnalysisRespons
   } catch (error: any) {
     // Check if it's a 404 (cache miss) vs other error
     if (error.response?.status === 404) {
-      console.log(`📋 No cached AI analysis found for season ${seasonId} - will generate new analysis`);
       throw new Error('CACHE_MISS');
     } else {
       console.error('AI analysis error:', error);

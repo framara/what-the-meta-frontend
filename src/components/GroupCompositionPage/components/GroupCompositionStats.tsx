@@ -41,35 +41,23 @@ export const GroupCompositionStats: React.FC<GroupCompositionStatsProps> = ({ ru
   
   // Memoize role spec counts calculation
   const roleSpecCounts = useMemo(() => {
-    const startTime = performance.now();
-    console.log(`🧮 [${new Date().toISOString()}] Starting calculateRoleSpecCounts for ${runs.length} runs...`);
     const result = calculateRoleSpecCounts(runs);
-    const time = performance.now() - startTime;
-    console.log(`✅ [${new Date().toISOString()}] calculateRoleSpecCounts completed in ${time.toFixed(2)}ms`);
     return result;
   }, [runs]);
 
   // Memoize top specs by role
   const topSpecsByRole = useMemo(() => {
-    const startTime = performance.now();
-    console.log(`🏆 [${new Date().toISOString()}] Starting getTopSpecsByRole calculations...`);
     const result = {
       tank: getTopSpecsByRole(roleSpecCounts, 'tank', 5),
       healer: getTopSpecsByRole(roleSpecCounts, 'healer', 5),
       dps: getTopSpecsByRole(roleSpecCounts, 'dps', 10)
     };
-    const time = performance.now() - startTime;
-    console.log(`✅ [${new Date().toISOString()}] getTopSpecsByRole completed in ${time.toFixed(2)}ms`);
     return result;
   }, [roleSpecCounts]);
 
   // Calculate compositions using useMemo for performance
   const topCompositions = useMemo(() => {
-    const startTime = performance.now();
-    console.log(`🎯 [${new Date().toISOString()}] Starting calculateGroupCompositions for ${runs.length} runs...`);
     const result = calculateGroupCompositions(runs, selectedSpec);
-    const time = performance.now() - startTime;
-    console.log(`✅ [${new Date().toISOString()}] calculateGroupCompositions completed in ${time.toFixed(2)}ms - found ${result.length} compositions`);
     return result;
   }, [runs, selectedSpec]);
 

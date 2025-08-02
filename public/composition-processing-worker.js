@@ -5,8 +5,6 @@ self.onmessage = async (event) => {
   const { seasons } = event.data;
   
   try {
-    console.log(`🔄 [WORKER] Starting composition processing for ${seasons.length} seasons...`);
-    
     // Process each season to find the most used composition
     const compositions = seasons.map((season) => {
       const compositionCounts = new Map();
@@ -64,11 +62,6 @@ self.onmessage = async (event) => {
     // Sort seasons within each expansion by season_id in descending order
     Object.keys(groupedCompositions).forEach(expansion => {
       groupedCompositions[expansion].sort((a, b) => b.season_id - a.season_id);
-    });
-    
-    console.log(`✅ [WORKER] Processing completed:`, {
-      total_compositions: compositions.length,
-      total_expansions: Object.keys(groupedCompositions).length
     });
     
     // Send the processed data back to the main thread

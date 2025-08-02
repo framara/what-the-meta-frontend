@@ -70,7 +70,6 @@ export const GroupCompositionPage: React.FC = () => {
   // Progressive loading function
   const fetchData = useCallback(async () => {
     const startTime = performance.now();
-    console.log(`🚀 [${new Date().toISOString()}] Starting fetchData for season ${filter.season_id}`);
     
     if (!filter.season_id) return;
 
@@ -79,7 +78,6 @@ export const GroupCompositionPage: React.FC = () => {
     const richCached = dataCache.get(`rich-${cacheKey}`);
     
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-      console.log(`⚡ [${new Date().toISOString()}] Cache HIT! Returning cached data in ${(performance.now() - startTime).toFixed(2)}ms`);
       setRuns(cached.runs);
       setSeasonData(cached.seasonData);
       setLoading(false);
@@ -87,7 +85,6 @@ export const GroupCompositionPage: React.FC = () => {
       
       // If we have rich data cached, use it immediately
       if (richCached && Date.now() - richCached.timestamp < CACHE_DURATION) {
-        console.log(`⚡ [${new Date().toISOString()}] Rich cache HIT! Using rich data`);
         setSeasonData(richCached.seasonData);
       } else {
         // Start worker to get rich data
@@ -98,11 +95,9 @@ export const GroupCompositionPage: React.FC = () => {
 
     // Prevent duplicate calls
     if (isFetchingRef.current) {
-      console.log(`⏳ [${new Date().toISOString()}] Already fetching, skipping duplicate call`);
       return;
     }
 
-    console.log(`💾 [${new Date().toISOString()}] Cache MISS - fetching fresh data`);
     isFetchingRef.current = true;
     setLoading(true);
     setError(null);
@@ -111,11 +106,9 @@ export const GroupCompositionPage: React.FC = () => {
     try {
       // Start with a smaller initial fetch for faster first render
       const initialLimit = Math.min(filter.limit || 1000, 250);
-      console.log(`📊 [${new Date().toISOString()}] Initial fetch limit: ${initialLimit} runs`);
       
       setLoadingProgress(10);
       const topKeysStart = performance.now();
-      console.log(`🔍 [${new Date().toISOString()}] Starting fetchTopKeys (${initialLimit} runs)...`);
       
       // Fetch top keys first (this is the heaviest call)
       const runsData = await fetchTopKeys({
@@ -126,17 +119,14 @@ export const GroupCompositionPage: React.FC = () => {
       });
       
       const topKeysTime = performance.now() - topKeysStart;
-      console.log(`✅ [${new Date().toISOString()}] fetchTopKeys completed in ${topKeysTime.toFixed(2)}ms - got ${runsData.length} runs`);
       
       setLoadingProgress(60);
-      console.log(`📱 [${new Date().toISOString()}] Setting initial runs data (${runsData.length} runs) - user should see data now`);
       setRuns(runsData); // Show initial data immediately
       
       // If we fetched less than the full limit, fetch the rest
       let finalRuns = runsData;
       if (initialLimit < (filter.limit || 1000)) {
         const remainingLimit = (filter.limit || 1000) - initialLimit;
-        console.log(`🔄 [${new Date().toISOString()}] Fetching remaining ${remainingLimit} runs...`);
         
         const additionalStart = performance.now();
         const additionalRuns = await fetchTopKeys({
@@ -148,10 +138,8 @@ export const GroupCompositionPage: React.FC = () => {
         });
         
         const additionalTime = performance.now() - additionalStart;
-        console.log(`✅ [${new Date().toISOString()}] Additional runs fetched in ${additionalTime.toFixed(2)}ms - got ${additionalRuns.length} runs`);
         
         finalRuns = [...runsData, ...additionalRuns];
-        console.log(`📊 [${new Date().toISOString()}] Total runs: ${finalRuns.length}`);
       }
       
       setLoadingProgress(90);
@@ -178,7 +166,6 @@ export const GroupCompositionPage: React.FC = () => {
       };
       
       // Cache the initial results
-      console.log(`💾 [${new Date().toISOString()}] Caching initial results...`);
       dataCache.set(cacheKey, {
         runs: finalRuns,
         seasonData: initialSeasonData,
@@ -190,8 +177,7 @@ export const GroupCompositionPage: React.FC = () => {
       setIsInitialLoad(false);
       setLoadingProgress(100);
       
-      const totalTime = performance.now() - startTime;
-      console.log(`🎉 [${new Date().toISOString()}] Initial data loaded successfully in ${totalTime.toFixed(2)}ms`);
+      const totalTime = performance.now() - startTime;  
       
       // Start background worker for rich composition data
       startCompositionWorker();
@@ -211,7 +197,6 @@ export const GroupCompositionPage: React.FC = () => {
   const startCompositionWorker = useCallback(() => {
     if (!filter.season_id) return;
     
-    console.log(`🔄 [${new Date().toISOString()}] Starting composition worker...`);
     setTrendLoading(true);
     
     // Create worker if it doesn't exist
@@ -223,11 +208,6 @@ export const GroupCompositionPage: React.FC = () => {
         const { success, seasonData, error } = event.data;
         
         if (success && seasonData) {
-          console.log(`✅ [${new Date().toISOString()}] Rich composition data received:`, {
-            season_id: seasonData.season_id,
-            total_periods: seasonData.total_periods,
-            total_keys: seasonData.total_keys
-          });
           
           // Update with rich data
           setSeasonData(seasonData);

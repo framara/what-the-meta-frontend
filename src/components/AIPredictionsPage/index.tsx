@@ -40,14 +40,12 @@ export const AIPredictionsPage: React.FC = () => {
   // Progressive loading function
   const loadData = useCallback(async () => {
     const startTime = performance.now();
-    console.log(`🚀 [${new Date().toISOString()}] Starting AI predictions load for season ${currentSeasonId}`);
-    
+
     if (!currentSeasonId) return;
 
     // Check cache first
     const cached = dataCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-      console.log(`⚡ [${new Date().toISOString()}] Cache HIT! Returning cached data in ${(performance.now() - startTime).toFixed(2)}ms`);
       setSeasonData(cached.seasonData);
       setSpecEvolution(cached.specEvolution);
       setDungeons(cached.seasonInfo.dungeons);
@@ -60,11 +58,9 @@ export const AIPredictionsPage: React.FC = () => {
 
     // Prevent duplicate calls
     if (isFetchingRef.current) {
-      console.log(`⏳ [${new Date().toISOString()}] Already loading, skipping duplicate call`);
       return;
     }
 
-    console.log(`💾 [${new Date().toISOString()}] Cache MISS - fetching fresh data`);
     isFetchingRef.current = true;
     setLoading(true);
     setError(null);
@@ -73,7 +69,6 @@ export const AIPredictionsPage: React.FC = () => {
     try {
       // Phase 1: Load fast data first (seasons, season info, spec evolution)
       setLoadingProgress(10);
-      console.log(`🔍 [${new Date().toISOString()}] Loading fast data...`);
       
       const [seasonInfo, specEvolutionResult] = await Promise.all([
         fetchSeasonInfo(currentSeasonId),
@@ -81,13 +76,11 @@ export const AIPredictionsPage: React.FC = () => {
       ]);
       
       setLoadingProgress(30);
-      console.log(`✅ [${new Date().toISOString()}] Fast data loaded`);
       
       setSpecEvolution(specEvolutionResult);
       setDungeons(seasonInfo.dungeons);
       
       // Show initial data immediately
-      console.log(`📱 [${new Date().toISOString()}] Setting initial data - user should see basic info now`);
       
       // Phase 2: Start background worker for heavy composition data
       startCompositionWorker();
@@ -112,7 +105,6 @@ export const AIPredictionsPage: React.FC = () => {
   const startCompositionWorker = useCallback(() => {
     if (!currentSeasonId) return;
     
-    console.log(`🔄 [${new Date().toISOString()}] Starting composition worker for AI predictions...`);
     setRichDataLoading(true);
     
     // Create worker if it doesn't exist
@@ -124,11 +116,6 @@ export const AIPredictionsPage: React.FC = () => {
         const { success, seasonData, error } = event.data;
         
         if (success && seasonData) {
-          console.log(`✅ [${new Date().toISOString()}] Rich composition data received for AI:`, {
-            season_id: seasonData.season_id,
-            total_periods: seasonData.total_periods,
-            total_keys: seasonData.total_keys
-          });
           
           // Update with rich data
           setSeasonData(seasonData);
@@ -170,7 +157,6 @@ export const AIPredictionsPage: React.FC = () => {
   const startAIAnalysis = useCallback(async (seasonData: any, specEvolution: any, dungeons: any[]) => {
     if (!currentSeasonId) return;
     
-    console.log(`🤖 [${new Date().toISOString()}] Starting AI analysis...`);
     setAiLoading(true);
     
     try {

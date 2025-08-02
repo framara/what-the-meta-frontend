@@ -5,8 +5,6 @@ self.onmessage = async (event) => {
   const { season_id, period_id, dungeon_id, limit, apiBaseUrl } = event.data;
   
   try {
-    console.log(`🔄 [WORKER] Starting composition data fetch for season ${season_id}`);
-    
     // Build the API URL - require apiBaseUrl to be provided
     if (!apiBaseUrl) {
       throw new Error('API base URL is required');
@@ -24,8 +22,6 @@ self.onmessage = async (event) => {
       url += `?${params.toString()}`;
     }
     
-    console.log(`🔗 [WORKER] Fetching from URL: ${url}`);
-    
     // Fetch the composition data
     const response = await fetch(url);
     
@@ -34,12 +30,6 @@ self.onmessage = async (event) => {
     }
     
     const seasonData = await response.json();
-    
-    console.log(`✅ [WORKER] Composition data fetched successfully:`, {
-      season_id: seasonData.season_id,
-      total_periods: seasonData.total_periods,
-      total_keys: seasonData.total_keys
-    });
     
     // Send the data back to the main thread
     self.postMessage({ 
