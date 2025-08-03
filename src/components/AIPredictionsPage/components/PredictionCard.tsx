@@ -112,7 +112,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({ prediction, type
       <div className={`prediction-card front ${type}`}>
         <div className="card-header">
           <div className="spec-info">
-            <div className="spec-icon" style={{ border: `3px solid ${classColor}` }}>
+            <div className="spec-icon" style={{ border: `2px solid ${classColor}` }}>
               <SpecIconImage 
                 specId={prediction.specId} 
                 alt={prediction.specName}

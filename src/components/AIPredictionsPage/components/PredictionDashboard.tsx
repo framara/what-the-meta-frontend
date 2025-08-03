@@ -267,7 +267,7 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ season
           AI-powered meta trend forecasting using OpenAI GPT-4 analysis
         </p>
         <p className="dashboard-data-info">
-          {getSeasonName(seasonData?.season_id)} • {seasonData?.total_periods || 0} weeks • {seasonData?.total_keys.toLocaleString() || 0} keys analyzed
+          {getSeasonName(seasonData?.season_id)} • {seasonData?.total_periods || 0} weeks • Highest 1.000 per week • {seasonData?.total_keys.toLocaleString() || 0} keys in total analyzed
         </p>
         {usingCache && (
           <div className="cache-indicator">
