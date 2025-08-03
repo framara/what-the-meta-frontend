@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_CLASS_NAMES } from '../constants/wow-constants';
+import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_CLASS_NAMES, WOW_SPEC_TO_CLASS } from '../constants/wow-constants';
+import { SpecIconImage } from '../utils/specIconImages';
 import './styles/LeaderboardTable.css';
 
 interface GroupMember {
@@ -175,12 +176,13 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
                         ? m.role.charAt(0).toUpperCase() + m.role.slice(1)
                         : 'Unknown';
                       const tooltipContent = `Name: ${m.character_name}\nRole: ${roleCap}\nClass: ${WOW_CLASS_NAMES[m.class_id] || m.class_id}\nSpec: ${WOW_SPECIALIZATIONS[m.spec_id] || m.spec_id}`;
-                      const classColor = WOW_CLASS_COLORS[m.class_id] || '#23263a';
+                      const classId = Number(WOW_SPEC_TO_CLASS[m.spec_id]) || 0;
+                      const classColor = WOW_CLASS_COLORS[classId] || '#23263a';
                       return (
-                        <span
+                        <div
                           key={m.character_name + idx}
                           className="saas-group-square"
-                          style={{ background: classColor }}
+                          style={{ border: `0.15rem solid ${classColor}` }}
                           onMouseEnter={e => {
                             const position = calculateTooltipPosition(e.target as HTMLElement, tooltipContent);
                             setTooltip({
@@ -191,7 +193,12 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
                             });
                           }}
                           onMouseLeave={() => setTooltip(null)}
-                        />
+                        >
+                          <SpecIconImage 
+                            specId={m.spec_id} 
+                            alt={WOW_SPECIALIZATIONS[m.spec_id] || 'Spec'}
+                          />
+                        </div>
                       );
                     })}
                   </div>

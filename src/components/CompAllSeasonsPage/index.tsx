@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { fetchTopKeysAllSeasons } from '../../services/api';
 import LoadingScreen from '../LoadingScreen';
-import { WOW_SPECIALIZATIONS, WOW_CLASS_COLORS, WOW_SPEC_ROLES } from '../../constants/wow-constants';
+import { WOW_SPECIALIZATIONS, WOW_CLASS_COLORS, WOW_SPEC_ROLES, WOW_SPEC_TO_CLASS } from '../../constants/wow-constants';
+import { SpecIconImage } from '../../utils/specIconImages';
 import './styles/CompAllSeasonsPage.css';
 
 interface GroupMember {
@@ -170,23 +171,29 @@ export const CompAllSeasonsPage: React.FC = () => {
     
   }, [cacheKey]);
 
-  // Helper function to get spec name from spec_id
-  const getSpecName = useCallback((specId: number): string => {
-    return WOW_SPECIALIZATIONS[specId] || `Spec ${specId}`;
-  }, []);
-
-  // Helper function to get class color
-  const getClassColor = useCallback((classId: number): string => {
-    return WOW_CLASS_COLORS[classId] || '#FFFFFF';
-  }, []);
-
   // Helper function to get role order for sorting
   const getRoleOrder = useCallback((specId: number): number => {
     const role = WOW_SPEC_ROLES[specId];
-    if (role === 'tank') return 1;
-    if (role === 'healer') return 2;
-    return 3; // DPS
+    if (role === 'tank') return 0;
+    if (role === 'healer') return 1;
+    return 2; // DPS
   }, []);
+
+  // Helper function to sort specs by role: tank, healer, dps, dps, dps
+  const sortSpecsByRole = useCallback((specIds: number[]): number[] => {
+    return [...specIds].sort((a, b) => {
+      const roleA = getRoleOrder(a);
+      const roleB = getRoleOrder(b);
+      
+      // First sort by role
+      if (roleA !== roleB) {
+        return roleA - roleB;
+      }
+      
+      // Within same role, sort by spec_id
+      return a - b;
+    });
+  }, [getRoleOrder]);
 
   // Load data on mount
   useEffect(() => {
@@ -265,6 +272,7 @@ export const CompAllSeasonsPage: React.FC = () => {
               <div className="seasons-grid">
                 {seasons.map((season) => {
                   const specIds = season.top_composition.spec_combination.split('-').map(id => parseInt(id));
+                  const sortedSpecIds = sortSpecsByRole(specIds);
                   
                   return (
                     <div key={season.season_id} className="season-card">
@@ -295,29 +303,22 @@ export const CompAllSeasonsPage: React.FC = () => {
                       <div className="composition-display">
                         <h4 className="composition-title">Most Popular Composition</h4>
                         <div className="specs-grid">
-                          {specIds.map((specId, index) => {
-                            // Find the member with this spec_id from the first run
-                            const member = season.top_composition.runs[0]?.members.find(m => Number(m.spec_id) === specId);
-                            const classColor = member ? getClassColor(Number(member.class_id)) : '#FFFFFF';
-                            // Check if color is light (white or yellow)
-                            const isLightColor = classColor === '#FFFFFF' || classColor === '#FFF569';
+                          {sortedSpecIds.map((specId, index) => {
+                            const classId = Number(WOW_SPEC_TO_CLASS[specId]) || 0;
+                            const classColor = WOW_CLASS_COLORS[classId] || '#FFFFFF';
                             
                             return (
                               <div 
                                 key={index} 
                                 className="spec-item"
                                 style={{ 
-                                  backgroundColor: classColor
+                                  border: `3px solid ${classColor}`
                                 }}
                               >
-                                <span 
-                                  className="spec-name"
-                                  style={{ 
-                                    color: isLightColor ? '#000000' : '#ffffff'
-                                  }}
-                                >
-                                  {getSpecName(specId)}
-                                </span>
+                                <SpecIconImage 
+                                  specId={specId} 
+                                  alt={WOW_SPECIALIZATIONS[specId] || 'Spec'}
+                                />
                               </div>
                             );
                           })}

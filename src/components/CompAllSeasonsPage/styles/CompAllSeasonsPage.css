@@ -279,31 +279,45 @@
 }
 
 .specs-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  margin: 1rem;
 }
 
 .spec-item {
+  width: 70px;
+  height: 70px;
+  border-radius: 15px;
   display: flex;
   align-items: center;
-  padding: 0.5rem 0.75rem;
-  border-radius: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  justify-content: center;
+  font-size: 1.2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease;
-  font-weight: 600;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  background: transparent;
+  overflow: hidden;
 }
 
 .spec-item:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-.spec-name {
-  font-size: 0.875rem;
-  font-weight: 600;
+/* Spec icon image styling for historical compositions */
+.spec-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  transform: scale(1.05);
+  margin: 0;
+}
+
+.spec-item:hover img {
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+  transform: scale(1.1);
 }
 
 .composition-stats {
@@ -430,14 +444,12 @@
   }
   
   .specs-grid {
-    gap: 0.375rem;
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    gap: 0.5rem;
   }
   
   .spec-item {
-    padding: 0.375rem;
-  }
-  
-  .spec-name {
-    font-size: 0.8rem;
+    width: 3rem;
+    height: 3rem;
   }
 } 

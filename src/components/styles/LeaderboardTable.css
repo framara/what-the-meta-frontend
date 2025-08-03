@@ -163,21 +163,25 @@
 }
 
 .saas-group-square {
-  width: 16px;
-  height: 16px;
-  border-radius: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   position: relative;
   overflow: hidden;
+  background: transparent;
 }
 
 /* Desktop: Larger squares to utilize empty space */
 @media (min-width: 768px) {
   .saas-group-square {
-    width: 22px;
-    height: 22px;
-    border-radius: 5px;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
   }
   
   .saas-group-squares {
@@ -202,9 +206,25 @@
 }
 
 .saas-group-square:hover {
-  transform: scale(1.3);
+  transform: scale(1.2);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
   z-index: 20;
+}
+
+/* Spec icon image styling for leaderboard */
+.saas-group-square img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+  transform: scale(1.05);
+  margin: 0;
+}
+
+.saas-group-square:hover img {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  transform: scale(1.1);
 }
 
 /* Enhanced tooltip */
@@ -306,8 +326,8 @@
   }
   
   .saas-group-square {
-    width: 14px;
-    height: 14px;
+    width: 18px;
+    height: 18px;
   }
   
   .pagination-container {
@@ -329,8 +349,8 @@
   }
   
   .saas-group-square {
-    width: 12px;
-    height: 12px;
+    width: 16px;
+    height: 16px;
   }
   
   .pagination-container {

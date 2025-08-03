@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_SPEC_ROLES } from '../constants/wow-constants';
+import { SpecIconImage } from '../utils/specIconImages';
 import './styles/SummaryStats.css';
 
 interface GroupMember {
@@ -93,9 +94,6 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
   ) || 0;
   const tankClassId = Number(WOW_SPEC_TO_CLASS[topTankSpecId]) || 0;
   const healerClassId = Number(WOW_SPEC_TO_CLASS[topHealerSpecId]) || 0;
-
-  // Emoji for roles
-  const roleEmoji: Record<string, string> = { tank: '🛡️', healer: '💚', dps: '⚔️' };
 
   // Helper to sort members by role: tank, heal, dps, dps, dps
   // Within same role, sort by spec_id
@@ -204,12 +202,12 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
         <div className="spec-cards-container">
           {/* Tank */}
           <div className="spec-card">
-            <span
-              className="spec-square"
+            <div
+              className="spec-icon"
               style={{
-                background: WOW_CLASS_COLORS[tankClassId] || '#fff',
+                border: `3px solid ${WOW_CLASS_COLORS[tankClassId] || '#fff'}`,
               }}
-              onMouseEnter={e => {
+              onMouseEnter={(e: React.MouseEvent) => {
                 const rect = (e.target as HTMLElement).getBoundingClientRect();
                 setSpecTooltip({
                   x: rect.left + rect.width / 2,
@@ -220,8 +218,11 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
               }}
               onMouseLeave={() => setSpecTooltip(null)}
             >
-              <span>{roleEmoji.tank}</span>
-            </span>
+              <SpecIconImage 
+                specId={topTankSpecId} 
+                alt={WOW_SPECIALIZATIONS[topTankSpecId] || 'Tank Spec'}
+              />
+            </div>
             <span className="spec-label">
               {WOW_SPECIALIZATIONS[topTankSpecId] || '-'}
             </span>
@@ -229,12 +230,12 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
           </div>
           {/* Healer */}
           <div className="spec-card">
-            <span
-              className="spec-square"
+            <div
+              className="spec-icon"
               style={{
-                background: WOW_CLASS_COLORS[healerClassId] || '#fff',
+                border: `3px solid ${WOW_CLASS_COLORS[healerClassId] || '#fff'}`,
               }}
-              onMouseEnter={e => {
+              onMouseEnter={(e: React.MouseEvent) => {
                 const rect = (e.target as HTMLElement).getBoundingClientRect();
                 setSpecTooltip({
                   x: rect.left + rect.width / 2,
@@ -245,8 +246,11 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
               }}
               onMouseLeave={() => setSpecTooltip(null)}
             >
-              <span>{roleEmoji.healer}</span>
-            </span>
+              <SpecIconImage 
+                specId={topHealerSpecId} 
+                alt={WOW_SPECIALIZATIONS[topHealerSpecId] || 'Healer Spec'}
+              />
+            </div>
             <span className="spec-label">
               {WOW_SPECIALIZATIONS[topHealerSpecId] || '-'}
             </span>
@@ -260,12 +264,12 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
                 key={specId}
                 className="spec-card"
               >
-                <span
-                  className="spec-square"
+                <div
+                  className="spec-icon"
                   style={{
-                    background: WOW_CLASS_COLORS[dpsClassId] || '#fff',
+                    border: `3px solid ${WOW_CLASS_COLORS[dpsClassId] || '#fff'}`,
                   }}
-                  onMouseEnter={e => {
+                  onMouseEnter={(e: React.MouseEvent) => {
                     const rect = (e.target as HTMLElement).getBoundingClientRect();
                     setSpecTooltip({
                       x: rect.left + rect.width / 2,
@@ -276,8 +280,11 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
                   }}
                   onMouseLeave={() => setSpecTooltip(null)}
                 >
-                  <span>{roleEmoji.dps}</span>
-                </span>
+                  <SpecIconImage 
+                    specId={specId} 
+                    alt={WOW_SPECIALIZATIONS[specId] || 'DPS Spec'}
+                  />
+                </div>
                 <span className="spec-label">
                   {WOW_SPECIALIZATIONS[specId] || '-'}
                 </span>
@@ -312,12 +319,12 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
                 key={specId + '-' + i}
                 className="spec-card"
               >
-                <span
-                  className="spec-square"
+                <div
+                  className="spec-icon"
                   style={{
-                    background: WOW_CLASS_COLORS[Number(classId)] || '#fff',
+                    border: `3px solid ${WOW_CLASS_COLORS[Number(classId)] || '#fff'}`,
                   }}
-                  onMouseEnter={e => {
+                  onMouseEnter={(e: React.MouseEvent) => {
                     const rect = (e.target as HTMLElement).getBoundingClientRect();
                     setSpecTooltip({
                       x: rect.left + rect.width / 2,
@@ -328,8 +335,11 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
                   }}
                   onMouseLeave={() => setSpecTooltip(null)}
                 >
-                  <span>{roleEmoji[role] || ''}</span>
-                </span>
+                  <SpecIconImage 
+                    specId={Number(specId)} 
+                    alt={WOW_SPECIALIZATIONS[Number(specId)] || 'Group Spec'}
+                  />
+                </div>
                 <span className="spec-label">
                   {WOW_SPECIALIZATIONS[Number(specId)] || '-'}
                 </span>
