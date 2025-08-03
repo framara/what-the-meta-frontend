@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { SpecIconImage } from '../../../utils/specIconImages';
 import { Tooltip } from './Tooltip';
 import '../styles/PredictionCard.css';
 
@@ -111,7 +112,12 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({ prediction, type
       <div className={`prediction-card front ${type}`}>
         <div className="card-header">
           <div className="spec-info">
-            <div className="spec-icon" style={{ backgroundColor: classColor }}></div>
+            <div className="spec-icon" style={{ border: `3px solid ${classColor}` }}>
+              <SpecIconImage 
+                specId={prediction.specId} 
+                alt={prediction.specName}
+              />
+            </div>
             <div className="spec-text">
               <div className="spec-name">{specName}</div>
               <div className="spec-class">{className}</div>
@@ -191,7 +197,12 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({ prediction, type
       <div className={`prediction-card back ${type}`}>
         <div className="card-header">
           <div className="spec-info">
-            <div className="spec-icon" style={{ backgroundColor: classColor }}></div>
+            <div className="spec-icon" style={{ border: `3px solid ${classColor}` }}>
+              <SpecIconImage 
+                specId={prediction.specId} 
+                alt={prediction.specName}
+              />
+            </div>
             <div className="spec-text">
               <div className="spec-name">{specName}</div>
               <div className="spec-class">{className}</div>

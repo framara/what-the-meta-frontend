@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_SPEC_ROLES } from '../../../constants/wow-constants';
-import { ROLE_EMOJI } from '../constants/compositionConstants';
+import { SpecIconImage } from '../../../utils/specIconImages';
 import { getTextColor } from '../utils/compositionUtils';
 import type { Composition } from '../utils/compositionUtils';
 import type { TooltipState } from '../hooks/useTooltip';
@@ -355,12 +355,13 @@ export const CompositionCard: React.FC<CompositionCardProps> = ({
               const specName = WOW_SPECIALIZATIONS[specId] || 'Unknown Spec';
               
               return (
-                <span
+                <div
                   key={specIndex}
                   className={`composition-spec ${isSelectedSpec ? 'selected-spec' : ''}`}
                   style={{
-                    background: WOW_CLASS_COLORS[classId] || '#fff',
-                    border: isSelectedSpec ? '3px solid #3b82f6' : 'none',
+                    border: isSelectedSpec 
+                      ? '3px solid #3b82f6' 
+                      : `3px solid ${WOW_CLASS_COLORS[classId] || '#fff'}`,
                     boxShadow: isSelectedSpec ? '0 0 0 2px rgba(59, 130, 246, 0.3)' : '0 2px 4px rgba(0, 0, 0, 0.2)',
                   }}
                   onMouseEnter={(e) => handleSpecMouseEnter(e, specId, classId)}
@@ -380,8 +381,11 @@ export const CompositionCard: React.FC<CompositionCardProps> = ({
                     }
                   }}
                 >
-                  {ROLE_EMOJI[role] || ''}
-                </span>
+                  <SpecIconImage 
+                    specId={specId} 
+                    alt={specName}
+                  />
+                </div>
               );
             })}
           </div>

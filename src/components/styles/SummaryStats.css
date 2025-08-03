@@ -183,22 +183,33 @@
   transform: translateY(-2px);
 }
 
-/* Enhanced spec squares */
-.spec-square {
+/* Enhanced spec icons */
+.spec-icon {
   width: 80px;
   height: 80px;
   border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  font-size: 2.5rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  background: transparent;
 }
 
-.spec-square::before {
+/* Spec icon image styling */
+.spec-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 20px;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  transform: scale(1.05);
+  margin: 0;
+}
+
+.spec-icon::before {
   content: '';
   position: absolute;
   top: 0;
@@ -209,13 +220,18 @@
   transition: left 0.5s ease;
 }
 
-.spec-square:hover::before {
+.spec-icon:hover::before {
   left: 100%;
 }
 
-.spec-square:hover {
+.spec-icon:hover {
   transform: scale(1.05);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
+}
+
+.spec-icon:hover img {
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
+  transform: scale(1.1);
 }
 
 /* Spec labels */
@@ -331,10 +347,10 @@
     gap: 1rem;
   }
   
-  .spec-square {
+  .spec-icon {
     width: 60px;
     height: 60px;
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     border-radius: 16px;
   }
   
@@ -356,10 +372,10 @@
     gap: 0.75rem;
   }
   
-  .spec-square {
+  .spec-icon {
     width: 50px;
     height: 50px;
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     border-radius: 12px;
   }
   
@@ -391,11 +407,11 @@
     gap: 2.25rem; /* Increased from 1.5rem */
   }
   
-  .spec-role-section .spec-square,
-  .group-composition-section .spec-square {
+  .spec-role-section .spec-icon,
+  .group-composition-section .spec-icon {
     width: 70px !important; /* Increased from 80px (50% bigger) */
     height: 70px !important; /* Increased from 80px (50% bigger) */
-    font-size: 1.2rem !important; /* Increased from 2rem (50% bigger) */
+    font-size: 1.5rem !important; /* Increased from 2.5rem (50% bigger) */
     border-radius: 15px !important; /* Increased from 20px (50% bigger) */
   }
   
