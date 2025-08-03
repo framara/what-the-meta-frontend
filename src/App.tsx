@@ -12,6 +12,7 @@ import { RaceBarsPage } from './components/RaceBarsPage';
 import { GroupCompositionPage } from './components/GroupCompositionPage/index';
 import { CompAllSeasonsPage } from './components/CompAllSeasonsPage/index';
 import { AIPredictionsPage } from './components/AIPredictionsPage';
+import { MetaHealthPage } from './components/MetaHealthPage';
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
 
@@ -118,6 +119,7 @@ function App() {
             <Route path="/group-composition" element={<GroupCompositionPage />} />
             <Route path="/historical-composition" element={<CompAllSeasonsPage />} />
             <Route path="/ai-predictions" element={<AIPredictionsPage />} />
+            <Route path="/meta-health" element={<MetaHealthPage />} />
             <Route path="/ai-analysis" element={
               <div className="max-w-7xl mx-auto px-4 py-8">
                 <h1 className="text-3xl font-bold text-gray-200 mb-6">AI Analysis</h1>

@@ -70,35 +70,60 @@ export async function fetchSeasonData(seasonId: number) {
 
 // New: Fetch composition data optimized for group composition analysis
 export async function fetchCompositionData(seasonId: number) {
+  console.log('API: fetchCompositionData called with seasonId:', seasonId);
   const url = `${API_BASE_URL}/meta/composition-data/${seasonId}`;
-  const response = await axios.get(url);
-  return response.data as {
-    season_id: number;
-    total_periods: number;
-    total_keys: number;
-    periods: Array<{
-      period_id: number;
-      keys_count: number;
-      keys: Array<{
-        id: number;
-        keystone_level: number;
-        score: number;
-        members: Array<{
-          spec_id: string;
-          class_id: string;
-          role: string;
+  console.log('API: fetchCompositionData URL:', url);
+  try {
+    const response = await axios.get(url);
+    console.log('API: fetchCompositionData response received:', {
+      status: response.status,
+      hasData: !!response.data,
+      dataKeys: Object.keys(response.data || {}),
+      periodsCount: response.data?.periods?.length || 0
+    });
+    return response.data as {
+      season_id: number;
+      total_periods: number;
+      total_keys: number;
+      periods: Array<{
+        period_id: number;
+        keys_count: number;
+        keys: Array<{
+          id: number;
+          keystone_level: number;
+          score: number;
+          members: Array<{
+            spec_id: string;
+            class_id: string;
+            role: string;
+          }>;
+          [key: string]: any;
         }>;
-        [key: string]: any;
       }>;
-    }>;
-  };
+    };
+  } catch (error) {
+    console.error('API: fetchCompositionData error:', error);
+    throw error;
+  }
 }
 
 // New: Fetch all seasons
 export async function fetchSeasons() {
+  console.log('API: fetchSeasons called');
   const url = `${API_BASE_URL}/wow/advanced/seasons`;
-  const response = await axios.get(url);
-  return response.data as Array<{ season_id: number; season_name: string }>;
+  console.log('API: fetchSeasons URL:', url);
+  try {
+    const response = await axios.get(url);
+    console.log('API: fetchSeasons response received:', {
+      status: response.status,
+      dataLength: response.data?.length || 0,
+      firstSeason: response.data?.[0]
+    });
+    return response.data;
+  } catch (error) {
+    console.error('API: fetchSeasons error:', error);
+    throw error;
+  }
 }
 
 // New: Fetch season info (periods and dungeons) for a given seasonId
@@ -112,11 +137,20 @@ export async function fetchSeasonInfo(seasonId: number) {
 }
 
 export async function fetchSpecEvolution(seasonId?: number) {
+  console.log('API: fetchSpecEvolution called with seasonId:', seasonId);
   const url = seasonId 
     ? `${API_BASE_URL}/meta/spec-evolution/${seasonId}`
     : `${API_BASE_URL}/meta/spec-evolution`;
-  const response = await axios.get(url);
-  return response.data as {
+  console.log('API: fetchSpecEvolution URL:', url);
+  try {
+    const response = await axios.get(url);
+    console.log('API: fetchSpecEvolution response received:', {
+      status: response.status,
+      hasData: !!response.data,
+      dataKeys: Object.keys(response.data || {}),
+      evolutionLength: response.data?.evolution?.length || 0
+    });
+    return response.data as {
     season_id: number;
     expansion_id: number;
     expansion_name: string;
@@ -128,4 +162,8 @@ export async function fetchSpecEvolution(seasonId?: number) {
       spec_counts: Record<string, number>;
     }>;
   };
+  } catch (error) {
+    console.error('API: fetchSpecEvolution error:', error);
+    throw error;
+  }
 }

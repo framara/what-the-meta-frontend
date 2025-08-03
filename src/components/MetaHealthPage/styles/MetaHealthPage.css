@@ -1,0 +1,249 @@
+.mh-meta-health-page {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  color: #f8fafc;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+}
+
+.mh-meta-health-page .mh-meta-health-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding: 2rem 0;
+}
+
+.mh-meta-health-page .mh-meta-health-header h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.mh-meta-health-page .mh-meta-health-header .mh-subtitle {
+  font-size: 1.25rem;
+  color: #cbd5e1;
+  margin: 0;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.mh-meta-health-page .mh-meta-health-filter {
+  margin-bottom: 3rem;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+/* Loading sections */
+.mh-meta-health-page .mh-data-loading-section,
+.mh-meta-health-page .mh-ai-loading-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-radius: 20px;
+  margin: 3rem 0;
+  border: 2px dashed rgba(59, 130, 246, 0.3);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.mh-meta-health-page .mh-data-loading-section::before,
+.mh-meta-health-page .mh-ai-loading-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Error container */
+.mh-meta-health-page .mh-error-container {
+  text-align: center;
+  padding: 3rem;
+  background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+  border: 1px solid #dc2626;
+  border-radius: 20px;
+  margin: 3rem 0;
+  box-shadow: 0 12px 40px rgba(220, 38, 38, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.mh-meta-health-page .mh-error-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+  animation: errorShimmer 3s infinite;
+}
+
+@keyframes errorShimmer {
+  0%, 100% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+}
+
+.mh-meta-health-page .mh-error-container h2 {
+  color: #fecaca;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.mh-meta-health-page .mh-error-container p {
+  color: #fca5a5;
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+}
+
+.mh-meta-health-page .mh-retry-button {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.4);
+  font-size: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.mh-meta-health-page .mh-retry-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.mh-meta-health-page .mh-retry-button:hover {
+  background: linear-gradient(135deg, #b91c1c, #991b1b);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(220, 38, 38, 0.5);
+}
+
+.mh-meta-health-page .mh-retry-button:hover::before {
+  left: 100%;
+}
+
+/* Initial state */
+.mh-meta-health-page .mh-initial-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 500px;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-radius: 20px;
+  margin: 3rem 0;
+  border: 2px dashed rgba(59, 130, 246, 0.3);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.mh-meta-health-page .mh-initial-state::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+  animation: shimmer 3s infinite;
+}
+
+.mh-meta-health-page .mh-initial-state-content {
+  text-align: center;
+  max-width: 600px;
+  padding: 2rem;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.mh-meta-health-page .mh-initial-state-content h2 {
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+}
+
+.mh-meta-health-page .mh-initial-state-content p {
+  font-size: 1.25rem;
+  color: #cbd5e1;
+  line-height: 1.8;
+  font-weight: 500;
+}
+
+/* Analysis content */
+.mh-meta-health-page .mh-meta-health-content {
+  margin-top: 3rem;
+}
+
+.mh-meta-health-page .mh-analysis-sections {
+  display: grid;
+  gap: 3rem;
+  margin-top: 3rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .mh-meta-health-page {
+    padding: 1rem;
+  }
+  
+  .mh-meta-health-page .mh-meta-health-header h1 {
+    font-size: 2.5rem;
+  }
+  
+  .mh-meta-health-page .mh-meta-health-header .mh-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .mh-meta-health-page .mh-data-loading-section,
+  .mh-meta-health-page .mh-ai-loading-section,
+  .mh-meta-health-page .mh-initial-state {
+    min-height: 300px;
+    margin: 2rem 0;
+  }
+  
+  .mh-meta-health-page .mh-initial-state-content h2 {
+    font-size: 2rem;
+  }
+  
+  .mh-meta-health-page .mh-initial-state-content p {
+    font-size: 1.1rem;
+  }
+} 

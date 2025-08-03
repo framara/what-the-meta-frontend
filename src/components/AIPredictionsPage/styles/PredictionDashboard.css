@@ -1,28 +1,45 @@
-.prediction-dashboard {
+.prediction-dashboard.dashboard-refactored {
   display: flex;
   flex-direction: column;
   gap: 2rem;
 }
 
-.dashboard-header {
+.prediction-dashboard.dashboard-refactored .dashboard-header {
   text-align: center;
   margin-bottom: 1rem;
 }
 
-.dashboard-title {
+.prediction-dashboard.dashboard-refactored .dashboard-title {
   font-size: 1.75rem;
   font-weight: 700;
   color: #f3f4f6;
   margin-bottom: 0.5rem;
-  display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
 }
 
-.dashboard-subtitle {
+.prediction-dashboard.dashboard-refactored .dashboard-subtitle {
   color: #9ca3af;
   font-size: 0.875rem;
+}
+
+.prediction-dashboard.dashboard-refactored .dashboard-data-info {
+  color: #9ca3af;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.prediction-dashboard.dashboard-refactored .cache-indicator {
+  color: #10b981;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.prediction-dashboard.dashboard-refactored .force-refresh-indicator {
+  color: #f59e0b;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
 }
 
 .predictions-summary-row {

@@ -21,7 +21,7 @@ const robotMessages = [
   '📈 Processing temporal trend data...',
   '🧮 Calculating confidence intervals...',
   '🎮 Mining competitive intelligence...',
-  '🔮 Unveiling the future of Mythic+ meta...'
+  '🔮 Unveiling the future of Mythic+ meta...'  
 ];
 
 export const AILoadingScreen: React.FC = () => {
