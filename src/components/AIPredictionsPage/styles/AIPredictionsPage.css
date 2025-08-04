@@ -13,26 +13,7 @@
   overflow: hidden;
 }
 
-.ai-predictions-page::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.08), transparent);
-  transition: left 0.8s ease;
-}
-
-.ai-predictions-page:hover::before {
-  left: 100%;
-}
-
-.ai-predictions-page:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  border-color: rgba(59, 130, 246, 0.3);
-}
+/* Removed shiny effect and elevate effect on hover */
 
 .page-header {
   text-align: center;

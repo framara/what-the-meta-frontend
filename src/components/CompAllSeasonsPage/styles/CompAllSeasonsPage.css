@@ -13,26 +13,7 @@
   overflow-x: hidden;
 }
 
-.comp-all-seasons-page::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.08), transparent);
-  transition: left 0.8s ease;
-}
-
-.comp-all-seasons-page:hover::before {
-  left: 100%;
-}
-
-.comp-all-seasons-page:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  border-color: rgba(59, 130, 246, 0.3);
-}
+/* Removed shiny effect and elevate effect on hover */
 
 .page-header {
   text-align: center;
@@ -284,7 +265,7 @@
   margin: 1rem;
 }
 
-.spec-item {
+.comp-all-seasons-page .spec-item {
   width: 70px;
   height: 70px;
   border-radius: 15px;
@@ -299,13 +280,13 @@
   overflow: hidden;
 }
 
-.spec-item:hover {
+.comp-all-seasons-page .spec-item:hover {
   transform: scale(1.1);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* Spec icon image styling for historical compositions */
-.spec-item img {
+.comp-all-seasons-page .spec-item img {
   width: 100%;
   height: 100%;
   object-fit: contain;
@@ -315,7 +296,7 @@
   margin: 0;
 }
 
-.spec-item:hover img {
+.comp-all-seasons-page .spec-item:hover img {
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
   transform: scale(1.1);
 }

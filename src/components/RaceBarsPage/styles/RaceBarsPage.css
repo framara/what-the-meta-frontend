@@ -54,26 +54,7 @@
   min-height: 600px;
 }
 
-.race-bars-page::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.08), transparent);
-  transition: left 0.8s ease;
-}
-
-.race-bars-page:hover::before {
-  left: 100%;
-}
-
-.race-bars-page:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  border-color: rgba(59, 130, 246, 0.3);
-}
+/* Removed shiny effect and elevate effect on hover */
 
 /* ===== CONTROLS SECTION ===== */
 .controls-section {
