@@ -6,9 +6,11 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 1;
 }
 
-.insights-header {
+.ai-analysis-insights .insights-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -17,7 +19,7 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.insights-header h3 {
+.ai-analysis-insights .insights-header h3 {
   margin: 0;
   color: #f8fafc;
   font-size: 1.5rem;
@@ -25,19 +27,19 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.insights-metrics {
+.ai-analysis-insights .insights-metrics {
   display: flex;
   gap: 20px;
 }
 
-.metric {
+.ai-analysis-insights .metric {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
 }
 
-.metric-label {
+.ai-analysis-insights .metric-label {
   font-size: 0.75rem;
   color: #94a3b8;
   font-weight: 500;
@@ -45,21 +47,21 @@
   letter-spacing: 0.5px;
 }
 
-.metric-value {
+.ai-analysis-insights .metric-value {
   font-size: 1.125rem;
   font-weight: 700;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-.metric-value.confidence {
+.ai-analysis-insights .metric-value.confidence {
   font-size: 1.25rem;
 }
 
-.insights-section {
+.ai-analysis-insights .insights-section {
   margin-bottom: 24px;
 }
 
-.insights-section h4 {
+.ai-analysis-insights .insights-section h4 {
   margin: 0 0 16px 0;
   color: #f1f5f9;
   font-size: 1.125rem;
@@ -69,15 +71,15 @@
   gap: 8px;
 }
 
-.trends-list,
-.insights-list {
+.ai-analysis-insights .trends-list,
+.ai-analysis-insights .insights-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.trend-item,
-.insight-item {
+.ai-analysis-insights .trend-item,
+.ai-analysis-insights .insight-item {
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -88,8 +90,8 @@
   transition: all 0.2s ease;
 }
 
-.trend-item:hover,
-.insight-item:hover {
+.ai-analysis-insights .trend-item:hover,
+.ai-analysis-insights .insight-item:hover {
   background: rgba(255, 255, 255, 0.08);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);

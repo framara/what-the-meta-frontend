@@ -332,7 +332,7 @@ const Navigation = () => {
         >
           <button
             className={`font-bold text-lg transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap flex items-center gap-1 ${
-              isActive('/ai-predictions') || isActive('/ai-analysis') || isActive('/ai-insights')
+              isActive('/ai-predictions') || isActive('/ai-analysis') || isActive('/ai-insights') || isActive('/meta-health')
                 ? 'text-blue-400 border-b-2 border-blue-400 md:border-b-2'
                 : 'hover:text-blue-400'
             }`}
@@ -370,9 +370,17 @@ const Navigation = () => {
               >
                 AI Predictions
               </Link>
-              <div className="px-4 py-2 text-gray-500 text-sm italic">
-                More coming soon...
-              </div>
+              <Link 
+                to="/meta-health" 
+                className={`block px-4 py-2 transition-colors rounded-b-lg ${
+                  isActive('/meta-health')
+                    ? 'text-blue-400 bg-gray-700'
+                    : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'
+                }`}
+                onClick={() => setAiDropdownOpen(false)}
+              >
+                Meta Health
+              </Link>
             </div>
           )}
         </div>
