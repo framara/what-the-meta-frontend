@@ -47,6 +47,32 @@ export interface MetaHealthRequest {
   forceRefresh?: boolean;
 }
 
+export interface CompositionAnalysis {
+  mostPopularGroup?: {
+    specs: number[]; // Array of 5 spec IDs in the most popular composition
+    specNames: string[]; // Array of spec names for display
+    usage: number; // Percentage of total runs this composition represents
+    avgLevel: number; // Average keystone level for this composition
+    count: number; // Total count of this composition
+  };
+  specReplacements?: {
+    [specId: number]: {
+      specName: string; // Name of the spec in the most popular group
+      role: string; // "tank", "healer", or "dps"
+      replacements: Array<{
+        specId: number; // ID of the replacement spec
+        specName: string; // Name of the replacement spec
+        count: number; // How many times this replacement occurred
+        avgLevel: number; // Average keystone level for this replacement
+        usage: number; // Percentage of total runs this replacement represents
+        role: string; // Role of the replacement spec
+      }>;
+    };
+  };
+  compositionDiversity: string; // "High", "Medium", "Low" - assessment of composition variety
+  dominantPatterns: string[]; // 1-2 sentences about composition flexibility and meta adaptability
+}
+
 export interface MetaHealthResponse {
   metaSummary: {
     overallState: string; // Healthy, Concerning, Unhealthy
@@ -58,8 +84,9 @@ export interface MetaHealthResponse {
     healer: RoleAnalysis;
     dps: RoleAnalysis;
   };
+  compositionAnalysis: CompositionAnalysis;
   balanceIssues: Array<{
-    type: string; // dominance, underuse, role_imbalance
+    type: string; // dominance, underuse, role_imbalance, composition_stagnation
     description: string;
     severity: string; // low, medium, high
   }>;

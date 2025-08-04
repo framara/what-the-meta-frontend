@@ -3,32 +3,61 @@ import { getMetaHealthAnalysis } from '../../services/aiService';
 import AILoadingScreen from '../AILoadingScreen';
 import { FilterBar } from '../FilterBar';
 import { useFilterState, useFilterDispatch } from '../FilterContext';
+import { WOW_SPEC_NAMES } from '../../constants/wow-constants';
 import './styles/MetaHealthPage.css';
 
-interface MetaHealthData {
-  metaSummary: {
-    overallState: string; // Healthy, Concerning, Unhealthy
-    summary: string;
-    keyInsights: string[];
-  };
-  roleAnalysis: {
-    tank: RoleAnalysis;
-    healer: RoleAnalysis;
-    dps: RoleAnalysis;
-  };
-  balanceIssues: Array<{
-    type: string; // dominance, underuse, role_imbalance
-    description: string;
-    severity: string; // low, medium, high
-  }>;
-}
+  // Local interfaces for meta health data
+  interface RoleAnalysis {
+    dominantSpecs: Array<{ specId: number; usage: number; name: string }>;
+    underusedSpecs: Array<{ specId: number; usage: number; name: string }>;
+    healthStatus: string;
+    totalRuns: number;
+  }
 
-interface RoleAnalysis {
-  dominantSpecs: Array<{ specId: number; usage: number; name: string }>; // Top 3 most used specs
-  underusedSpecs: Array<{ specId: number; usage: number; name: string }>;
-  healthStatus: string; // Good, Concerning, Poor
-  totalRuns: number; // Total number of runs for this role
-}
+  interface CompositionAnalysis {
+    mostPopularGroup?: {
+      specs: number[];
+      specNames: string[];
+      usage: number;
+      avgLevel: number;
+      count: number;
+    };
+    specReplacements?: {
+      [specId: number]: {
+        specName: string;
+        role: string;
+        replacements: Array<{
+          specId: number;
+          specName: string;
+          count: number;
+          avgLevel: number;
+          usage: number;
+          role: string;
+        }>;
+      };
+    };
+    compositionDiversity: string;
+    dominantPatterns: string[];
+  }
+
+  interface MetaHealthData {
+    metaSummary: {
+      overallState: string;
+      summary: string;
+      keyInsights: string[];
+    };
+    roleAnalysis: {
+      tank: RoleAnalysis;
+      healer: RoleAnalysis;
+      dps: RoleAnalysis;
+    };
+    compositionAnalysis: CompositionAnalysis;
+    balanceIssues: Array<{
+      type: string;
+      description: string;
+      severity: string;
+    }>;
+  }
 
 export const MetaHealthPage: React.FC = () => {
   const [metaHealthData, setMetaHealthData] = useState<MetaHealthData | null>(null);
@@ -272,6 +301,93 @@ export const MetaHealthPage: React.FC = () => {
               })}
             </div>
           </div>
+
+          {/* Composition Analysis */}
+          {metaHealthData.compositionAnalysis && (
+            <div className="mh-composition-section">
+              <h2>Composition Analysis</h2>
+              <div className="mh-composition-content">
+                <div className="mh-composition-overview">
+                  <div className="mh-diversity-badge">
+                    <span className="mh-diversity-label">Diversity:</span>
+                    <span className={`mh-diversity-value mh-diversity-${metaHealthData.compositionAnalysis.compositionDiversity.toLowerCase()}`}>
+                      {metaHealthData.compositionAnalysis.compositionDiversity}
+                    </span>
+                  </div>
+                  
+                  {metaHealthData.compositionAnalysis.dominantPatterns.length > 0 && (
+                    <div className="mh-patterns-section">
+                      <h3>Dominant Patterns</h3>
+                      <ul className="mh-patterns-list">
+                        {metaHealthData.compositionAnalysis.dominantPatterns.map((pattern, index) => (
+                          <li key={index} className="mh-pattern-item">
+                            {pattern}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                {/* Most Popular Group */}
+                {metaHealthData.compositionAnalysis.mostPopularGroup && (
+                  <div className="mh-most-popular-group">
+                    <h3>Most Popular Group</h3>
+                    <div className="mh-composition-card mh-popular-group-card">
+                      <div className="mh-composition-header">
+                        <span className="mh-composition-usage">{metaHealthData.compositionAnalysis.mostPopularGroup.usage.toFixed(1)}%</span>
+                        <span className="mh-composition-count">({metaHealthData.compositionAnalysis.mostPopularGroup.count} runs)</span>
+                      </div>
+                      <div className="mh-composition-specs">
+                        {metaHealthData.compositionAnalysis.mostPopularGroup.specNames.map((specName, specIndex) => (
+                          <span key={specIndex} className="mh-composition-spec">
+                            {specName}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="mh-composition-level">
+                        Avg Level: {metaHealthData.compositionAnalysis.mostPopularGroup.avgLevel}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Spec Replacements */}
+                {metaHealthData.compositionAnalysis.specReplacements && (
+                  <div className="mh-spec-replacements">
+                    <h3>Spec Replacements</h3>
+                    <div className="mh-replacements-grid">
+                      {Object.entries(metaHealthData.compositionAnalysis.specReplacements).map(([specId, specData]) => (
+                        <div key={specId} className="mh-replacement-card">
+                          <div className="mh-replacement-header">
+                            <h4 className="mh-replacement-spec">{specData.specName}</h4>
+                            <span className="mh-replacement-role">{specData.role}</span>
+                          </div>
+                          
+                          {specData.replacements.length > 0 ? (
+                            <div className="mh-replacements-list">
+                              <h5>Most Common Replacements:</h5>
+                              {specData.replacements.map((replacement, index) => (
+                                <div key={index} className="mh-replacement-item">
+                                  <span className="mh-replacement-name">{replacement.specName}</span>
+                                  <span className="mh-replacement-usage">{replacement.usage.toFixed(1)}%</span>
+                                  <span className="mh-replacement-count">({replacement.count} runs)</span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="mh-no-replacements">
+                              <p>No common replacements found</p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Balance Issues */}
           {metaHealthData.balanceIssues.length > 0 && (
