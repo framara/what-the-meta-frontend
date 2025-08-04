@@ -3,69 +3,31 @@ import { getMetaHealthAnalysis } from '../../services/aiService';
 import AILoadingScreen from '../AILoadingScreen';
 import { FilterBar } from '../FilterBar';
 import { useFilterState, useFilterDispatch } from '../FilterContext';
-import { MetaHealthDashboard } from './components/MetaHealthDashboard';
-import { RoleHealthAnalysis } from './components/RoleHealthAnalysis';
-import { CompositionHealthAnalysis } from './components/CompositionHealthAnalysis';
-import { TemporalAnalysis } from './components/TemporalAnalysis';
-import { MetaHealthInsights } from './components/MetaHealthInsights';
 import './styles/MetaHealthPage.css';
 
 interface MetaHealthData {
-  metaHealth: {
-    overallScore: number;
-    diversityScore: number;
-    balanceScore: number;
-    compositionHealth: number;
-    trends: {
-      improving: boolean;
-      diversityTrend: string;
-      balanceTrend: string;
-    };
+  metaSummary: {
+    overallState: string; // Healthy, Concerning, Unhealthy
+    summary: string;
+    keyInsights: string[];
   };
   roleAnalysis: {
     tank: RoleAnalysis;
     healer: RoleAnalysis;
     dps: RoleAnalysis;
   };
-  compositionAnalysis: {
-    totalCompositions: number;
-    dominantComposition: {
-      specs: number[];
-      usage: number;
-      healthStatus: string;
-    };
-    compositionDiversity: number;
-    flexibility: {
-      highFlexibility: string[];
-      lowFlexibility: string[];
-      recommendations: string[];
-    };
-  };
-  temporalAnalysis: {
-    seasonStartDiversity: number;
-    currentDiversity: number;
-    diversityChange: number;
-    dramaticChanges: Array<{
-      week: number;
-      description: string;
-      impact: string;
-    }>;
-    seasonEvolution: {
-      startState: string;
-      currentState: string;
-      keyChanges: string[];
-    };
-  };
-  aiInsights: string[];
-  recommendations: string[];
+  balanceIssues: Array<{
+    type: string; // dominance, underuse, role_imbalance
+    description: string;
+    severity: string; // low, medium, high
+  }>;
 }
 
 interface RoleAnalysis {
-  viableSpecs: number;
-  dominanceScore: number;
-  topSpec: { specId: number; usage: number };
-  healthStatus: string;
-  recommendations: string[];
+  dominantSpecs: Array<{ specId: number; usage: number; name: string }>; // Top 3 most used specs
+  underusedSpecs: Array<{ specId: number; usage: number; name: string }>;
+  healthStatus: string; // Good, Concerning, Poor
+  totalRuns: number; // Total number of runs for this role
 }
 
 export const MetaHealthPage: React.FC = () => {
@@ -77,44 +39,28 @@ export const MetaHealthPage: React.FC = () => {
   const completedSeasonRef = useRef<number | null>(null);
   const pendingRequestRef = useRef<Promise<any> | null>(null);
 
-  console.log('MetaHealthPage: Component rendered', {
-    loading,
-    error,
-    currentSeasonId: filter.season_id,
-    hasMetaHealthData: !!metaHealthData
-  });
-
   // Load data when season changes
   useEffect(() => {
-    console.log('MetaHealthPage: Season changed, currentSeasonId:', filter.season_id);
     if (!filter.season_id) {
-      console.log('MetaHealthPage: No currentSeasonId, skipping loadData');
       return;
     }
 
     const currentSeasonId = filter.season_id;
     let isCancelled = false;
 
-    // Check if we've already completed this season
     if (completedSeasonRef.current === currentSeasonId) {
-      console.log('MetaHealthPage: Season already completed, skipping loadData');
       return;
     }
 
     const loadData = async () => {
-      console.log('MetaHealthPage: Starting loadData for season:', currentSeasonId);
-      
-      // Only set loading if we haven't completed this season yet
       if (completedSeasonRef.current !== currentSeasonId) {
         setLoading(true);
         setError(null);
       }
 
       try {
-        console.log('MetaHealthPage: Starting meta health analysis...');
         await startMetaHealthAnalysis(currentSeasonId);
 
-        // Mark this season as completed after analysis finishes
         if (!isCancelled) {
           completedSeasonRef.current = currentSeasonId;
         }
@@ -126,7 +72,6 @@ export const MetaHealthPage: React.FC = () => {
         }
       } finally {
         if (!isCancelled) {
-          console.log('MetaHealthPage: loadData completed, setting loading to false');
           setLoading(false);
         }
       }
@@ -134,30 +79,15 @@ export const MetaHealthPage: React.FC = () => {
 
     loadData();
 
-    // Cleanup function to handle React StrictMode double-invocation
     return () => {
-      console.log('MetaHealthPage: Effect cleanup - cancelling loadData');
       isCancelled = true;
     };
   }, [filter.season_id]);
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      console.log('MetaHealthPage: Component unmounting');
-    };
-  }, []);
-
   const startMetaHealthAnalysis = async (seasonId: number) => {
     const currentSeasonId = filter.season_id;
     
-    console.log('MetaHealthPage: startMetaHealthAnalysis called', {
-      seasonId: currentSeasonId
-    });
-
-    // Check if there's already a pending request for this season
     if (pendingRequestRef.current) {
-      console.log('MetaHealthPage: Request already in progress, waiting for completion');
       try {
         const analysis = await pendingRequestRef.current;
         return analysis;
@@ -167,9 +97,6 @@ export const MetaHealthPage: React.FC = () => {
     }
 
     try {
-      console.log('MetaHealthPage: Calling getMetaHealthAnalysis...');
-      
-      // Create the request and store it in the ref
       const requestPromise = getMetaHealthAnalysis({
         seasonId: currentSeasonId!
       });
@@ -177,58 +104,63 @@ export const MetaHealthPage: React.FC = () => {
       
       const analysis = await requestPromise;
 
-      // Check if we're still on the same season
       if (filter.season_id !== currentSeasonId) {
-        console.log('MetaHealthPage: Season changed during analysis, skipping state updates');
         return;
       }
 
-      console.log('MetaHealthPage: Meta health analysis completed successfully', {
-        analysisKeys: Object.keys(analysis || {}),
-        hasMetaHealth: !!analysis?.metaHealth,
-        hasRoleAnalysis: !!analysis?.roleAnalysis,
-        hasCompositionAnalysis: !!analysis?.compositionAnalysis,
-        hasTemporalAnalysis: !!analysis?.temporalAnalysis
-      });
-
       setMetaHealthData(analysis);
-      
-      // Clear the pending request ref
       pendingRequestRef.current = null;
-      
-      // Mark this season as completed AFTER setting the data
       completedSeasonRef.current = currentSeasonId || null;
     } catch (err) {
       console.error('MetaHealthPage: Failed to get meta health analysis:', err);
       setError('Failed to get meta health analysis');
-      
-      // Clear the pending request ref on error
       pendingRequestRef.current = null;
     }
   };
 
   const handleRefresh = () => {
-    console.log('MetaHealthPage: Refresh requested');
     if (filter.season_id) {
-      // Trigger a refresh by dispatching the same season ID
-      // This will cause the useEffect to run again
       dispatch({ type: 'SET_SEASON', season_id: filter.season_id });
     }
   };
 
-  console.log('MetaHealthPage: Render state', {
-    loading,
-    error,
-    hasMetaHealthData: !!metaHealthData,
-    currentSeasonId: filter.season_id
-  });
+  const getStateColor = (state: string) => {
+    switch (state.toLowerCase()) {
+      case 'healthy':
+        return '#10B981';
+      case 'concerning':
+        return '#F59E0B';
+      case 'unhealthy':
+        return '#EF4444';
+      default:
+        return '#6B7280';
+    }
+  };
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity.toLowerCase()) {
+      case 'low':
+        return '#10B981';
+      case 'medium':
+        return '#F59E0B';
+      case 'high':
+        return '#EF4444';
+      default:
+        return '#6B7280';
+    }
+  };
+
+  const calculateUsagePercentage = (usage: number, totalRuns: number) => {
+    // The AI already returns usage as a percentage, so we just return it directly
+    return usage;
+  };
 
   return (
     <div className="mh-meta-health-page">
       <div className="mh-meta-health-header">
-        <h1>Meta Health Monitor</h1>
+        <h1>Meta Analysis</h1>
         <p className="mh-subtitle">
-          AI-powered analysis of meta diversity, balance, and composition health
+          Simple insights about the current meta state
         </p>
       </div>
 
@@ -240,17 +172,15 @@ export const MetaHealthPage: React.FC = () => {
         className="mh-meta-health-filter"
       />
 
-      {/* Show loading when season is selected and data is being fetched */}
       {loading && (
         <div className="mh-data-loading-section">
           <AILoadingScreen />
         </div>
       )}
 
-      {/* Show error if data loading failed */}
       {error && (
         <div className="mh-error-container">
-          <h2>Error Loading Meta Health Data</h2>
+          <h2>Error Loading Meta Analysis</h2>
           <p>{error}</p>
           <button onClick={handleRefresh} className="mh-retry-button">
             Retry
@@ -258,29 +188,121 @@ export const MetaHealthPage: React.FC = () => {
         </div>
       )}
 
-      {/* Show analysis results when data is available */}
       {metaHealthData && !loading && (
         <div className="mh-meta-health-content">
-          <MetaHealthDashboard metaHealth={metaHealthData.metaHealth} />
-          
-          <div className="mh-analysis-sections">
-            <RoleHealthAnalysis roleAnalysis={metaHealthData.roleAnalysis} />
-            <CompositionHealthAnalysis compositionAnalysis={metaHealthData.compositionAnalysis} />
-            <TemporalAnalysis temporalAnalysis={metaHealthData.temporalAnalysis} />
-            <MetaHealthInsights 
-              insights={metaHealthData.aiInsights}
-              recommendations={metaHealthData.recommendations}
-            />
+          {/* Meta Summary */}
+          <div className="mh-summary-section">
+            <div className="mh-summary-header">
+              <h2>Meta Overview</h2>
+              <div 
+                className="mh-state-badge"
+                style={{ backgroundColor: getStateColor(metaHealthData.metaSummary.overallState) }}
+              >
+                {metaHealthData.metaSummary.overallState}
+              </div>
+            </div>
+            <p className="mh-summary-text">{metaHealthData.metaSummary.summary}</p>
+            
+            <div className="mh-insights-section">
+              <h3>Key Insights</h3>
+              <ul className="mh-insights-list">
+                {metaHealthData.metaSummary.keyInsights.map((insight, index) => (
+                  <li key={index} className="mh-insight-item">
+                    {insight}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
+
+          {/* Role Analysis */}
+          <div className="mh-roles-section">
+            <h2>Role Analysis</h2>
+            <div className="mh-roles-grid">
+              {['tank', 'healer', 'dps'].map((role) => {
+                const data = metaHealthData.roleAnalysis[role as keyof typeof metaHealthData.roleAnalysis];
+                
+                // Sort specs by usage descending
+                const sortedDominantSpecs = [...data.dominantSpecs].sort((a, b) => b.usage - a.usage);
+                const sortedUnderusedSpecs = [...data.underusedSpecs].sort((a, b) => b.usage - a.usage);
+                
+                return (
+                  <div key={role} className="mh-role-card">
+                                         <div className="mh-role-header">
+                       <h3 className="mh-role-title">{role === 'dps' ? 'DPS' : role.charAt(0).toUpperCase() + role.slice(1)}</h3>
+                      <div 
+                        className="mh-health-badge"
+                        style={{ backgroundColor: getStateColor(data.healthStatus) }}
+                      >
+                        {data.healthStatus}
+                      </div>
+                    </div>
+                    
+                    <div className="mh-dominant-spec">
+                      <h4>Most Popular</h4>
+                      <div className="mh-specs-list">
+                        {sortedDominantSpecs.map((spec, index) => (
+                          <div key={index} className="mh-spec-item">
+                            <span className="mh-spec-name">{spec.name}</span>
+                            <span className="mh-usage">
+                              {calculateUsagePercentage(spec.usage, data.totalRuns).toFixed(1)}%
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {sortedUnderusedSpecs.length > 0 && (
+                      <div className="mh-underused-specs">
+                        <h4>Underused Specs</h4>
+                        <div className="mh-specs-list">
+                          {sortedUnderusedSpecs.map((spec, index) => (
+                            <div key={index} className="mh-spec-item">
+                              <span className="mh-spec-name">{spec.name}</span>
+                              <span className="mh-usage">
+                                {calculateUsagePercentage(spec.usage, data.totalRuns).toFixed(1)}%
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Balance Issues */}
+          {metaHealthData.balanceIssues.length > 0 && (
+            <div className="mh-issues-section">
+              <h2>Balance Issues</h2>
+              <div className="mh-issues-list">
+                {metaHealthData.balanceIssues.map((issue, index) => (
+                  <div key={index} className="mh-issue-card">
+                    <div className="mh-issue-header">
+                      <span className="mh-issue-type">{issue.type}</span>
+                      <div 
+                        className="mh-severity-badge"
+                        style={{ backgroundColor: getSeverityColor(issue.severity) }}
+                      >
+                        {issue.severity}
+                      </div>
+                    </div>
+                    <p className="mh-issue-description">{issue.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Show initial state when no season is selected */}
       {!filter.season_id && !loading && !error && (
         <div className="mh-initial-state">
           <div className="mh-initial-state-content">
             <h2>Select a Season</h2>
-            <p>Choose a season from the dropdown above to analyze its meta health and diversity.</p>
+            <p>Choose a season from the dropdown above to analyze its meta state.</p>
           </div>
         </div>
       )}

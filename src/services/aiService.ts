@@ -44,64 +44,32 @@ export interface AIAnalysisResponse {
 
 export interface MetaHealthRequest {
   seasonId: number;
+  forceRefresh?: boolean;
 }
 
 export interface MetaHealthResponse {
-  metaHealth: {
-    overallScore: number;
-    diversityScore: number;
-    balanceScore: number;
-    compositionHealth: number;
-    trends: {
-      improving: boolean;
-      diversityTrend: string;
-      balanceTrend: string;
-    };
+  metaSummary: {
+    overallState: string; // Healthy, Concerning, Unhealthy
+    summary: string;
+    keyInsights: string[];
   };
   roleAnalysis: {
     tank: RoleAnalysis;
     healer: RoleAnalysis;
     dps: RoleAnalysis;
   };
-  compositionAnalysis: {
-    totalCompositions: number;
-    dominantComposition: {
-      specs: number[];
-      usage: number;
-      healthStatus: string;
-    };
-    compositionDiversity: number;
-    flexibility: {
-      highFlexibility: string[];
-      lowFlexibility: string[];
-      recommendations: string[];
-    };
-  };
-  temporalAnalysis: {
-    seasonStartDiversity: number;
-    currentDiversity: number;
-    diversityChange: number;
-    dramaticChanges: Array<{
-      week: number;
-      description: string;
-      impact: string;
-    }>;
-    seasonEvolution: {
-      startState: string;
-      currentState: string;
-      keyChanges: string[];
-    };
-  };
-  aiInsights: string[];
-  recommendations: string[];
+  balanceIssues: Array<{
+    type: string; // dominance, underuse, role_imbalance
+    description: string;
+    severity: string; // low, medium, high
+  }>;
 }
 
 export interface RoleAnalysis {
-  viableSpecs: number;
-  dominanceScore: number;
-  topSpec: { specId: number; usage: number };
-  healthStatus: string;
-  recommendations: string[];
+  dominantSpecs: Array<{ specId: number; usage: number; name: string }>; // Top 3 most used specs
+  underusedSpecs: Array<{ specId: number; usage: number; name: string }>;
+  healthStatus: string; // Good, Concerning, Poor
+  totalRuns: number; // Total number of runs for this role
 }
 
 export async function getAIPredictions(request: AIPredictionRequest): Promise<AIAnalysisResponse> {
