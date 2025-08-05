@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Footer: React.FC = () => {
     const currentYear = new Date().getFullYear();
@@ -6,7 +7,7 @@ const Footer: React.FC = () => {
     return (
         <footer className="w-full bg-gradient-to-t from-gray-950 to-gray-900 border-t border-blue-500/20 mt-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8">
-                <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {/* Left side - Brand and description */}
                     <div className="flex flex-col items-center md:items-start text-center md:text-left">
                         <div className="flex items-center gap-2 mb-2">
@@ -19,6 +20,40 @@ const Footer: React.FC = () => {
                         <p className="text-gray-400 text-sm max-w-md">
                             Track the meta evolution in World of Warcraft Mythic+ dungeons.
                         </p>
+                    </div>
+
+                    {/* Middle - Legal/Info Links */}
+                    <div className="flex flex-col items-center">
+                        <h4 className="text-blue-400 font-semibold mb-3">Legal</h4>
+                        <div className="flex flex-col gap-2 text-sm">
+                            <Link
+                                to="/about"
+                                className="text-gray-300 hover:text-blue-400 transition-colors duration-200 flex items-center gap-2"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                About
+                            </Link>
+                            <Link
+                                to="/privacy"
+                                className="text-gray-300 hover:text-blue-400 transition-colors duration-200 flex items-center gap-2"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                Privacy Policy
+                            </Link>
+                            <Link
+                                to="/terms"
+                                className="text-gray-300 hover:text-blue-400 transition-colors duration-200 flex items-center gap-2"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Terms of Service
+                            </Link>
+                        </div>
                     </div>
 
                     {/* Right side - Connect */}
@@ -37,7 +72,7 @@ const Footer: React.FC = () => {
                                 GitHub
                             </a>
                             <a
-                                href="mailto:framarale@gmail.com"
+                                href="mailto:contact@whatthemeta.io"
                                 className="text-gray-300 hover:text-blue-400 transition-colors duration-200 flex items-center gap-2"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

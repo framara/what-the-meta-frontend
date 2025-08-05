@@ -13,6 +13,9 @@ import { GroupCompositionPage } from './components/GroupCompositionPage/index';
 import { CompAllSeasonsPage } from './components/CompAllSeasonsPage/index';
 import { AIPredictionsPage } from './components/AIPredictionsPage';
 import { MetaHealthPage } from './components/MetaHealthPage';
+import AboutPage from './components/AboutPage';
+import PrivacyPage from './components/PrivacyPage';
+import TermsPage from './components/TermsPage';
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
 
@@ -120,6 +123,9 @@ function App() {
             <Route path="/historical-composition" element={<CompAllSeasonsPage />} />
             <Route path="/ai-predictions" element={<AIPredictionsPage />} />
             <Route path="/meta-health" element={<MetaHealthPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
             <Route path="/ai-analysis" element={
               <div className="max-w-7xl mx-auto px-4 py-8">
                 <h1 className="text-3xl font-bold text-gray-200 mb-6">AI Analysis</h1>

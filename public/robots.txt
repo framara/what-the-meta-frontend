@@ -1,0 +1,75 @@
+# Robots.txt for What the Meta? - WoW Mythic+ Leaderboard
+# Allow all search engines to crawl the site
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://whatthemeta.io/sitemap.xml
+
+# Disallow admin and API endpoints
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /node_modules/
+Disallow: /src/
+Disallow: /scripts/
+Disallow: /backups/
+Disallow: /pgdata/
+
+# Disallow development and configuration files
+Disallow: /.env
+Disallow: /.env.*
+Disallow: /package.json
+Disallow: /package-lock.json
+Disallow: /tsconfig.json
+Disallow: /vite.config.ts
+Disallow: /tailwind.config.js
+Disallow: /postcss.config.js
+Disallow: /eslint.config.js
+
+# Disallow temporary and cache files
+Disallow: /tmp/
+Disallow: /cache/
+Disallow: /.cache/
+Disallow: /dist/
+Disallow: /build/
+
+# Allow important static assets
+Allow: /public/
+Allow: /assets/
+Allow: /images/
+Allow: /icons/
+Allow: /spec-icons-png/
+
+# Crawl delay (optional - be respectful to server resources)
+Crawl-delay: 1
+
+# Specific rules for major search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 2
+
+# Block bad bots
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+# Additional sitemap for news/content (if you add a blog later)
+# Sitemap: https://whatthemeta.io/news-sitemap.xml 
