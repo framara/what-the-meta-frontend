@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_CLASS_NAMES } from './wow-constants';
+import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_CLASS_NAMES, WOW_SPEC_TO_CLASS } from '../constants/wow-constants';
+import { SpecIconImage } from '../utils/specIconImages';
 import './styles/LeaderboardTable.css';
 
 interface GroupMember {
@@ -56,12 +57,20 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
   const pagedRuns = runs.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   // Helper to sort members by role: tank, heal, dps, dps, dps
+  // Within same role, sort by spec_id
   function sortMembers(members: GroupMember[]) {
     const roleOrder: Record<string, number> = { tank: 0, healer: 1, dps: 2 };
     return [...members].sort((a, b) => {
       const ra = roleOrder[a.role] ?? 99;
       const rb = roleOrder[b.role] ?? 99;
-      return ra - rb;
+      
+      // First sort by role
+      if (ra !== rb) {
+        return ra - rb;
+      }
+      
+      // Within same role, sort by spec_id
+      return a.spec_id - b.spec_id;
     });
   }
 
@@ -73,110 +82,186 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
     color: string;
   } | null>(null);
 
+  // Helper to determine text color for tooltip
+  function getTextColor(bgColor: string): string {
+    const hex = bgColor.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.5 ? '#23263a' : '#fff';
+  }
+
+  // Helper to calculate tooltip position within table bounds
+  function calculateTooltipPosition(element: HTMLElement, content: string): { x: number; y: number } {
+    const rect = element.getBoundingClientRect();
+    const tableContainer = element.closest('.leaderboard-table-container');
+    const tableRect = tableContainer?.getBoundingClientRect();
+    
+    if (!tableRect) {
+      return { x: rect.left + rect.width / 2, y: rect.top };
+    }
+
+    // Tooltip dimensions (approximate)
+    const tooltipWidth = 200;
+    const tooltipHeight = 80;
+    const padding = 10;
+
+    // Calculate initial position (centered above the element)
+    let x = rect.left + rect.width / 2;
+    let y = rect.top - tooltipHeight - padding;
+
+    // Adjust horizontal position to stay within table bounds
+    const minX = tableRect.left + padding;
+    const maxX = tableRect.right - tooltipWidth - padding;
+    
+    if (x < minX) {
+      x = minX;
+    } else if (x > maxX) {
+      x = maxX;
+    }
+
+    // Adjust vertical position to stay within table bounds
+    const minY = tableRect.top + padding;
+    const maxY = tableRect.bottom - tooltipHeight - padding;
+    
+    if (y < minY) {
+      // If tooltip would go above table, position it below the element
+      y = rect.bottom + padding;
+    }
+    
+    if (y > maxY) {
+      y = maxY;
+    }
+
+    return { x, y };
+  }
+
   return (
-    <div className="overflow-x-auto mt-6 relative">
-      <table className="min-w-full border text-sm saas-table">
-        <thead>
-          <tr className="bg-gray-800 text-white">
-            <th className="px-2 py-1">Rank</th>
-            <th className="px-2 py-1">Keystone</th>
-            <th className="px-2 py-1">Score</th>
-            <th className="px-2 py-1">Dungeon</th>
-            <th className="px-2 py-1">Time</th>
-            <th className="px-2 py-1">Date</th>
-            <th className="px-2 py-1">Group</th>
-          </tr>
-        </thead>
-        <tbody>
-          {pagedRuns.map((run, i) => (
-            <tr key={run.id} className="border-b hover:bg-gray-100">
-              <td className="px-2 py-1 text-center">{page * PAGE_SIZE + i + 1}</td>
-              <td className="px-2 py-1 text-center">{run.keystone_level}</td>
-              <td className="px-2 py-1 text-center">{typeof run.score === 'number' ? run.score.toFixed(1) : run.score}</td>
-              <td className="px-2 py-1">
-                {dungeonMap[run.dungeon_id] ? (
-                  <>
-                    <span className="dungeon-name-desktop">{dungeonMap[run.dungeon_id].name}</span>
-                    <span className="dungeon-name-mobile">{dungeonMap[run.dungeon_id].shortname}</span>
-                  </>
-                ) : run.dungeon_id}
-              </td>
-              <td className="px-2 py-1 text-center">{msToTime(run.duration_ms)}</td>
-              <td className="px-2 py-1 text-center">{new Date(run.completed_at).toLocaleDateString()}</td>
-              <td className="px-2 py-1">
-                <div className="saas-group-squares">
-                  {sortMembers(run.members).map((m, idx) => {
-                    const roleCap = m.role && typeof m.role === 'string'
-                      ? m.role.charAt(0).toUpperCase() + m.role.slice(1)
-                      : 'Unknown';
-                    const tooltipContent = `Name: ${m.character_name}\nRole: ${roleCap}\nClass: ${WOW_CLASS_NAMES[m.class_id] || m.class_id}\nSpec: ${WOW_SPECIALIZATIONS[m.spec_id] || m.spec_id}`;
-                    const classColor = WOW_CLASS_COLORS[m.class_id] || '#23263a';
-                    return (
-                      <span
-                        key={m.character_name + idx}
-                        className="saas-group-square"
-                        style={{ background: classColor }}
-                        onMouseEnter={e => {
-                          const rect = (e.target as HTMLElement).getBoundingClientRect();
-                          setTooltip({
-                            x: rect.left + rect.width / 2,
-                            y: rect.top,
-                            content: tooltipContent.replace(/\n/g, '<br/>'),
-                            color: classColor,
-                          });
-                        }}
-                        onMouseLeave={() => setTooltip(null)}
-                      />
-                    );
-                  })}
-                </div>
-              </td>
+    <>
+      <div className="leaderboard-table-container">
+        <table className="leaderboard-table">
+          <thead>
+            <tr>
+              <th className="table-cell rank-cell">Rank</th>
+              <th className="md:hidden">Key</th>
+              <th className="hidden md:table-cell">Key</th>
+              <th className="hidden md:table-cell">Dungeon</th>
+              <th className="hidden md:table-cell">Score</th>
+              <th className="hidden md:table-cell">Time</th>
+              <th className="hidden md:table-cell">Date</th>
+              <th className="table-cell">Group</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-      {/* Pagination controls */}
-      <div className="flex justify-center items-center gap-4 mt-4">
-        <button
-          className="px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-600 transition"
-          onClick={() => setPage(p => Math.max(0, p - 1))}
-          disabled={page === 0}
-        >
-          Prev
-        </button>
-        <span className="text-gray-200 font-medium">
-          Page {page + 1} of {pageCount}
-        </span>
-        <button
-          className="px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-600 transition"
-          onClick={() => setPage(p => Math.min(pageCount - 1, p + 1))}
-          disabled={page >= pageCount - 1}
-        >
-          Next
-        </button>
+          </thead>
+          <tbody>
+            {pagedRuns.map((run, i) => (
+              <tr key={run.id}>
+                <td className="table-cell rank-cell">{page * PAGE_SIZE + i + 1}</td>
+                <td className="md:hidden">{run.keystone_level} {dungeonMap[run.dungeon_id] ? dungeonMap[run.dungeon_id].shortname : run.dungeon_id}</td>
+                <td className="hidden md:table-cell">{run.keystone_level}</td>
+                <td className="hidden md:table-cell">{dungeonMap[run.dungeon_id] ? (
+                    <>
+                      <span className="dungeon-name-desktop">{dungeonMap[run.dungeon_id].name}</span>
+                      <span className="dungeon-name-mobile">{dungeonMap[run.dungeon_id].shortname}</span>
+                    </>
+                  ) : run.dungeon_id}
+                </td>
+                <td className="hidden md:table-cell">{typeof run.score === 'number' ? run.score.toFixed(1) : run.score}</td>
+                <td className="hidden md:table-cell">{msToTime(run.duration_ms)}</td>
+                <td className="hidden md:table-cell">{new Date(run.completed_at).toLocaleDateString()}</td>
+                <td className="table-cell">
+                  <div className="saas-group-squares">
+                    {sortMembers(run.members).map((m, idx) => {
+                      const roleCap = m.role && typeof m.role === 'string'
+                        ? m.role.charAt(0).toUpperCase() + m.role.slice(1)
+                        : 'Unknown';
+                      const tooltipContent = `Name: ${m.character_name}\nRole: ${roleCap}\nClass: ${WOW_CLASS_NAMES[m.class_id] || m.class_id}\nSpec: ${WOW_SPECIALIZATIONS[m.spec_id] || m.spec_id}`;
+                      const classId = Number(WOW_SPEC_TO_CLASS[m.spec_id]) || 0;
+                      const classColor = WOW_CLASS_COLORS[classId] || '#23263a';
+                      return (
+                        <div
+                          key={m.character_name + idx}
+                          className="saas-group-square"
+                          style={{ border: `0.15rem solid ${classColor}` }}
+                          onMouseEnter={e => {
+                            const position = calculateTooltipPosition(e.target as HTMLElement, tooltipContent);
+                            setTooltip({
+                              x: position.x,
+                              y: position.y,
+                              content: tooltipContent.replace(/\n/g, '<br/>'),
+                              color: classColor,
+                            });
+                          }}
+                          onMouseLeave={() => setTooltip(null)}
+                        >
+                          <SpecIconImage 
+                            specId={m.spec_id} 
+                            alt={WOW_SPECIALIZATIONS[m.spec_id] || 'Spec'}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {/* Enhanced Pagination */}
+        <div className="pagination-container">
+          <button
+            className="pagination-button"
+            onClick={() => setPage(0)}
+            disabled={page === 0}
+            aria-label="First page"
+          >
+            {'«'}
+          </button>
+          <button
+            className="pagination-button"
+            onClick={() => setPage(p => Math.max(0, p - 1))}
+            disabled={page === 0}
+            aria-label="Previous page"
+          >
+            {'‹'}
+          </button>
+          <span className="pagination-info">
+            Page {page + 1} of {pageCount}
+          </span>
+          <button
+            className="pagination-button"
+            onClick={() => setPage(p => Math.min(pageCount - 1, p + 1))}
+            disabled={page >= pageCount - 1}
+            aria-label="Next page"
+          >
+            {'›'}
+          </button>
+          <button
+            className="pagination-button"
+            onClick={() => setPage(pageCount - 1)}
+            disabled={page >= pageCount - 1}
+            aria-label="Last page"
+          >
+            {'»'}
+          </button>
+        </div>
       </div>
+
+      {/* Enhanced Tooltip - Moved outside table container */}
       {tooltip && (
         <div
-          className="leaderboard-tooltip fixed z-50 px-4 py-2 rounded-lg text-xs shadow-lg border pointer-events-none"
+          className="leaderboard-tooltip"
           style={{
-            left: tooltip.x + 8,
-            top: tooltip.y - 8,
-            minWidth: 160,
-            maxWidth: 240,
-            whiteSpace: 'pre-line',
+            left: tooltip.x,
+            top: tooltip.y,
             background: tooltip.color,
-            borderColor: '#23263a',
-            borderWidth: 1.5,
-            color:
-              tooltip.color.toLowerCase() === '#fff' || tooltip.color.toLowerCase() === '#ffffff' || tooltip.color.toLowerCase() === '#fff569'
-                ? '#23263a'
-                : '#fff',
-            fontWeight: 500,
-            boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
+            borderColor: tooltip.color,
+            color: getTextColor(tooltip.color),
           }}
           dangerouslySetInnerHTML={{ __html: tooltip.content }}
         />
       )}
-    </div>
+    </>
   );
-}; 
+} 

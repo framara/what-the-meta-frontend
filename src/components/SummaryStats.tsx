@@ -1,5 +1,6 @@
-import React from 'react';
-import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_SPEC_ROLES } from './wow-constants';
+import React, { useState } from 'react';
+import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_SPEC_ROLES } from '../constants/wow-constants';
+import { SpecIconImage } from '../utils/specIconImages';
 import './styles/SummaryStats.css';
 
 interface GroupMember {
@@ -94,16 +95,23 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
   const tankClassId = Number(WOW_SPEC_TO_CLASS[topTankSpecId]) || 0;
   const healerClassId = Number(WOW_SPEC_TO_CLASS[topHealerSpecId]) || 0;
 
-  // Emoji for roles
-  const roleEmoji: Record<string, string> = { tank: '🛡️', healer: '💚', dps: '⚔️' };
-
   // Helper to sort members by role: tank, heal, dps, dps, dps
-  function sortMembers<T extends { role: string }>(members: T[]): T[] {
+  // Within same role, sort by spec_id
+  function sortMembers<T extends { role: string; spec_id?: number }>(members: T[]): T[] {
     const roleOrder: Record<string, number> = { tank: 0, healer: 1, dps: 2 };
     return [...members].sort((a, b) => {
       const ra = roleOrder[a.role] ?? 99;
       const rb = roleOrder[b.role] ?? 99;
-      return ra - rb;
+      
+      // First sort by role
+      if (ra !== rb) {
+        return ra - rb;
+      }
+      
+      // Within same role, sort by spec_id
+      const specA = a.spec_id ?? 0;
+      const specB = b.spec_id ?? 0;
+      return specA - specB;
     });
   }
 
@@ -148,73 +156,105 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
     groupSpecCount[specId] = (groupSpecCount[specId] || 0) + 1;
   });
 
+  // Tooltip state for spec cards
+  const [specTooltip, setSpecTooltip] = useState<{
+    x: number;
+    y: number;
+    content: string;
+    color: string;
+  } | null>(null);
+
+  // Helper to determine text color for tooltip
+  function getTextColor(bgColor: string): string {
+    const hex = bgColor.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.5 ? '#23263a' : '#fff';
+  }
+
   return (
-    <div className="flex flex-wrap gap-6 mb-8">
-      <div className="flex-1 min-w-[180px] bg-gray-800 rounded-xl p-4 shadow text-center">
-        <div className="text-xs text-gray-400 mb-1">Top Runs</div>
-        <div className="text-xl font-bold">{totalRuns}</div>
+    <div className="mb-8">
+      {/* Summary Stats Grid */}
+      <div className="stats-grid">
+        <div className="stats-card">
+          <div className="label">Top Runs</div>
+          <div className="value">{totalRuns}</div>
+        </div>
+        <div className="stats-card">
+          <div className="label">Highest Keystone</div>
+          <div className="value">{highestKeystone}</div>
+        </div>
+        <div className="stats-card">
+          <div className="label">Fastest Time</div>
+          <div className="value">{fastestTime}</div>
+        </div>
+        <div className="stats-card">
+          <div className="label">Most Popular Dungeon</div>
+          <div className="value">{mostPopularDungeon}</div>
+        </div>
       </div>
-      <div className="flex-1 min-w-[180px] bg-gray-800 rounded-xl p-4 shadow text-center">
-        <div className="text-xs text-gray-400 mb-1">Highest Keystone</div>
-        <div className="text-xl font-bold">{highestKeystone}</div>
-      </div>
-      <div className="flex-1 min-w-[180px] bg-gray-800 rounded-xl p-4 shadow text-center">
-        <div className="text-xs text-gray-400 mb-1">Fastest Time</div>
-        <div className="text-xl font-bold">{fastestTime}</div>
-      </div>
-      <div className="flex-1 min-w-[180px] bg-gray-800 rounded-xl p-4 shadow text-center">
-        <div className="text-xs text-gray-400 mb-1">Most Popular Dungeon</div>
-        <div className="text-xl font-bold">{mostPopularDungeon}</div>
-      </div>
+
       {/* Most Popular Specs by Role */}
-      <div className="w-full bg-gray-800 rounded-xl p-4 shadow text-center flex flex-col items-center mb-6">
-        <div className="text-xs text-gray-400 mb-4">Most Popular Specs by Role</div>
-        <div className="flex justify-center gap-8 mb-2">
+      <div className="spec-role-section">
+        <div className="spec-role-title">Most Popular Specs by Role</div>
+        <div className="spec-cards-container">
           {/* Tank */}
-          <div className="flex flex-col items-center justify-center">
-            <span
-              className="saas-group-square"
+          <div className="spec-card">
+            <div
+              className="spec-icon"
               style={{
-                background: WOW_CLASS_COLORS[tankClassId] || '#fff',
-                width: 80,
-                height: 80,
-                borderRadius: 20,
-                fontSize: 32,
-                marginBottom: 10,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                border: `3px solid ${WOW_CLASS_COLORS[tankClassId] || '#fff'}`,
               }}
+              onMouseEnter={(e: React.MouseEvent) => {
+                const rect = (e.target as HTMLElement).getBoundingClientRect();
+                setSpecTooltip({
+                  x: rect.left + rect.width / 2,
+                  y: rect.top,
+                  content: WOW_SPECIALIZATIONS[topTankSpecId] || '-',
+                  color: WOW_CLASS_COLORS[tankClassId] || '#23263a',
+                });
+              }}
+              onMouseLeave={() => setSpecTooltip(null)}
             >
-              <span>{roleEmoji.tank}</span>
-            </span>
-            <span className="summary-spec-label text-lg font-bold mt-2">
+              <SpecIconImage 
+                specId={topTankSpecId} 
+                alt={WOW_SPECIALIZATIONS[topTankSpecId] || 'Tank Spec'}
+              />
+            </div>
+            <span className="spec-label">
               {WOW_SPECIALIZATIONS[topTankSpecId] || '-'}
             </span>
-            <span className="summary-spec-count text-xs text-gray-300 mt-1">x{specCountInRuns[topTankSpecId] || 0}</span>
+            <span className="spec-count">x{specCountInRuns[topTankSpecId] || 0}</span>
           </div>
           {/* Healer */}
-          <div className="flex flex-col items-center justify-center">
-            <span
-              className="saas-group-square"
+          <div className="spec-card">
+            <div
+              className="spec-icon"
               style={{
-                background: WOW_CLASS_COLORS[healerClassId] || '#fff',
-                width: 80,
-                height: 80,
-                borderRadius: 20,
-                fontSize: 32,
-                marginBottom: 10,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                border: `3px solid ${WOW_CLASS_COLORS[healerClassId] || '#fff'}`,
               }}
+              onMouseEnter={(e: React.MouseEvent) => {
+                const rect = (e.target as HTMLElement).getBoundingClientRect();
+                setSpecTooltip({
+                  x: rect.left + rect.width / 2,
+                  y: rect.top,
+                  content: WOW_SPECIALIZATIONS[topHealerSpecId] || '-',
+                  color: WOW_CLASS_COLORS[healerClassId] || '#23263a',
+                });
+              }}
+              onMouseLeave={() => setSpecTooltip(null)}
             >
-              <span>{roleEmoji.healer}</span>
-            </span>
-            <span className="summary-spec-label text-lg font-bold mt-2">
+              <SpecIconImage 
+                specId={topHealerSpecId} 
+                alt={WOW_SPECIALIZATIONS[topHealerSpecId] || 'Healer Spec'}
+              />
+            </div>
+            <span className="spec-label">
               {WOW_SPECIALIZATIONS[topHealerSpecId] || '-'}
             </span>
-            <span className="summary-spec-count text-xs text-gray-300 mt-1">x{specCountInRuns[topHealerSpecId] || 0}</span>
+            <span className="spec-count">x{specCountInRuns[topHealerSpecId] || 0}</span>
           </div>
           {/* Top 3 DPS */}
           {topDps.map((specId, i) => {
@@ -222,62 +262,85 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
             return (
               <div
                 key={specId}
-                className="flex flex-col items-center justify-center"
+                className="spec-card"
               >
-                <span
-                  className="saas-group-square"
+                <div
+                  className="spec-icon"
                   style={{
-                    background: WOW_CLASS_COLORS[dpsClassId] || '#fff',
-                    width: 80,
-                    height: 80,
-                    borderRadius: 20,
-                    fontSize: 32,
-                    marginBottom: 10,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    border: `3px solid ${WOW_CLASS_COLORS[dpsClassId] || '#fff'}`,
                   }}
+                  onMouseEnter={(e: React.MouseEvent) => {
+                    const rect = (e.target as HTMLElement).getBoundingClientRect();
+                    setSpecTooltip({
+                      x: rect.left + rect.width / 2,
+                      y: rect.top,
+                      content: WOW_SPECIALIZATIONS[specId] || '-',
+                      color: WOW_CLASS_COLORS[dpsClassId] || '#23263a',
+                    });
+                  }}
+                  onMouseLeave={() => setSpecTooltip(null)}
                 >
-                  <span>{roleEmoji.dps}</span>
-                </span>
-                <span className="summary-spec-label text-lg font-bold mt-2">
+                  <SpecIconImage 
+                    specId={specId} 
+                    alt={WOW_SPECIALIZATIONS[specId] || 'DPS Spec'}
+                  />
+                </div>
+                <span className="spec-label">
                   {WOW_SPECIALIZATIONS[specId] || '-'}
                 </span>
-                <span className="summary-spec-count text-xs text-gray-300 mt-1">x{specCountInRuns[specId] || 0}</span>
+                <span className="spec-count">x{specCountInRuns[specId] || 0}</span>
               </div>
             );
           })}
         </div>
+        <div className="meta-evolution-button-container">
+          <button 
+            className="meta-evolution-link"
+            onClick={() => {
+              // Navigate to the meta evolution page
+              window.location.href = '/meta-evolution';
+            }}
+            title="View Meta Evolution Charts"
+          >
+            View Charts
+          </button>
+        </div>
       </div>
+
       {/* Most Popular Group Composition */}
-      <div className="w-full bg-gray-800 rounded-xl p-4 shadow text-center flex flex-col items-center">
-        <div className="text-xs text-gray-400 mb-4">Most Popular Group Composition</div>
-        <div className="flex justify-center gap-8 mb-2">
+      <div className="group-composition-section">
+        <div className="spec-role-title">Most Popular Group Composition</div>
+        <div className="spec-cards-container">
           {mostPopularGroupSpecs.map((specId, i) => {
             const classId = getClassId(specId);
             const role = getRole(specId);
             return (
               <div
                 key={specId + '-' + i}
-                className="flex flex-col items-center justify-center"
+                className="spec-card"
               >
-                <span
-                  className="saas-group-square"
+                <div
+                  className="spec-icon"
                   style={{
-                    background: WOW_CLASS_COLORS[Number(classId)] || '#fff',
-                    width: 80,
-                    height: 80,
-                    borderRadius: 20,
-                    fontSize: 32,
-                    marginBottom: 10,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    border: `3px solid ${WOW_CLASS_COLORS[Number(classId)] || '#fff'}`,
                   }}
+                  onMouseEnter={(e: React.MouseEvent) => {
+                    const rect = (e.target as HTMLElement).getBoundingClientRect();
+                    setSpecTooltip({
+                      x: rect.left + rect.width / 2,
+                      y: rect.top,
+                      content: WOW_SPECIALIZATIONS[Number(specId)] || '-',
+                      color: WOW_CLASS_COLORS[Number(classId)] || '#23263a',
+                    });
+                  }}
+                  onMouseLeave={() => setSpecTooltip(null)}
                 >
-                  <span>{roleEmoji[role] || ''}</span>
-                </span>
-                <span className="summary-spec-label text-lg font-bold mt-2">
+                  <SpecIconImage 
+                    specId={Number(specId)} 
+                    alt={WOW_SPECIALIZATIONS[Number(specId)] || 'Group Spec'}
+                  />
+                </div>
+                <span className="spec-label">
                   {WOW_SPECIALIZATIONS[Number(specId)] || '-'}
                 </span>
               </div>
@@ -285,9 +348,37 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
           })}
         </div>
         {mostPopularGroupCount > 0 && (
-          <div className="text-xs text-gray-300 mt-2">x{mostPopularGroupCount} times</div>
+          <div className="group-count">x{mostPopularGroupCount} times</div>
         )}
+        <div className="meta-evolution-button-container">
+          <button 
+            className="meta-evolution-link"
+            onClick={() => {
+              // Navigate to the group composition page
+              window.location.href = '/group-composition';
+            }}
+            title="View Group Composition Analysis"
+          >
+            View More
+          </button>
+        </div>
       </div>
+
+      {/* Enhanced Tooltip */}
+      {specTooltip && (
+        <div
+          className="spec-tooltip"
+          style={{
+            left: specTooltip.x,
+            top: specTooltip.y - 10,
+            background: specTooltip.color,
+            borderColor: specTooltip.color,
+            color: getTextColor(specTooltip.color),
+          }}
+        >
+          {specTooltip.content}
+        </div>
+      )}
     </div>
   );
 }; 

@@ -1,0 +1,65 @@
+.ai-tooltip-wrapper {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+}
+
+.ai-tooltip-content {
+  position: absolute;
+  top: 0;
+  left: 110%;
+  transform: translateY(-50%);
+  min-width: 200px;
+  max-width: 300px;
+  background: rgba(31, 41, 55, 0.96);
+  color: #dbeafe;
+  border: 1.5px solid rgba(59, 130, 246, 0.13);
+  border-radius: 14px;
+  padding: 0.85rem 1.25rem;
+  font-size: 0.8rem;
+  font-family: inherit;
+  font-weight: 200;
+  z-index: 10000;
+  box-shadow: 0 8px 32px rgba(30, 64, 175, 0.13);
+  white-space: normal;
+  pointer-events: none;
+  opacity: 0;
+  animation: ai-tooltip-fadein 0.18s forwards;
+  transition: opacity 0.18s;
+  letter-spacing: 0.01em;
+}
+
+@keyframes ai-tooltip-fadein {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.ai-tooltip-debug {
+  border: 1.5px solid rgba(59, 130, 246, 0.13) !important;
+  background: rgba(31, 41, 55, 0.96) !important;
+  color: #dbeafe !important;
+}
+
+.ai-tooltip-icon {
+  margin-left: 0.5rem;
+  color: #3b82f6;
+  font-size: 1.1em;
+  vertical-align: middle;
+  transition: color 0.2s;
+}
+.ai-tooltip-wrapper:hover .ai-tooltip-icon,
+.ai-tooltip-wrapper:focus .ai-tooltip-icon {
+  color: #60a5fa;
+}
+
+@media (max-width: 600px) {
+  .ai-tooltip-content {
+    left: 0;
+    top: 120%;
+    transform: none;
+    min-width: 150px;
+    font-size: 0.92rem;
+    padding: 0.65rem 0.9rem;
+  }
+}

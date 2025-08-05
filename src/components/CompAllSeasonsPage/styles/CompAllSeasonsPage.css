@@ -1,0 +1,436 @@
+.comp-all-seasons-page {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  transition: all 0.4s ease;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Removed shiny effect and elevate effect on hover */
+
+.page-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.header-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+}
+
+.page-description {
+  font-size: 1.125rem;
+  color: #9ca3af;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.comp-all-seasons-filter {
+  margin-bottom: 2rem;
+}
+
+.comp-all-seasons-content {
+  min-height: 400px;
+}
+
+.expansion-section {
+  margin-bottom: 3rem;
+}
+
+.expansion-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #f3f4f6;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+}
+
+.expansion-title::after {
+  content: '';
+  position: absolute;
+  bottom: -0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 2px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  border-radius: 1px;
+}
+
+.seasons-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  margin-top: 2rem;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.season-card {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.season-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.08), transparent);
+  transition: left 0.8s ease;
+}
+
+.season-card:hover::before {
+  left: 100%;
+}
+
+.season-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.season-header {
+  margin-bottom: 1.5rem;
+}
+
+.season-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.season-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #f3f4f6;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.season-info {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.expansion, .patch, .expansion-badge {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  padding: 0.25rem 0.5rem;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 0.375rem;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  font-weight: 500;
+}
+
+.expansion-badge {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.2);
+  color: #a78bfa;
+}
+
+.season-stats {
+  margin-top: 1rem;
+}
+
+.popularity-bar {
+  background: rgba(31, 41, 55, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.popularity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.popularity-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #e5e7eb;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.popularity-percentage {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #10b981;
+}
+
+.popularity-progress {
+  width: 100%;
+  height: 8px;
+  background: rgba(31, 41, 55, 0.5);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.popularity-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #34d399);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.popularity-details {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.detail-icon {
+  font-size: 0.875rem;
+  opacity: 0.8;
+}
+
+.composition-display {
+  background: rgba(17, 24, 39, 0.5);
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.composition-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e5e7eb;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.specs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  margin: 1rem;
+}
+
+.comp-all-seasons-page .spec-item {
+  width: 70px;
+  height: 70px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  background: transparent;
+  overflow: hidden;
+}
+
+.comp-all-seasons-page .spec-item:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Spec icon image styling for historical compositions */
+.comp-all-seasons-page .spec-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  transform: scale(1.05);
+  margin: 0;
+}
+
+.comp-all-seasons-page .spec-item:hover img {
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+  transform: scale(1.1);
+}
+
+.composition-stats {
+  text-align: center;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.usage-count {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.error-container {
+  text-align: center;
+  padding: 3rem 1rem;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.error-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ef4444;
+  margin-bottom: 1rem;
+}
+
+.error-message {
+  color: #9ca3af;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.retry-button {
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.retry-button:hover {
+  background-color: #2563eb;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .seasons-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .comp-all-seasons-page {
+    padding: 0 0.5rem;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+  }
+  
+  .page-description {
+    font-size: 1rem;
+  }
+  
+  .expansion-title {
+    font-size: 1.5rem;
+  }
+  
+  .seasons-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .season-card {
+    padding: 1rem;
+  }
+  
+  .season-name {
+    font-size: 1.25rem;
+  }
+  
+  .season-info {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .popularity-bar {
+    padding: 0.75rem;
+  }
+  
+  .popularity-percentage {
+    font-size: 1.125rem;
+  }
+  
+  .popularity-details {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .comp-all-seasons-page {
+    padding: 1rem;
+  }
+  
+  .page-title {
+    font-size: 1.75rem;
+  }
+  
+  .page-description {
+    font-size: 0.9rem;
+  }
+  
+  .season-card {
+    padding: 0.75rem;
+  }
+  
+  .season-name {
+    font-size: 1.125rem;
+  }
+  
+  .specs-grid {
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    gap: 0.5rem;
+  }
+  
+  .spec-item {
+    width: 3rem;
+    height: 3rem;
+  }
+} 

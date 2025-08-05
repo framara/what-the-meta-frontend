@@ -1,72 +1,127 @@
-# WoW Mythic+ Leaderboard Frontend
+# What the Meta? - WoW Mythic+ Leaderboard & Meta Analysis
 
-A modern dashboard for visualizing World of Warcraft Mythic+ meta, built with React, TypeScript, Vite, Tailwind CSS, and Recharts.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Website](https://img.shields.io/badge/Website-whatthemeta.io-blue.svg)](https://whatthemeta.io)
 
-## Features
-- **Leaderboard Dashboard:** View top runs, group compositions, and stats for each season, week, and dungeon.
-- **Meta Evolution:** Visualize spec/class popularity over time with line charts, stacked bar charts, and a heatmap.
-- **Interactive Filters:** Filter by season, week, dungeon, role, and more.
-- **Modern UI:** Responsive, dark-mode SaaS look with beautiful charts and tooltips.
-- **Heatmap:** Instantly see "hot" specs and meta shifts week by week.
-- **Pagination & Sorting:** Fast, client-side table navigation.
+A comprehensive World of Warcraft Mythic+ leaderboard and meta analysis tool that provides real-time data, group composition analysis, and meta evolution tracking.
 
-## Tech Stack
-- **React + TypeScript** (Vite for fast dev)
-- **Tailwind CSS** (utility-first styling)
-- **Recharts** (data visualizations)
-- **Context + useReducer** (state management)
-- **API:** Connects to the [WoW API Proxy & Leaderboard backend](../wow-api/README.md)
+## 🌟 Features
 
-## Getting Started
+- **Real-time Leaderboards**: Track top Mythic+ runs across all dungeons and seasons
+- **Group Composition Analysis**: Analyze successful team compositions and class combinations
+- **Meta Evolution Tracking**: Watch how the meta changes over time with detailed charts
+- **AI Predictions**: Get AI-powered insights about upcoming meta shifts
+- **Race Bars**: Visual representation of spec popularity and performance trends
+- **Meta Health**: Comprehensive analysis of current meta balance
 
-### 1. Install dependencies
-```sh
-npm install
+## 🚀 Live Demo
+
+Visit [whatthemeta.io](https://whatthemeta.io) to see the application in action.
+
+## 🛠️ Tech Stack
+
+- **Frontend**: React 18, TypeScript, Tailwind CSS
+- **Build Tool**: Vite
+- **Deployment**: Vercel
+- **Analytics**: Google Analytics
+- **Data Source**: Blizzard API
+
+## 📋 Prerequisites
+
+- Node.js 18+ 
+- npm or yarn
+
+## 🚀 Quick Start
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/framara/wow-leaderboard-frontend.git
+   cd wow-leaderboard-frontend
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   cp env.example .env.local
+   ```
+   Add your Google Analytics ID to `.env.local`:
+   ```
+   VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX
+   ```
+
+4. **Start development server**
+   ```bash
+   npm run dev
+   ```
+
+5. **Open your browser**
+   Navigate to `http://localhost:5173`
+
+## 📁 Project Structure
+
+```
+src/
+├── components/          # React components
+│   ├── AboutPage.tsx   # About page
+│   ├── Footer.tsx      # Site footer
+│   ├── Navigation.tsx  # Main navigation
+│   └── ...             # Other components
+├── services/           # API services
+├── constants/          # App constants
+├── utils/              # Utility functions
+└── App.tsx            # Main app component
 ```
 
-### 2. Run the development server
-```sh
-npm run dev
-```
-- The app will be available at [http://localhost:5173](http://localhost:5173) by default.
+## 🔧 Available Scripts
 
-### 3. Connect to the backend API
-- By default, the frontend expects the backend at `http://localhost:3000`.
-- You can change the API base URL in your environment or config if needed.
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
 
-### 4. Expose your local frontend to the internet (for demos/testing)
-- **LocalTunnel:**
-  ```sh
-  npx localtunnel --port 5173
-  ```
-- **ngrok:**
-  ```sh
-  npx ngrok http 5173
-  ```
-- Share the public URL provided by the tool.
-- If you see a "Blocked request. This host ... is not allowed" error, add `allowedHosts: 'all'` to your `vite.config.ts` under `server`:
-  ```js
-  // vite.config.ts
-  export default defineConfig({
-    // ...
-    server: {
-      allowedHosts: 'all',
-    },
-  });
-  ```
+## 📊 Data Sources
 
-## Development Tips
-- **Linting:** Uses ESLint with recommended React/TypeScript rules.
-- **Styling:** Tailwind classes are used throughout for rapid UI iteration.
-- **Charts:** All charts are built with Recharts; see `MetaEvolutionPage.tsx` for advanced chart logic.
-- **API:** All API calls are in `src/api/`.
-- **State:** Filter and dashboard state is managed with React Context + useReducer for scalability.
+All data is sourced from the official World of Warcraft API. We do not claim ownership of game data and acknowledge that it belongs to Blizzard Entertainment.
 
-## Troubleshooting
-- **API errors:** Make sure the backend is running and accessible at the expected URL.
-- **CORS issues:** The backend enables CORS by default, but check your browser console for errors.
-- **LocalTunnel/ngrok errors:** If you get a host not allowed error, update `vite.config.ts` as above.
-- **Data not updating:** Refresh materialized views on the backend via the `/admin/refresh-views` endpoint after importing new data.
+## 🤝 Contributing
 
-## License
-MIT
+We welcome contributions! Please read our contributing guidelines:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## ⚠️ Important Notice
+
+- **Code Ownership**: All code in this repository is owned by What the Meta? and is protected by copyright law.
+- **Game Data**: World of Warcraft data belongs to Blizzard Entertainment. We only display publicly available information.
+- **Commercial Use**: This code is provided for educational and personal use. Commercial use requires explicit permission.
+- **Attribution**: If you use this code, you must include proper attribution to What the Meta?.
+
+## 🆘 Support
+
+- **Website**: [whatthemeta.io](https://whatthemeta.io)
+- **Email**: contact@whatthemeta.io
+- **GitHub Issues**: [Report bugs or request features](https://github.com/framara/wow-leaderboard-frontend/issues)
+
+## �� Acknowledgments
+
+- Blizzard Entertainment for providing the WoW API
+- The WoW Mythic+ community for inspiration and feedback
+- Open source contributors who have helped improve this project
+
+---
+
+**Made with ❤️ for the WoW community**
+
+*Not affiliated with Blizzard Entertainment*
