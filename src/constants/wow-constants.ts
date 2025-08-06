@@ -166,5 +166,6 @@ export const SEASON_METADATA: Record<number, { expansion: string; patch: string;
   11: { expansion: 'Dragonflight', patch: '10.2', name: 'DF S3' },
   12: { expansion: 'Dragonflight', patch: '10.2.6', name: 'DF S4' },
   13: { expansion: 'The War Within', patch: '11.0', name: 'TWW S1' },
-  14: { expansion: 'The War Within', patch: '11.1', name: 'TWW S2' }
+  14: { expansion: 'The War Within', patch: '11.1', name: 'TWW S2' },
+  15: { expansion: 'The War Within', patch: '11.2', name: 'TWW S3' }
 };

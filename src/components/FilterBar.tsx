@@ -42,7 +42,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     }
     
     // Fallback to The War Within (id: 10) and season 14 if no valid expansion found
-    return { expansionId: 10, seasonId: 14 };
+    return { expansionId: 10, seasonId: 15 };
   };
 
   // Set default expansion and season when expansion filter becomes visible

@@ -50,7 +50,7 @@ const FilterDispatchContext = createContext<Dispatch<FilterAction> | undefined>(
 export const FilterProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(filterReducer, { 
     expansion_id: 10, // The War Within (latest expansion)
-    season_id: 14, // TWW S2 (latest season)
+    season_id: 15, // TWW S3 (latest season)
     period_id: undefined,
     dungeon_id: undefined,
     limit: 1000 
