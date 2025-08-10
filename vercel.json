@@ -1,5 +1,15 @@
 {
   "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        { "type": "host", "value": "www.whatthemeta.io" }
+      ],
+      "destination": "https://whatthemeta.io/:path*",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/((?!api|_next|.*\\..*).*)",
@@ -7,6 +17,13 @@
     }
   ],
   "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
+      ]
+    },
     {
       "source": "/sitemap.xml",
       "headers": [
