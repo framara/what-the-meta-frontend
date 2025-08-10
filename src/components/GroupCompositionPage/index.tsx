@@ -5,6 +5,7 @@ import { GroupCompositionStats } from './components/GroupCompositionStats';
 import LoadingScreen from '../LoadingScreen';
 import { FilterBar } from '../FilterBar';
 import './styles/GroupCompositionPage.css';
+import SEO from '../SEO';
 
 interface Season {
   season_id: number;
@@ -338,6 +339,10 @@ export const GroupCompositionPage: React.FC = () => {
 
   return (
     <div className="group-composition-page">
+      <SEO
+        title="Group Composition – What the Meta?"
+        description="Analyze popular Mythic+ team compositions, roles, and spec synergy across dungeons and seasons."
+      />
       {pageHeaderContent}
       
       <FilterBar {...filterBarProps} />

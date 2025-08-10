@@ -1,9 +1,11 @@
 import React from 'react';
+import SEO from './SEO';
 import { Link } from 'react-router-dom';
 
 const AboutPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
+      <SEO title="About – What the Meta?" description="Learn about What the Meta? the Mythic+ leaderboard and meta analysis tool for World of Warcraft." />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-8">
           <Link to="/" className="text-blue-400 hover:text-blue-300 mb-4 inline-block">

@@ -1,9 +1,11 @@
 import React from 'react';
+import SEO from './SEO';
 import { Link } from 'react-router-dom';
 
 const PrivacyPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
+      <SEO title="Privacy Policy – What the Meta?" description="Privacy policy for What the Meta? website and services." />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-8">
           <Link to="/" className="text-blue-400 hover:text-blue-300 mb-4 inline-block">

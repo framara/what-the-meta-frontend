@@ -4,6 +4,7 @@ import LoadingScreen from '../LoadingScreen';
 import { WOW_SPECIALIZATIONS, WOW_CLASS_COLORS, WOW_SPEC_ROLES, WOW_SPEC_TO_CLASS } from '../../constants/wow-constants';
 import { SpecIconImage } from '../../utils/specIconImages';
 import './styles/CompAllSeasonsPage.css';
+import SEO from '../SEO';
 
 interface GroupMember {
   class_id: string;
@@ -244,6 +245,10 @@ export const CompAllSeasonsPage: React.FC = () => {
 
   return (
     <div className="comp-all-seasons-page">
+      <SEO
+        title="Historical Composition – What the Meta?"
+        description="Top Mythic+ compositions across all seasons with trends by expansion and patch."
+      />
       <div className="page-header">
         <div className="header-content">
           <h1 className="page-title">
