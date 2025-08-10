@@ -212,7 +212,7 @@ const Navigation = () => {
         >
           <button
             className={`font-bold text-lg transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap flex items-center gap-1 ${
-              isActive('/group-composition') || isActive('//historical-composition')
+              isActive('/group-composition') || isActive('/historical-composition')
                 ? 'text-blue-400 border-b-2 border-blue-400 md:border-b-2'
                 : 'hover:text-blue-400'
             }`}
