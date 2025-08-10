@@ -8,6 +8,7 @@ import { useRaceBarsData } from './hooks/useRaceBarsData';
 import { RaceBars } from './components/RaceBars';
 import type { ChartView } from '../MetaEvolutionPage/types';
 import './styles/RaceBarsPage.css';
+import SEO from '../SEO';
 
 export const RaceBarsPage: React.FC = () => {
   const filter = useFilterState();
@@ -184,6 +185,10 @@ export const RaceBarsPage: React.FC = () => {
 
   return (
     <div className="race-bars-page">
+      <SEO
+        title="Race Bars – What the Meta?"
+        description="Animated race charts showing spec popularity over time for Mythic+ runs."
+      />
       {pageHeaderContent}
       
       <FilterBar {...filterBarProps} />

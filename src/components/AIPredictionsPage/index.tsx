@@ -7,6 +7,7 @@ import { AIAnalysisInsights } from './components/AIAnalysisInsights';
 import AILoadingScreen from '../AILoadingScreen';
 import './styles/AIPredictionsPage.css';
 import toast from 'react-hot-toast';
+import SEO from '../SEO';
 
 export const AIPredictionsPage: React.FC = () => {
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysisResponse | null>(null);
@@ -197,6 +198,10 @@ export const AIPredictionsPage: React.FC = () => {
 
   return (
     <div className="ai-predictions-page">
+      <SEO 
+        title="AI Predictions – What the Meta?"
+        description="Machine‑learning predictions for Mythic+ meta: spec performance, composition trends, and season outlooks."
+      />
       {/* Force Refresh Controls */}
       {currentSeasonId && isTestingEnabled && (
         <div className="force-refresh-controls">

@@ -13,6 +13,7 @@ import { HeatmapChart } from './charts/HeatmapChart';
 import { TreemapChart } from './charts/TreemapChart';
 import './styles/MetaEvolutionPage.css';
 import { ChartDescriptionPopover } from './components/ChartDescriptionPopover';
+import SEO from '../SEO';
 import { useFilterState } from '../FilterContext';
 
 export const MetaEvolutionPage: React.FC = () => {
@@ -49,6 +50,10 @@ export const MetaEvolutionPage: React.FC = () => {
 
   return (
     <div className="meta-evolution-page">
+      <SEO 
+        title="Meta Evolution – What the Meta?"
+        description="Explore how the Mythic+ meta evolves across seasons with popularity, performance, and composition charts."
+      />
 
       <div className="page-header">
         <div className="header-content">

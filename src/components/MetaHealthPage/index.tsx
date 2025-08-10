@@ -5,6 +5,7 @@ import { FilterBar } from '../FilterBar';
 import { useFilterState, useFilterDispatch } from '../FilterContext';
 import { WOW_SPEC_NAMES } from '../../constants/wow-constants';
 import './styles/MetaHealthPage.css';
+import SEO from '../SEO';
 
   // Local interfaces for meta health data
   interface RoleAnalysis {
@@ -186,6 +187,10 @@ export const MetaHealthPage: React.FC = () => {
 
   return (
     <div className="mh-meta-health-page">
+      <SEO
+        title="Meta Health – What the Meta?"
+        description="Balance snapshot of the Mythic+ meta by role, composition diversity, and dominant patterns across seasons."
+      />
       <div className="mh-meta-health-header">
         <h1>Meta Analysis</h1>
         <p className="mh-subtitle">
