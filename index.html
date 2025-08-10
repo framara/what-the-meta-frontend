@@ -13,8 +13,8 @@
     <meta name="robots" content="index, follow" />
     <meta name="language" content="English" />
     
-    <!-- Canonical URL -->
-    <link rel="canonical" href="https://whatthemeta.io" />
+  <!-- Canonical URL (updated at runtime to match the current route) -->
+  <link rel="canonical" href="https://whatthemeta.io" />
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -156,6 +156,31 @@
         }
       ]
     }
+    </script>
+
+    <!-- Normalize canonical and social URL tags for SPA routes -->
+    <script>
+      (function () {
+        try {
+          var href = window.location.origin + window.location.pathname + window.location.search;
+          // Canonical
+          var canonical = document.querySelector('link[rel="canonical"]');
+          if (!canonical) {
+            canonical = document.createElement('link');
+            canonical.setAttribute('rel', 'canonical');
+            document.head.appendChild(canonical);
+          }
+          canonical.setAttribute('href', href);
+
+          // OpenGraph/Twitter URL
+          var og = document.querySelector('meta[property="og:url"]');
+          if (og) og.setAttribute('content', href);
+          var tw = document.querySelector('meta[property="twitter:url"]');
+          if (tw) tw.setAttribute('content', href);
+        } catch (e) {
+          /* no-op */
+        }
+      })();
     </script>
   </head>
   <body>
