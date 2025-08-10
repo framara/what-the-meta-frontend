@@ -1,5 +1,7 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { fetchSpecEvolution } from '../../../services/api';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { fetchSeasons, fetchSpecEvolution } from '../../../services/api';
+import { useFilterDispatch } from '../../FilterContext';
+import toast from 'react-hot-toast';
 import { 
   WOW_SPECIALIZATIONS, 
   WOW_SPEC_TO_CLASS, 
@@ -99,6 +101,8 @@ export const useRaceBarsData = (
 ): RaceBarsData => {
   const [allData, setAllData] = useState<ApiResponse | null>(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const fallbackTriedRef = useRef<number | null>(null);
+  const dispatch = useFilterDispatch();
   
   const [data, setData] = useState<RaceBarsData>({
     season_id: 0,
@@ -195,16 +199,16 @@ export const useRaceBarsData = (
       }
 
       // Fetch new data
-      const response = await fetchSpecEvolution(season_id);
+  let response: any = await fetchSpecEvolution(season_id);
       
       // Transform single season response to multi-season format for consistency
-      const transformedResponse: ApiResponse = {
+  const transformedResponse: ApiResponse = {
         seasons: [{
           season_id: response.season_id,
           expansion_id: response.expansion_id || 10, // Default to The War Within
           expansion_name: response.expansion_name || 'The War Within',
           season_name: response.season_name,
-          evolution: response.evolution.map(period => ({
+          evolution: response.evolution.map((period: any) => ({
             period_id: period.period_id,
             week: period.week,
             period_label: period.period_label,
@@ -218,7 +222,30 @@ export const useRaceBarsData = (
       
       setAllData(transformedResponse);
       setIsInitialLoad(false);
-    } catch (error) {
+    } catch (error: unknown) {
+      // If latest season has no data yet, backend returns 404. Fallback once to previous season and notify.
+      const status = (typeof error === 'object' && error !== null && 'response' in error)
+        ? (error as any).response?.status
+        : undefined;
+      if (status === 404 && typeof season_id === 'number' && fallbackTriedRef.current !== season_id) {
+        try {
+          const seasons = await fetchSeasons();
+          const sorted = [...seasons].sort((a: any, b: any) => b.season_id - a.season_id);
+          const idx = sorted.findIndex((s: any) => s.season_id === season_id);
+          const prev = idx >= 0 ? sorted[idx + 1] : null;
+          if (prev?.season_id) {
+            const latest = sorted[0];
+            const latestLabel = latest?.season_name || `Season ${season_id}`;
+            toast.dismiss('season-fallback');
+            toast.success(`${latestLabel} has not started yet. Showing previous season instead.`, { id: 'season-fallback' });
+            fallbackTriedRef.current = season_id;
+            dispatch({ type: 'SET_SEASON', season_id: prev.season_id });
+            return;
+          }
+        } catch (secondary) {
+          // fall through to error state below
+        }
+      }
       console.error('Error fetching race bars data:', error);
       setData(prev => ({ 
         ...prev, 
@@ -235,6 +262,11 @@ export const useRaceBarsData = (
       fetchData();
     }
   }, [season_id, fetchData]);
+
+  // Reset fallback guard when the selected season changes explicitly
+  useEffect(() => {
+    fallbackTriedRef.current = null;
+  }, [season_id]);
 
   // Process and filter data based on current filters - optimized with useMemo
   const processedData = useMemo(() => {

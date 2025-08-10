@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { fetchSeasonInfo, fetchSeasons } from '../../services/api';
 import { getAIPredictions, getAIAnalysis } from '../../services/aiService';
 import type { AIAnalysisResponse } from '../../services/aiService';
@@ -6,6 +6,7 @@ import { PredictionDashboard } from './components/PredictionDashboard';
 import { AIAnalysisInsights } from './components/AIAnalysisInsights';
 import AILoadingScreen from '../AILoadingScreen';
 import './styles/AIPredictionsPage.css';
+import toast from 'react-hot-toast';
 
 export const AIPredictionsPage: React.FC = () => {
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysisResponse | null>(null);
@@ -16,6 +17,7 @@ export const AIPredictionsPage: React.FC = () => {
   const [cacheMetadata, setCacheMetadata] = useState<{ created_at: string; age_hours: number; max_age_hours: number } | null>(null);
   const [forceRefresh, setForceRefresh] = useState(false);
   const [currentSeasonId, setCurrentSeasonId] = useState<number | null>(null);
+  const fallbackTriedRef = useRef<number | null>(null);
 
   // Check if testing features should be enabled
   const isTestingEnabled = import.meta.env.VITE_ENABLE_TESTING_FEATURES === 'true';
@@ -68,9 +70,30 @@ export const AIPredictionsPage: React.FC = () => {
       }
       console.log(`✅ [Frontend] AI analysis completed for season ${seasonId}`);
       setAiAnalysis(aiResponse);
-    } catch (aiError) {
+  } catch (aiError: any) {
       console.error('❌ [Frontend] AI analysis failed:', aiError);
-      // Don't fail the entire page if AI fails, just show a warning
+      // If AI endpoints are not available (404) for the latest season, fallback to previous season once
+      try {
+    const status = aiError?.response?.status;
+    if (status === 404 && fallbackTriedRef.current !== seasonId) {
+          const seasons = await fetchSeasons();
+          const sorted = [...seasons].sort((a: any, b: any) => b.season_id - a.season_id);
+          if (sorted.length > 1 && seasonId === sorted[0].season_id) {
+            const latestLabel = sorted[0]?.season_name || `Season ${sorted[0].season_id}`;
+            const prev = sorted[1];
+            if (prev?.season_id) {
+              toast.dismiss('season-fallback');
+              toast.success(`${latestLabel} has not started yet. Showing previous season instead.`, { id: 'season-fallback' });
+              fallbackTriedRef.current = seasonId;
+              setCurrentSeasonId(prev.season_id);
+              return; // Trigger reload for previous season
+            }
+          }
+        }
+      } catch (fallbackErr) {
+        console.warn('Fallback decision failed, showing generic error:', fallbackErr);
+      }
+      // If we get here, show a generic error
       setError('AI analysis failed. Please try again later.');
     } finally {
       setAiLoading(false);
@@ -85,6 +108,30 @@ export const AIPredictionsPage: React.FC = () => {
     setError(null);
 
     try {
+      // If this is the latest season but has no data yet, fallback once to previous season
+      try {
+        const info = await fetchSeasonInfo(currentSeasonId);
+        const hasData = (info?.periods?.length ?? 0) > 0 || (info?.dungeons?.length ?? 0) > 0;
+        if (!hasData && fallbackTriedRef.current !== currentSeasonId) {
+          const seasons = await fetchSeasons();
+          const sorted = [...seasons].sort((a: any, b: any) => b.season_id - a.season_id);
+          if (sorted.length > 1 && currentSeasonId === sorted[0].season_id) {
+            const latestLabel = sorted[0]?.season_name || `Season ${sorted[0].season_id}`;
+            const prev = sorted[1];
+            if (prev?.season_id) {
+              toast.dismiss('season-fallback');
+              toast.success(`${latestLabel} has not started yet. Showing previous season instead.`, { id: 'season-fallback' });
+              fallbackTriedRef.current = currentSeasonId;
+              setCurrentSeasonId(prev.season_id);
+              setLoading(false);
+              return; // re-run for previous season
+            }
+          }
+        }
+      } catch {
+        // If checking season info fails, continue to AI flow; startAIAnalysis will still handle errors
+      }
+
       // Start AI analysis immediately - no need to fetch dungeons data
       await startAIAnalysis(currentSeasonId);
       

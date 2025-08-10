@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useFilterState, useFilterDispatch } from './FilterContext';
 import { fetchSeasons, fetchSeasonInfo } from '../services/api';
 import { WOW_EXPANSIONS } from '../constants/wow-constants';
 import './styles/FilterBar.css';
+import toast from 'react-hot-toast';
 
 interface FilterBarProps {
   showExpansion?: boolean;
@@ -70,6 +71,12 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       setLoading(false);
     });
   }, []);
+
+  // Convenience memo for latest season id
+  const latestSeasonId = useMemo(() => {
+    if (seasonOptions.length === 0) return undefined;
+    return Math.max(...seasonOptions.map(s => s.value));
+  }, [seasonOptions]);
 
   // Get expansion options for the filter
   const getExpansionOptions = () => {
@@ -150,27 +157,49 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   // Optimized season info fetching with granular loading states
   useEffect(() => {
     if (!filter.season_id || (!showPeriod && !showDungeon)) return;
-    
-    // Set loading states only for the specific filters that need data
-    if (showPeriod) setPeriodLoading(true);
-    if (showDungeon) setDungeonLoading(true);
-    
-    fetchSeasonInfo(filter.season_id).then(info => {
-      if (showPeriod) {
-        const sortedPeriods = [...info.periods].sort((a, b) => b.period_id - a.period_id);
-        setPeriodOptions(sortedPeriods.map(p => ({ label: p.period_name, value: p.period_id })));
-        setPeriodLoading(false);
+
+    const load = async () => {
+      // Set loading states only for the specific filters that need data
+      if (showPeriod) setPeriodLoading(true);
+      if (showDungeon) setDungeonLoading(true);
+
+      try {
+        const info = await fetchSeasonInfo(filter.season_id!);
+
+        const hasData = (info?.periods?.length ?? 0) > 0 || (info?.dungeons?.length ?? 0) > 0;
+        const isLatest = latestSeasonId && filter.season_id === latestSeasonId;
+
+        if (!hasData && isLatest && seasonOptions.length > 1) {
+          // Auto-fallback to previous season and notify the user
+          const sortedByValue = [...seasonOptions].sort((a,b) => b.value - a.value);
+          const prev = sortedByValue[1];
+          if (prev) {
+            const latestLabel = seasonOptions.find(s => s.value === latestSeasonId)?.label || `Season ${latestSeasonId}`;
+            toast.dismiss('season-fallback');
+            toast.success(`${latestLabel} has not started yet. Showing previous season instead.`, { id: 'season-fallback' });
+            dispatch({ type: 'SET_SEASON', season_id: prev.value });
+            return; // bail out; effect will rerun
+          }
+        }
+
+        if (showPeriod) {
+          const sortedPeriods = [...(info.periods || [])].sort((a, b) => b.period_id - a.period_id);
+          setPeriodOptions(sortedPeriods.map(p => ({ label: p.period_name, value: p.period_id })));
+          setPeriodLoading(false);
+        }
+        if (showDungeon) {
+          setDungeonOptions((info.dungeons || []).map(d => ({ label: d.dungeon_name, value: d.dungeon_id })));
+          setDungeonLoading(false);
+        }
+      } catch (error) {
+        console.error('Error fetching season info:', error);
+        if (showPeriod) setPeriodLoading(false);
+        if (showDungeon) setDungeonLoading(false);
       }
-      if (showDungeon) {
-        setDungeonOptions(info.dungeons.map(d => ({ label: d.dungeon_name, value: d.dungeon_id })));
-        setDungeonLoading(false);
-      }
-    }).catch(error => {
-      console.error('Error fetching season info:', error);
-      if (showPeriod) setPeriodLoading(false);
-      if (showDungeon) setDungeonLoading(false);
-    });
-  }, [filter.season_id, showPeriod, showDungeon]);
+    };
+
+    load();
+  }, [filter.season_id, showPeriod, showDungeon, latestSeasonId, seasonOptions, dispatch]);
 
   // Count visible filters
   const visibleFiltersCount = [showExpansion, true, showPeriod, showDungeon, showLimit].filter(Boolean).length;
