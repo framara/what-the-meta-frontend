@@ -119,9 +119,16 @@ export async function getAIPredictions(request: AIPredictionRequest): Promise<AI
     });
     
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ [AI Service] AI prediction error:', error);
-    throw new Error('Failed to get AI predictions');
+    // Preserve axios error so callers can inspect response.status (e.g., 404)
+    if (error?.response) {
+      throw error;
+    }
+    // Fallback: wrap unknown error types
+    const wrapped: any = new Error('Failed to get AI predictions');
+    if (error?.message) wrapped.cause = error;
+    throw wrapped;
   }
 }
 

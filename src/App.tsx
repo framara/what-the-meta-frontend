@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import LoadingScreen from './components/LoadingScreen';
 import './App.css';
-import { fetchTopKeys, fetchSeasonInfo } from './services/api';
+import { fetchTopKeys, fetchSeasonInfo, fetchSeasons } from './services/api';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { useFilterState } from './components/FilterContext';
+import { useFilterDispatch, useFilterState } from './components/FilterContext';
 import { FilterBar } from './components/FilterBar';
 import { LeaderboardTable } from './components/LeaderboardTable';
 import { SummaryStats } from './components/SummaryStats';
@@ -18,6 +18,7 @@ import PrivacyPage from './components/PrivacyPage';
 import TermsPage from './components/TermsPage';
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
+import toast from 'react-hot-toast';
 
 function App() {
   const [apiData, setApiData] = useState<any>(null);
@@ -25,6 +26,12 @@ function App() {
   const [dungeons, setDungeons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const filter = useFilterState();
+  const dispatch = useFilterDispatch();
+  const fallbackTriedRef = useRef<number | null>(null);
+  // Allow fallback again whenever the user changes the season explicitly
+  useEffect(() => {
+    fallbackTriedRef.current = null;
+  }, [filter.season_id]);
 
   useEffect(() => {
     if (!filter.season_id) return;
@@ -36,7 +43,30 @@ function App() {
     if (filter.dungeon_id) params.dungeon_id = filter.dungeon_id;
     if (filter.limit) params.limit = filter.limit;
     fetchTopKeys(params)
-      .then(data => setApiData(data))
+      .then(async (data) => {
+        // If no data and this is the latest season, fallback to previous season once
+        if ((Array.isArray(data) && data.length === 0) && fallbackTriedRef.current !== filter.season_id) {
+          try {
+            const seasons = await fetchSeasons();
+            const sorted = [...seasons].sort((a: any, b: any) => b.season_id - a.season_id);
+            const latestId = sorted[0]?.season_id;
+            if (latestId && filter.season_id === latestId) {
+              const prev = sorted[1];
+              if (prev?.season_id) {
+                const latestLabel = sorted[0]?.season_name || `Season ${latestId}`;
+                toast.dismiss('season-fallback');
+                toast.success(`${latestLabel} has not started yet. Showing previous season instead.`, { id: 'season-fallback' });
+                fallbackTriedRef.current = filter.season_id ?? null;
+                dispatch({ type: 'SET_SEASON', season_id: prev.season_id });
+                return; // effect will re-run with the new season
+              }
+            }
+          } catch (e) {
+            // If fallback fails, just proceed to set empty data
+          }
+        }
+        setApiData(data);
+      })
       .catch(err => setApiError(err.message || 'API error'))
       .finally(() => setLoading(false));
   }, [filter.season_id, filter.period_id, filter.dungeon_id, filter.limit]);
