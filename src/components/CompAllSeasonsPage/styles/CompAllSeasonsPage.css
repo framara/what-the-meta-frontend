@@ -111,6 +111,27 @@
   position: relative;
   overflow: hidden;
 }
+.cas-skel-card-inner {
+  position: absolute;
+  inset: 0;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cas-skel-h {
+  height: 16px;
+  width: 60%;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.2);
+}
+.cas-skel-l {
+  height: 10px;
+  width: 80%;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.16);
+}
+.cas-skel-l.short { width: 50%; }
 .cas-skeleton-note { margin-top: 12px; text-align: center; }
 .cas-skeleton-text { color: #e5e7eb; font-size: 0.9rem; font-weight: 500; }
 @keyframes casShimmer { to { transform: translateX(100%); } }
@@ -123,6 +144,14 @@
 .cas-fade-in { animation: casFade 220ms ease-in-out; }
 .cas-fade-dim { opacity: 0.65; transition: opacity 200ms ease-in-out; }
 @keyframes casFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .cas-skeleton-bar::after,
+  .cas-skeleton-card::after { display: none; animation: none !important; }
+  .cas-inline-spinner { animation: none !important; }
+  .cas-fade-in, .cas-fade-dim { animation: none !important; transition: none !important; }
+}
 
 /* Responsive: match seasons-grid */
 @media (max-width: 1024px) {

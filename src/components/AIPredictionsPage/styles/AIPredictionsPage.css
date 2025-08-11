@@ -81,6 +81,14 @@
 .ai-fade-dim { opacity: 0.65; transition: opacity 200ms ease-in-out; }
 @keyframes aiFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .ai-skeleton-bar::after,
+  .ai-skeleton-card::after { display: none; animation: none !important; }
+  .ai-inline-spinner { animation: none !important; }
+  .ai-fade-in, .ai-fade-dim { animation: none !important; transition: none !important; }
+}
+
 /* Removed shiny effect and elevate effect on hover */
 
 .page-header {

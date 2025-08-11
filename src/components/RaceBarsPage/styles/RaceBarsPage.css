@@ -285,6 +285,12 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .rb-skeleton-bar::after { display: none; animation: none !important; }
+  .rb-fade { animation: none !important; }
+}
+
 /* ===== COMING SOON SECTION ===== */
 .coming-soon-container {
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);

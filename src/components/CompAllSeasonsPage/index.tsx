@@ -287,7 +287,13 @@ export const CompAllSeasonsPage: React.FC = () => {
               <div className="cas-skeleton-bar wide" />
               <div className="cas-skeleton-grid">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="cas-skeleton-card" />
+                  <div key={i} className="cas-skeleton-card">
+                    <div className="cas-skel-card-inner">
+                      <div className="cas-skel-h" />
+                      <div className="cas-skel-l" />
+                      <div className="cas-skel-l short" />
+                    </div>
+                  </div>
                 ))}
               </div>
               <div className="cas-skeleton-note">

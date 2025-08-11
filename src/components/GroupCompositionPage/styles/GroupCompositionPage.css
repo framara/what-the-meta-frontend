@@ -1027,6 +1027,15 @@
   }
 }
 
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .gc-skeleton-bar::after,
+  .gc-skeleton-card::after { display: none; animation: none !important; }
+  .gc-mini-spinner::after { animation: none !important; }
+  .gc-fade-in, .gc-fade-dim { animation: none !important; transition: none !important; }
+  .gc-chip-dot { animation: none !important; box-shadow: none !important; }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .page-title {

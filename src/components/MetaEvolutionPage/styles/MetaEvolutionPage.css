@@ -962,6 +962,14 @@
   }
 }
 
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .loading-spinner { animation: none !important; }
+  .meta-skeleton-bar::after,
+  .meta-skeleton-cell::after { display: none; animation: none !important; }
+  .chart-fade { animation: none !important; }
+}
+
 /* Mobile responsive styles for popover */
 @media (max-width: 768px) {
   .chart-description-content {
