@@ -398,6 +398,136 @@
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
+/* Inline skeleton overlay */
+.gc-content-wrapper { position: relative; min-height: 400px; }
+.gc-skeleton-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(2, 6, 23, 0.55) 0%, rgba(15,23,42,0.55) 100%);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: 12px;
+}
+.gc-skeleton {
+  width: min(900px, 95%);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(59,130,246,0.25);
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(51, 65, 85, 0.8) 100%);
+  position: relative;
+  overflow: hidden;
+}
+.gc-skeleton-bar {
+  height: 14px;
+  width: 45%;
+  margin: 8px 0;
+  border-radius: 6px;
+  background: rgba(148,163,184,0.2);
+  position: relative;
+  overflow: hidden;
+}
+.gc-skeleton-bar.wide { width: 75%; }
+.gc-skeleton-bar::after,
+.gc-skeleton-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.1), rgba(255,255,255,0));
+  animation: gcShimmer 1.6s infinite;
+}
+.gc-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.gc-skeleton-card {
+  height: 120px;
+  border-radius: 10px;
+  background: rgba(148,163,184,0.18);
+  position: relative;
+  overflow: hidden;
+}
+.gc-skeleton-note { margin-top: 12px; text-align: center; }
+.gc-skeleton-text { color: #e5e7eb; font-size: 0.9rem; font-weight: 500; }
+.gc-skeleton-subtext { color: #9ca3af; font-size: 0.8rem; margin-top: 4px; }
+@keyframes gcShimmer { to { transform: translateX(100%); } }
+
+/* Trend overlay */
+.gc-trend-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(17, 24, 39, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: 12px;
+  backdrop-filter: blur(4px);
+}
+.gc-trend-content { text-align: center; }
+.gc-trend-title { color: #e5e7eb; font-size: 0.95rem; font-weight: 600; margin-top: 0.5rem; }
+.gc-trend-subtitle { color: #9ca3af; font-size: 0.8rem; margin-top: 0.25rem; }
+
+/* Determinate progress */
+.gc-progress { margin-top: 0.5rem; width: min(420px, 80vw); margin-inline: auto; }
+.gc-progress-track {
+  height: 8px;
+  background: rgba(148,163,184,0.2);
+  border-radius: 9999px;
+  overflow: hidden;
+  border: 1px solid rgba(59,130,246,0.25);
+}
+.gc-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  box-shadow: 0 0 20px rgba(59,130,246,0.35);
+  transition: width 160ms ease;
+}
+.gc-progress-label {
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  color: #e5e7eb; font-size: 0.85rem; margin-top: 0.35rem;
+}
+.gc-progress-percent { color: #93c5fd; font-weight: 700; }
+.gc-progress-stage { color: #cbd5e1; }
+
+/* Fades */
+.gc-fade-in { animation: gcFade 220ms ease-in-out; }
+.gc-fade-dim { opacity: 0.65; transition: opacity 200ms ease-in-out; }
+@keyframes gcFade {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Non-blocking chip while hydrating trends */
+.gc-trend-chip {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  z-index: 11;
+  font-size: 0.8rem;
+  color: #e5e7eb;
+  background: rgba(30,41,59,0.8);
+  border: 1px solid rgba(59,130,246,0.35);
+  border-radius: 9999px;
+  padding: 6px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+  backdrop-filter: blur(6px);
+}
+.gc-chip-dot {
+  width: 8px; height: 8px; border-radius: 9999px; background: #60a5fa;
+  box-shadow: 0 0 8px #60a5fa; animation: gcPulse 1.2s ease-in-out infinite;
+}
+@keyframes gcPulse { 0%, 100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.25); opacity: 1; } }
+
 /* Group Composition Stats */
 .group-composition-stats {
   display: flex;
@@ -750,6 +880,28 @@
 .mini-trend-chart circle {
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
 }
+
+/* Mini spinner overlay when hydrating trends */
+.gc-mini-spinner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  pointer-events: none;
+}
+.gc-mini-spinner::after {
+  content: '';
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(148,163,184,0.35);
+  border-top-color: #60a5fa;
+  border-radius: 9999px;
+  animation: gcSpin 0.8s linear infinite;
+  box-shadow: 0 0 12px rgba(59,130,246,0.35);
+}
+@keyframes gcSpin { to { transform: rotate(360deg); } }
 
 .flip-hint {
   color: #9ca3af;

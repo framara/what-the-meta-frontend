@@ -25,6 +25,7 @@ function App() {
   const [apiError, setApiError] = useState<string | null>(null);
   const [dungeons, setDungeons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasBooted, setHasBooted] = useState(false);
   const filter = useFilterState();
   const dispatch = useFilterDispatch();
   const fallbackTriedRef = useRef<number | null>(null);
@@ -35,7 +36,7 @@ function App() {
 
   useEffect(() => {
     if (!filter.season_id) return;
-    setApiData(null);
+    // Only clear data when changing filters; keeps skeleton inline
     setApiError(null);
     setLoading(true);
     const params: any = { season_id: filter.season_id };
@@ -68,7 +69,10 @@ function App() {
         setApiData(data);
       })
       .catch(err => setApiError(err.message || 'API error'))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        if (!hasBooted) setHasBooted(true);
+      });
   }, [filter.season_id, filter.period_id, filter.dungeon_id, filter.limit]);
 
   useEffect(() => {
@@ -76,8 +80,8 @@ function App() {
     fetchSeasonInfo(filter.season_id).then(info => setDungeons(info.dungeons));
   }, [filter.season_id]);
 
-  if (loading) {
-    return <LoadingScreen />;
+  if (!hasBooted && loading) {
+    return <LoadingScreen />; // initial app boot only
   }
 
   if (apiError) {
@@ -130,12 +134,10 @@ function App() {
                   showDungeon={true}
                   showLimit={true}
                 />
-                {apiData && apiData.length > 0 ? (
-                  <>
-                    <SummaryStats runs={apiData} dungeons={dungeons} />
-                    <LeaderboardTable runs={apiData} dungeons={dungeons} />
-                  </>
-                ) : (
+                {/* Inline loading: show skeleton table while fetching */}
+                <SummaryStats runs={apiData || []} dungeons={dungeons} />
+                <LeaderboardTable runs={apiData || []} dungeons={dungeons} loading={loading} />
+                {!loading && (!apiData || apiData.length === 0) && (
                   <div className="flex flex-col items-center justify-center py-16 text-center">
                     <div className="text-6xl mb-4">📊</div>
                     <h2 className="text-2xl font-bold text-gray-200 mb-2">All keys were depleted this week</h2>

@@ -370,6 +370,67 @@
   pointer-events: none;
 }
 
+/* Skeleton shimmer */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgba(148, 163, 184, 0.15); /* slate-400 at ~15% */
+  border-radius: 6px;
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmer 1.6s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton-bar {
+  height: 14px;
+  width: 100%;
+}
+
+.skeleton-bar.short {
+  width: 50%;
+}
+
+.skeleton-bar.tiny {
+  width: 35%;
+}
+
+.skeleton-chip {
+  height: 20px;
+  width: 64px;
+  border-radius: 10px;
+}
+
+.skeleton-square {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+}
+
+@media (min-width: 768px) {
+  .skeleton-square {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+  }
+}
+
 /* Empty state */
 .empty-state {
   text-align: center;

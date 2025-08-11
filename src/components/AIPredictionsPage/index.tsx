@@ -4,7 +4,6 @@ import { getAIPredictions, getAIAnalysis } from '../../services/aiService';
 import type { AIAnalysisResponse } from '../../services/aiService';
 import { PredictionDashboard } from './components/PredictionDashboard';
 import { AIAnalysisInsights } from './components/AIAnalysisInsights';
-import AILoadingScreen from '../AILoadingScreen';
 import './styles/AIPredictionsPage.css';
 import toast from 'react-hot-toast';
 import SEO from '../SEO';
@@ -246,38 +245,52 @@ export const AIPredictionsPage: React.FC = () => {
             <p>Loading AI predictions for the current season...</p>
           </div>
         </div>
-      ) : loading ? (
-        <AILoadingScreen />
       ) : (
-        <div className="ai-predictions-content">
-          {aiLoading ? (
-            <div className="ai-analysis-loading">
-              <div className="ai-loading-content">
-                <div className="ai-loading-spinner"></div>
-                <h3>🤖 AI Analysis in Progress</h3>
-                <p>Analyzing season data and generating predictions...</p>
-                <p className="ai-loading-note">This may take a few moments as we process the data with OpenAI GPT-4</p>
-              </div>
-            </div>
-          ) : aiAnalysis ? (
-            <>
-              <PredictionDashboard 
-                aiAnalysis={aiAnalysis}
-                usingCache={usingCache}
-                cacheMetadata={cacheMetadata}
-                forceRefresh={forceRefresh}
-                seasonId={currentSeasonId}
-              />
-              <AIAnalysisInsights analysis={aiAnalysis.analysis} />
-            </>
-          ) : (
-            <div className="ai-fallback-container">
-              <div className="ai-fallback-content">
-                <h3>📊 No Analysis Available</h3>
-                <p>AI analysis is not available. Please try refreshing the page.</p>
+        <div className="ai-content-wrapper">
+          {/* Inline skeleton overlay for initial and AI analysis load */}
+          {(loading || (aiLoading && !aiAnalysis)) && (
+            <div className="ai-skeleton-overlay">
+              <div className="ai-skeleton">
+                <div className="ai-skeleton-bar" />
+                <div className="ai-skeleton-bar wide" />
+                <div className="ai-skeleton-grid">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="ai-skeleton-card" />
+                  ))}
+                </div>
+                <div className="ai-skeleton-note">
+                  <div className="ai-inline-spinner" />
+                  <div className="ai-skeleton-text">
+                    {aiLoading ? 'AI analysis in progress…' : 'Loading predictions…'}
+                  </div>
+                </div>
               </div>
             </div>
           )}
+
+          <div className={`ai-predictions-content ${(loading || (aiLoading && !aiAnalysis)) ? 'ai-fade-dim' : 'ai-fade-in'}`}>
+            {aiAnalysis ? (
+              <>
+                <PredictionDashboard 
+                  aiAnalysis={aiAnalysis}
+                  usingCache={usingCache}
+                  cacheMetadata={cacheMetadata}
+                  forceRefresh={forceRefresh}
+                  seasonId={currentSeasonId}
+                />
+                <AIAnalysisInsights analysis={aiAnalysis.analysis} />
+              </>
+            ) : (
+              !loading && !aiLoading && (
+                <div className="ai-fallback-container">
+                  <div className="ai-fallback-content">
+                    <h3>📊 No Analysis Available</h3>
+                    <p>AI analysis is not available. Please try refreshing the page.</p>
+                  </div>
+                </div>
+              )
+            )}
+          </div>
         </div>
       )}
     </div>

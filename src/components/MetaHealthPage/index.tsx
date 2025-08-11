@@ -206,11 +206,20 @@ export const MetaHealthPage: React.FC = () => {
         className="mh-meta-health-filter"
       />
 
-      {loading && (
-        <div className="mh-data-loading-section">
-          <AILoadingScreen />
-        </div>
-      )}
+      <div className="mh-content-wrapper" style={{ position: 'relative' }}>
+        {loading && (
+          <div className="mh-skeleton-overlay">
+            <div className="mh-skeleton">
+              <div className="mh-skeleton-bar" />
+              <div className="mh-skeleton-bar wide" />
+              <div className="mh-skeleton-grid">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="mh-skeleton-card" />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
       {error && (
         <div className="mh-error-container">
@@ -222,8 +231,8 @@ export const MetaHealthPage: React.FC = () => {
         </div>
       )}
 
-      {metaHealthData && !loading && (
-        <div className="mh-meta-health-content">
+      {metaHealthData && (
+        <div className={`mh-meta-health-content ${loading ? 'mh-fade-dim' : 'mh-fade-in'}`}>
           {/* Meta Summary */}
           <div className="mh-summary-section">
             <div className="mh-summary-header">
@@ -419,7 +428,7 @@ export const MetaHealthPage: React.FC = () => {
         </div>
       )}
 
-      {!filter.season_id && !loading && !error && (
+  {!filter.season_id && !loading && !error && (
         <div className="mh-initial-state">
           <div className="mh-initial-state-content">
             <h2>Select a Season</h2>
@@ -427,6 +436,7 @@ export const MetaHealthPage: React.FC = () => {
           </div>
         </div>
       )}
+  </div>
     </div>
   );
 }; 

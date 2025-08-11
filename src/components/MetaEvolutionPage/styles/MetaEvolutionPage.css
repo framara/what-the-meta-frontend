@@ -225,6 +225,22 @@
   overflow: hidden;
 }
 
+/* Fade-in when switching chart types */
+.chart-fade {
+  animation: chartFade 220ms ease-in-out;
+}
+
+@keyframes chartFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .chart-container::before {
   content: '';
   position: absolute;
@@ -516,6 +532,81 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+/* Inline skeleton overlay for charts */
+.meta-skeleton-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(2, 6, 23, 0.6) 0%, rgba(15, 23, 42, 0.6) 100%);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: 12px;
+}
+
+.meta-skeleton-chart {
+  width: min(900px, 95%);
+  height: 280px;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(59,130,246,0.25);
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(51, 65, 85, 0.8) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.meta-skeleton-axis {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  bottom: 16px;
+  width: 2px;
+  background: rgba(148,163,184,0.25);
+}
+
+.meta-skeleton-bar {
+  height: 14px;
+  width: 40%;
+  margin: 8px 0;
+  border-radius: 6px;
+  background: rgba(148,163,184,0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.meta-skeleton-bar.wide { width: 65%; }
+
+.meta-skeleton-bar::after,
+.meta-skeleton-cell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.1), rgba(255,255,255,0));
+  animation: metaShimmer 1.6s infinite;
+}
+
+.meta-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 8px;
+  position: absolute;
+  left: 32px;
+  right: 16px;
+  bottom: 16px;
+}
+
+.meta-skeleton-cell {
+  height: 24px;
+  border-radius: 6px;
+  background: rgba(148,163,184,0.18);
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes metaShimmer { to { transform: translateX(100%); } }
 
 /* Heatmap grid */
 .meta-heatmap-header {

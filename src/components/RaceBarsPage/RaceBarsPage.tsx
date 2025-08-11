@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { FilterBar } from '../FilterBar';
 import { MobileAlert } from '../MetaEvolutionPage/components/MobileAlert';
-import LoadingScreen from '../LoadingScreen';
+// Inline skeleton overlays are used instead of a full-screen loader
 import { ChartDescriptionPopover } from '../MetaEvolutionPage/components/ChartDescriptionPopover';
 import { useFilterState } from '../FilterContext';
 import { useRaceBarsData } from './hooks/useRaceBarsData';
@@ -171,18 +171,6 @@ export const RaceBarsPage: React.FC = () => {
     handleRacerReady
   ]);
 
-  // Show loading immediately for better perceived performance
-  if (shouldShowLoading) {
-    return (
-      <div className="race-bars-page">
-        {pageHeaderContent}
-        <FilterBar {...filterBarProps} />
-        {isMobile && <MobileAlert />}
-        <LoadingScreen />
-      </div>
-    );
-  }
-
   return (
     <div className="race-bars-page">
       <SEO
@@ -196,13 +184,29 @@ export const RaceBarsPage: React.FC = () => {
       {/* Mobile Alert - Charts recommended for desktop */}
       {isMobile && <MobileAlert />}
 
-      {hasError ? (
+      <div className="race-bars-content" style={{ position: 'relative' }}>
+        {shouldShowLoading && (
+          <div className="rb-skeleton-overlay">
+            <div className="rb-skeleton">
+              <div className="rb-skeleton-axis" />
+              <div className="rb-skeleton-track" />
+              <div className="rb-skeleton-bars">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="rb-skeleton-bar" />)
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {hasError ? (
         errorContent
       ) : hasNoPeriods ? (
         comingSoonContent
       ) : (
-        raceBarsContent
+        <div className="rb-fade">{raceBarsContent}</div>
       )}
+      </div>
     </div>
   );
 }; 

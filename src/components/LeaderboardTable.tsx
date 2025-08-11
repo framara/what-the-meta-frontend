@@ -29,6 +29,7 @@ interface Dungeon {
 interface LeaderboardTableProps {
   runs: Run[];
   dungeons: Dungeon[];
+  loading?: boolean; // shows skeleton rows when true
 }
 
 function msToTime(ms: number) {
@@ -38,7 +39,7 @@ function msToTime(ms: number) {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
-export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeons }) => {
+export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeons, loading = false }) => {
   const dungeonMap = React.useMemo(() => {
     const map: Record<number, { name: string; shortname: string } > = {};
     dungeons.forEach(d => {
@@ -55,6 +56,9 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
   const [page, setPage] = useState(0);
   const pageCount = Math.ceil(runs.length / PAGE_SIZE);
   const pagedRuns = runs.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+  // Build skeleton rows while loading
+  const skeletonRowCount = PAGE_SIZE;
 
   // Helper to sort members by role: tank, heal, dps, dps, dps
   // Within same role, sort by spec_id
@@ -154,7 +158,27 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
             </tr>
           </thead>
           <tbody>
-            {pagedRuns.map((run, i) => (
+            {loading && pagedRuns.length === 0 && (
+              Array.from({ length: skeletonRowCount }).map((_, i) => (
+                <tr key={`skeleton-${i}`}>
+                  <td className="table-cell rank-cell"><div className="skeleton skeleton-bar tiny" /></td>
+                  <td className="md:hidden"><div className="skeleton skeleton-bar" /></td>
+                  <td className="hidden md:table-cell"><div className="skeleton skeleton-bar short" /></td>
+                  <td className="hidden md:table-cell"><div className="skeleton skeleton-bar" /></td>
+                  <td className="hidden md:table-cell"><div className="skeleton skeleton-bar short" /></td>
+                  <td className="hidden md:table-cell"><div className="skeleton skeleton-bar tiny" /></td>
+                  <td className="hidden md:table-cell"><div className="skeleton skeleton-bar tiny" /></td>
+                  <td className="table-cell">
+                    <div className="saas-group-squares">
+                      {Array.from({ length: 5 }).map((__, j) => (
+                        <div key={j} className="skeleton skeleton-square" />
+                      ))}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+            {!loading && pagedRuns.map((run, i) => (
               <tr key={run.id}>
                 <td className="table-cell rank-cell">{page * PAGE_SIZE + i + 1}</td>
                 <td className="md:hidden">{run.keystone_level} {dungeonMap[run.dungeon_id] ? dungeonMap[run.dungeon_id].shortname : run.dungeon_id}</td>
@@ -209,7 +233,7 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
         </table>
 
         {/* Enhanced Pagination */}
-        <div className="pagination-container">
+  <div className="pagination-container">
           <button
             className="pagination-button"
             onClick={() => setPage(0)}

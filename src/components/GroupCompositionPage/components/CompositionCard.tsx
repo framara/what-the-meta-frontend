@@ -33,6 +33,7 @@ interface CompositionCardProps {
   onSpecClick: (specId: number) => void;
   setSpecTooltip: (tooltip: TooltipState | null) => void;
   seasonData: SeasonData | null;
+  trendLoading?: boolean;
 }
 
 interface CompositionStats {
@@ -170,7 +171,8 @@ export const CompositionCard: React.FC<CompositionCardProps> = ({
   selectedSpec,
   onSpecClick,
   setSpecTooltip,
-  seasonData
+  seasonData,
+  trendLoading = false
 }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
@@ -390,9 +392,13 @@ export const CompositionCard: React.FC<CompositionCardProps> = ({
             })}
           </div>
           
-          {/* Mini trend chart */}
-          <div className="trend-chart-container">
-            <MiniTrendChart trendData={trendData} />
+          {/* Mini trend chart; show spinner only while hydrating */}
+          <div className="trend-chart-container" style={{ position: 'relative' }}>
+            {trendLoading ? (
+              <div className="gc-mini-spinner" role="status" aria-label="Loading trend" />
+            ) : (
+              <MiniTrendChart trendData={trendData} />
+            )}
           </div>
           
           <div className="flip-hint">
