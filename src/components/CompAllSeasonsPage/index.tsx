@@ -7,8 +7,8 @@ import './styles/CompAllSeasonsPage.css';
 import SEO from '../SEO';
 
 interface GroupMember {
-  class_id: string;
-  spec_id: string;
+  class_id: number;
+  spec_id: number;
   role: string;
 }
 
