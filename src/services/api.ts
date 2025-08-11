@@ -126,6 +126,25 @@ export async function fetchSeasons() {
   }
 }
 
+// Helper: Get latest season id (API provides DB-first data)
+export async function getLatestSeasonId(): Promise<number | null> {
+  try {
+    // Prefer dedicated endpoint if available
+    const url = `${API_BASE_URL}/wow/advanced/current-season`;
+    const resp = await axios.get(url);
+    if (resp?.data?.season_id) return Number(resp.data.season_id);
+  } catch {
+    // Fallback to full seasons list
+  }
+  try {
+    const seasons = await fetchSeasons();
+    if (!Array.isArray(seasons) || seasons.length === 0) return null;
+    return seasons.reduce((max: number, s: any) => (s.season_id > max ? s.season_id : max), seasons[0].season_id);
+  } catch {
+    return null;
+  }
+}
+
 // New: Fetch season info (periods and dungeons) for a given seasonId
 export async function fetchSeasonInfo(seasonId: number) {
   const url = `${API_BASE_URL}/wow/advanced/season-info/${seasonId}`;
