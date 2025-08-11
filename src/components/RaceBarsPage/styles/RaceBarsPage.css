@@ -208,6 +208,89 @@
   width: 100%;
 }
 
+/* Inline skeleton overlay for race bars */
+.rb-skeleton-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(2, 6, 23, 0.55) 0%, rgba(15,23,42,0.55) 100%);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: 12px;
+}
+
+.rb-skeleton {
+  width: min(900px, 95%);
+  height: 360px;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(59,130,246,0.25);
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(51, 65, 85, 0.8) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.rb-skeleton-axis {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  bottom: 16px;
+  width: 2px;
+  background: rgba(148,163,184,0.25);
+}
+
+.rb-skeleton-track {
+  position: absolute;
+  left: 24px;
+  right: 16px;
+  bottom: 32px;
+  height: 2px;
+  background: rgba(148,163,184,0.25);
+}
+
+.rb-skeleton-bars {
+  position: absolute;
+  left: 24px;
+  right: 16px;
+  top: 24px;
+  bottom: 48px;
+  display: grid;
+  grid-template-rows: repeat(8, 1fr);
+  gap: 10px;
+}
+
+.rb-skeleton-bar {
+  background: rgba(148,163,184,0.2);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.rb-skeleton-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.1), rgba(255,255,255,0));
+  animation: rbShimmer 1.6s infinite;
+}
+
+@keyframes rbShimmer { to { transform: translateX(100%); } }
+
+.rb-fade { animation: rbFade 220ms ease-in-out; }
+@keyframes rbFade {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .rb-skeleton-bar::after { display: none; animation: none !important; }
+  .rb-fade { animation: none !important; }
+}
+
 /* ===== COMING SOON SECTION ===== */
 .coming-soon-container {
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);

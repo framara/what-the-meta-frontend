@@ -5,7 +5,7 @@ import { FilterBar } from '../FilterBar';
 import { ChartTypeSelector } from './components/ChartTypeSelector';
 import { ChartViewSelector } from './components/ChartViewSelector';
 import { MobileAlert } from './components/MobileAlert';
-import LoadingScreen from '../LoadingScreen';
+// Inline skeletons are used instead of full-screen loader on this page
 import { LineChart } from './charts/LineChart';
 import { BarChart } from './charts/BarChart';
 import { AreaChart } from './charts/AreaChart';
@@ -15,6 +15,7 @@ import './styles/MetaEvolutionPage.css';
 import { ChartDescriptionPopover } from './components/ChartDescriptionPopover';
 import SEO from '../SEO';
 import { useFilterState } from '../FilterContext';
+import { useSeasonLabel } from '../../hooks/useSeasonLabel';
 
 export const MetaEvolutionPage: React.FC = () => {
   const filter = useFilterState();
@@ -41,18 +42,29 @@ export const MetaEvolutionPage: React.FC = () => {
   }, [charts]);
 
   const currentChart = charts[chartView];
-
-  // Only show full loading screen for initial load, not for data updates
-  const shouldShowLoading = loading && !currentChart.data.length;
-  
-  // Show skeleton loading for data updates
-  const shouldShowSkeleton = loading && currentChart.data.length > 0;
+  // Always keep header/filters visible; use inline skeleton overlay while loading
+  const isLoading = loading;
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://whatthemeta.io';
+  const { seasonLabel } = useSeasonLabel(filter.season_id);
 
   return (
     <div className="meta-evolution-page">
       <SEO 
-        title="Meta Evolution – What the Meta?"
+        title={`Meta Evolution – ${seasonLabel} – What the Meta?`}
         description="Explore how the Mythic+ meta evolves across seasons with popularity, performance, and composition charts."
+        keywords={[
+          'World of Warcraft','WoW','Mythic+','meta evolution','spec popularity','class trends','composition trends','season trends','charts','analytics'
+        ]}
+        canonicalUrl="/meta-evolution"
+        image="/og-image.jpg"
+    structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: origin + '/' },
+      { '@type': 'ListItem', position: 2, name: `Meta Evolution (${seasonLabel})`, item: origin + '/meta-evolution' }
+          ]
+        }}
       />
 
       <div className="page-header">
@@ -93,73 +105,64 @@ export const MetaEvolutionPage: React.FC = () => {
         </div>
       </div>
 
-      {shouldShowLoading ? (
-        <LoadingScreen />
-      ) : (
-        <div className="chart-container-wrapper" style={{ position: 'relative' }}>
-          {/* Skeleton loading overlay */}
-          {shouldShowSkeleton && (
-            <div 
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 10,
-                borderRadius: '8px'
-              }}
-            >
-              <div style={{ textAlign: 'center' }}>
-                <div className="loading-spinner" style={{ margin: '0 auto 1rem' }}></div>
-                <p style={{ color: '#666', fontSize: '0.9rem' }}>Updating chart data...</p>
+      <div className="chart-container-wrapper" style={{ position: 'relative' }}>
+        {/* Skeleton loading overlay - non-blocking, dark themed */}
+        {isLoading && (
+          <div className="meta-skeleton-overlay">
+            <div className="meta-skeleton-chart">
+              <div className="meta-skeleton-axis" />
+              <div className="meta-skeleton-bar" />
+              <div className="meta-skeleton-bar wide" />
+              <div className="meta-skeleton-bar" />
+              <div className="meta-skeleton-grid">
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <div key={i} className="meta-skeleton-cell" />
+                ))}
               </div>
             </div>
-          )}
-          
+          </div>
+        )}
+
+        <div key={activeChart} className="chart-fade">
           {activeChart === 'line' && (
-            <LineChart 
-              data={currentChart.data} 
-              topSpecs={currentChart.topSpecs} 
-              isMobile={isMobile}
-            />
-          )}
-          {activeChart === 'bar' && (
-            <BarChart 
-              data={currentChart.data} 
-              topSpecs={currentChart.topSpecs} 
-              isMobile={isMobile}
-            />
-          )}
-          {activeChart === 'area' && (
-            <AreaChart 
-              data={currentChart.data} 
-              topSpecs={currentChart.topSpecs} 
-              isMobile={isMobile}
-            />
-          )}
-          {activeChart === 'heatmap' && (
-            <HeatmapChart 
-              data={currentChart.data} 
-              topSpecs={currentChart.topSpecs}
-            />
-          )}
-          {activeChart === 'treemap' && (
-            <TreemapChart 
-              data={currentChart.data} 
-              topSpecs={currentChart.topSpecs}
-              treemapWeek={treemapWeek}
-              setTreemapWeek={setTreemapWeek}
-              chartView={chartView}
-              allSpecs={allSpecs}
-            />
-          )}
+              <LineChart 
+                data={currentChart.data} 
+                topSpecs={currentChart.topSpecs} 
+                isMobile={isMobile}
+              />
+            )}
+            {activeChart === 'bar' && (
+              <BarChart 
+                data={currentChart.data} 
+                topSpecs={currentChart.topSpecs} 
+                isMobile={isMobile}
+              />
+            )}
+            {activeChart === 'area' && (
+              <AreaChart 
+                data={currentChart.data} 
+                topSpecs={currentChart.topSpecs} 
+                isMobile={isMobile}
+              />
+            )}
+            {activeChart === 'heatmap' && (
+              <HeatmapChart 
+                data={currentChart.data} 
+                topSpecs={currentChart.topSpecs}
+              />
+            )}
+            {activeChart === 'treemap' && (
+              <TreemapChart 
+                data={currentChart.data} 
+                topSpecs={currentChart.topSpecs}
+                treemapWeek={treemapWeek}
+                setTreemapWeek={setTreemapWeek}
+                chartView={chartView}
+                allSpecs={allSpecs}
+              />
+            )}
         </div>
-      )}
+      </div>
     </div>
   );
 }; 

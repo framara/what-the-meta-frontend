@@ -6,6 +6,7 @@ import LoadingScreen from '../LoadingScreen';
 import { FilterBar } from '../FilterBar';
 import './styles/GroupCompositionPage.css';
 import SEO from '../SEO';
+import { useSeasonLabel } from '../../hooks/useSeasonLabel';
 
 interface Season {
   season_id: number;
@@ -53,6 +54,7 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 export const GroupCompositionPage: React.FC = () => {
   const filter = useFilterState();
+  const { seasonLabel } = useSeasonLabel(filter.season_id);
   const [runs, setRuns] = useState<Run[]>([]);
   const [seasonData, setSeasonData] = useState<SeasonData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -60,8 +62,12 @@ export const GroupCompositionPage: React.FC = () => {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [trendLoading, setTrendLoading] = useState(false);
+  const [trendProgress, setTrendProgress] = useState(0);
+  const [trendStage, setTrendStage] = useState<'idle' | 'requesting' | 'downloading' | 'parsing' | 'finalizing'>('idle');
   const isFetchingRef = useRef(false);
   const workerRef = useRef<Worker | null>(null);
+  const lastRequestIdRef = useRef<string | null>(null);
+  const fetchRequestIdRef = useRef<string | null>(null);
 
   // Memoized cache key for current filter state
   const cacheKey = useMemo(() => {
@@ -71,6 +77,8 @@ export const GroupCompositionPage: React.FC = () => {
   // Progressive loading function
   const fetchData = useCallback(async () => {
     const startTime = performance.now();
+    const requestId = `fetch-${filter.season_id}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    fetchRequestIdRef.current = requestId;
     
     if (!filter.season_id) return;
 
@@ -79,8 +87,9 @@ export const GroupCompositionPage: React.FC = () => {
     const richCached = dataCache.get(`rich-${cacheKey}`);
     
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-      setRuns(cached.runs);
-      setSeasonData(cached.seasonData);
+  if (fetchRequestIdRef.current !== requestId) return;
+  setRuns(cached.runs);
+  setSeasonData(cached.seasonData);
       setLoading(false);
       setIsInitialLoad(false);
       
@@ -112,7 +121,7 @@ export const GroupCompositionPage: React.FC = () => {
       const topKeysStart = performance.now();
       
       // Fetch top keys first (this is the heaviest call)
-      const runsData = await fetchTopKeys({
+  const runsData = await fetchTopKeys({
         season_id: filter.season_id,
         period_id: filter.period_id,
         dungeon_id: filter.dungeon_id,
@@ -121,8 +130,9 @@ export const GroupCompositionPage: React.FC = () => {
       
       const topKeysTime = performance.now() - topKeysStart;
       
-      setLoadingProgress(60);
-      setRuns(runsData); // Show initial data immediately
+  setLoadingProgress(60);
+  if (fetchRequestIdRef.current !== requestId) return;
+  setRuns(runsData); // Show initial data immediately
       
       // If we fetched less than the full limit, fetch the rest
       let finalRuns = runsData;
@@ -130,7 +140,7 @@ export const GroupCompositionPage: React.FC = () => {
         const remainingLimit = (filter.limit || 1000) - initialLimit;
         
         const additionalStart = performance.now();
-        const additionalRuns = await fetchTopKeys({
+  const additionalRuns = await fetchTopKeys({
           season_id: filter.season_id,
           period_id: filter.period_id,
           dungeon_id: filter.dungeon_id,
@@ -146,7 +156,7 @@ export const GroupCompositionPage: React.FC = () => {
       setLoadingProgress(90);
       
       // Create initial season data structure from runs (for immediate display)
-      const initialSeasonData = {
+  const initialSeasonData = {
         season_id: filter.season_id,
         total_periods: 1,
         total_keys: finalRuns.length,
@@ -173,8 +183,9 @@ export const GroupCompositionPage: React.FC = () => {
         timestamp: Date.now()
       });
       
-      setRuns(finalRuns);
-      setSeasonData(initialSeasonData);
+  if (fetchRequestIdRef.current !== requestId) return;
+  setRuns(finalRuns);
+  setSeasonData(initialSeasonData);
       setIsInitialLoad(false);
       setLoadingProgress(100);
       
@@ -198,42 +209,61 @@ export const GroupCompositionPage: React.FC = () => {
   const startCompositionWorker = useCallback(() => {
     if (!filter.season_id) return;
     
+    // Reset and start progress for background phase
     setTrendLoading(true);
+    setTrendProgress(0);
+    setTrendStage('requesting');
+    const requestId = `${filter.season_id}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    lastRequestIdRef.current = requestId;
     
-    // Create worker if it doesn't exist
-    if (!workerRef.current) {
-      workerRef.current = new Worker('/composition-worker.js');
-      
-      // Set up message handler
-      workerRef.current.onmessage = (event) => {
-        const { success, seasonData, error } = event.data;
-        
-        if (success && seasonData) {
-          
-          // Update with rich data
-          setSeasonData(seasonData);
-          setTrendLoading(false);
-          
-          // Update cache with rich data
-          const richCacheKey = `rich-${cacheKey}`;
-          dataCache.set(richCacheKey, {
-            runs: runs,
-            seasonData: seasonData,
-            timestamp: Date.now()
-          });
-          
-        } else {
-          console.error(`❌ [${new Date().toISOString()}] Worker error:`, error);
-          setTrendLoading(false);
-        }
-      };
-      
-      // Set up error handler
-      workerRef.current.onerror = (error) => {
+    // Always (re)create worker to cancel any in-flight previous req
+    if (workerRef.current) {
+      try { workerRef.current.terminate(); } catch { /* no-op */ }
+    }
+    workerRef.current = new Worker('/composition-worker.js');
+
+    // Set up message handler
+    workerRef.current.onmessage = (event: MessageEvent) => {
+      const data = event.data as any;
+      // Ignore messages from stale requests
+      if (!data || (data.requestId && data.requestId !== lastRequestIdRef.current)) {
+        return;
+      }
+
+      if (data.type === 'progress') {
+        const stage = data.stage as typeof trendStage;
+        const progress = typeof data.progress === 'number' ? data.progress : undefined;
+        if (stage) setTrendStage(stage);
+        if (typeof progress === 'number') setTrendProgress(Math.max(0, Math.min(100, progress)));
+        return;
+      }
+
+      const { success, seasonData, error } = data;
+      if (success && seasonData) {
+        setTrendProgress(100);
+        setTrendStage('finalizing');
+        // Update with rich data
+        setSeasonData(seasonData);
+        setTrendLoading(false);
+
+        // Update cache with rich data
+        const richCacheKey = `rich-${cacheKey}`;
+        dataCache.set(richCacheKey, {
+          runs: runs,
+          seasonData: seasonData,
+          timestamp: Date.now()
+        });
+      } else {
         console.error(`❌ [${new Date().toISOString()}] Worker error:`, error);
         setTrendLoading(false);
-      };
-    }
+      }
+    };
+    
+    // Set up error handler
+    workerRef.current.onerror = (error) => {
+      console.error(`❌ [${new Date().toISOString()}] Worker error:`, error);
+      setTrendLoading(false);
+    };
     
     // Send data to worker
     workerRef.current.postMessage({
@@ -241,7 +271,8 @@ export const GroupCompositionPage: React.FC = () => {
       period_id: filter.period_id,
       dungeon_id: filter.dungeon_id,
       limit: filter.limit,
-      apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
+      apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000',
+      requestId
     });
     
   }, [filter.season_id, filter.period_id, filter.dungeon_id, filter.limit, cacheKey, runs]);
@@ -318,20 +349,9 @@ export const GroupCompositionPage: React.FC = () => {
   // Memoize main content
   const mainContent = useMemo(() => (
     <div className="group-composition-content">
-      <GroupCompositionStats runs={runs} seasonData={seasonData} />
+      <GroupCompositionStats runs={runs} seasonData={seasonData} trendLoading={trendLoading} />
     </div>
-  ), [runs, seasonData]);
-
-  // Show loading only for initial load, not for data updates
-  if (isInitialLoad && loading) {
-    return (
-      <div className="group-composition-page">
-        {pageHeaderContent}
-        <FilterBar {...filterBarProps} />
-        <LoadingScreen />
-      </div>
-    );
-  }
+  ), [runs, seasonData, trendLoading]);
 
   if (error) {
     return errorContent;
@@ -340,69 +360,71 @@ export const GroupCompositionPage: React.FC = () => {
   return (
     <div className="group-composition-page">
       <SEO
-        title="Group Composition – What the Meta?"
+  title={`Group Composition – ${seasonLabel} – What the Meta?`}
         description="Analyze popular Mythic+ team compositions, roles, and spec synergy across dungeons and seasons."
+        keywords={[ 'WoW','Mythic+','group composition','team comps','roles','spec synergy','dungeon meta','party setup' ]}
+        canonicalUrl="/group-composition"
+        image="/og-image.jpg"
+    structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: (typeof window !== 'undefined' ? window.location.origin : 'https://whatthemeta.io') + '/' },
+      { '@type': 'ListItem', position: 2, name: `Group Composition (${seasonLabel})`, item: (typeof window !== 'undefined' ? window.location.origin : 'https://whatthemeta.io') + '/group-composition' }
+          ]
+        }}
       />
       {pageHeaderContent}
       
       <FilterBar {...filterBarProps} />
 
-      {loading ? (
-        <div className="loading-overlay" style={{
-          position: 'relative',
-          minHeight: '400px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: 'rgba(255, 255, 255, 0.8)',
-          borderRadius: '8px',
-          margin: '1rem 0'
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <div className="loading-spinner" style={{ margin: '0 auto 1rem' }}></div>
-            <p style={{ color: '#666', fontSize: '0.9rem' }}>
-              Loading composition data... {loadingProgress}%
-            </p>
-            {runs.length > 0 && (
-              <p style={{ color: '#888', fontSize: '0.8rem', marginTop: '0.5rem' }}>
-                Showing {runs.length} runs (loading more...)
-              </p>
-            )}
-          </div>
-        </div>
-      ) : (
-        <div style={{ position: 'relative' }}>
-          {mainContent}
-          
-          {/* Trend loading overlay */}
-          {trendLoading && (
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(17, 24, 39, 0.8)', // Dark background matching page theme
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 10,
-              borderRadius: '8px',
-              backdropFilter: 'blur(4px)'
-            }}>
-              <div style={{ textAlign: 'center' }}>
-                <div className="loading-spinner" style={{ margin: '0 auto 1rem' }}></div>
-                <p style={{ color: '#e5e7eb', fontSize: '0.9rem', fontWeight: '500' }}>
-                  Loading trend data...
-                </p>
-                <p style={{ color: '#9ca3af', fontSize: '0.8rem', marginTop: '0.5rem' }}>
-                  Charts will update with historical data
-                </p>
+      <div className="gc-content-wrapper">
+        {/* Inline skeleton overlay for data loading */}
+        {loading && (
+          <div className="gc-skeleton-overlay">
+            <div className="gc-skeleton">
+              <div className="gc-skeleton-bar" />
+              <div className="gc-skeleton-bar wide" />
+              <div className="gc-skeleton-grid">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="gc-skeleton-card" />
+                ))}
+              </div>
+              <div className="gc-skeleton-note">
+                <div className="loading-spinner" />
+                <div className="gc-skeleton-text">Loading composition data... {loadingProgress}%</div>
+                {runs.length > 0 && (
+                  <div className="gc-skeleton-subtext">Showing {runs.length} runs (loading more...)</div>
+                )}
               </div>
             </div>
-          )}
+          </div>
+        )}
+
+        <div className={`group-composition-content ${loading ? 'gc-fade-dim' : 'gc-fade-in'}`}>
+          {mainContent}
         </div>
-      )}
+
+        {/* Trend loading: if we already have runs visible, use a non-blocking chip; otherwise show overlay */}
+        {trendLoading && !loading && runs.length === 0 && (
+          <div className="gc-trend-overlay">
+            <div className="gc-trend-content">
+              <div className="loading-spinner" />
+              <p className="gc-trend-title">Analyzing historical trends…</p>
+              <div className="gc-progress">
+                <div className="gc-progress-track" aria-hidden="true">
+                  <div className="gc-progress-bar" style={{ width: `${Math.round(trendProgress)}%` }} />
+                </div>
+                <div className="gc-progress-label" aria-live="polite">
+                  <span className="gc-progress-stage">{trendStage === 'requesting' ? 'Connecting' : trendStage === 'downloading' ? 'Downloading' : trendStage === 'parsing' ? 'Parsing' : trendStage === 'finalizing' ? 'Finalizing' : 'Loading'}</span>
+                  <span className="gc-progress-percent">{Math.round(trendProgress)}%</span>
+                </div>
+              </div>
+              <p className="gc-trend-subtitle">You can continue exploring while we enhance the charts</p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }; 

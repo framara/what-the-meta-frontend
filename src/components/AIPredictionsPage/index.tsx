@@ -4,10 +4,10 @@ import { getAIPredictions, getAIAnalysis } from '../../services/aiService';
 import type { AIAnalysisResponse } from '../../services/aiService';
 import { PredictionDashboard } from './components/PredictionDashboard';
 import { AIAnalysisInsights } from './components/AIAnalysisInsights';
-import AILoadingScreen from '../AILoadingScreen';
 import './styles/AIPredictionsPage.css';
 import toast from 'react-hot-toast';
 import SEO from '../SEO';
+import { useSeasonLabel } from '../../hooks/useSeasonLabel';
 
 export const AIPredictionsPage: React.FC = () => {
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysisResponse | null>(null);
@@ -19,6 +19,7 @@ export const AIPredictionsPage: React.FC = () => {
   const [forceRefresh, setForceRefresh] = useState(false);
   const [currentSeasonId, setCurrentSeasonId] = useState<number | null>(null);
   const fallbackTriedRef = useRef<number | null>(null);
+  const { seasonLabel } = useSeasonLabel(currentSeasonId);
 
   // Check if testing features should be enabled
   const isTestingEnabled = import.meta.env.VITE_ENABLE_TESTING_FEATURES === 'true';
@@ -199,8 +200,19 @@ export const AIPredictionsPage: React.FC = () => {
   return (
     <div className="ai-predictions-page">
       <SEO 
-        title="AI Predictions – What the Meta?"
+        title={`AI Predictions – ${seasonLabel} – What the Meta?`}
         description="Machine‑learning predictions for Mythic+ meta: spec performance, composition trends, and season outlooks."
+        keywords={['WoW','Mythic+','AI predictions','machine learning','spec performance','composition trends','season forecast']}
+        canonicalUrl="/ai-predictions"
+        image="/og-image.jpg"
+        structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: (typeof window !== 'undefined' ? window.location.origin : 'https://whatthemeta.io') + '/' },
+            { '@type': 'ListItem', position: 2, name: 'AI Predictions', item: (typeof window !== 'undefined' ? window.location.origin : 'https://whatthemeta.io') + '/ai-predictions' }
+          ]
+        }}
       />
       {/* Force Refresh Controls */}
       {currentSeasonId && isTestingEnabled && (
@@ -246,38 +258,52 @@ export const AIPredictionsPage: React.FC = () => {
             <p>Loading AI predictions for the current season...</p>
           </div>
         </div>
-      ) : loading ? (
-        <AILoadingScreen />
       ) : (
-        <div className="ai-predictions-content">
-          {aiLoading ? (
-            <div className="ai-analysis-loading">
-              <div className="ai-loading-content">
-                <div className="ai-loading-spinner"></div>
-                <h3>🤖 AI Analysis in Progress</h3>
-                <p>Analyzing season data and generating predictions...</p>
-                <p className="ai-loading-note">This may take a few moments as we process the data with OpenAI GPT-4</p>
-              </div>
-            </div>
-          ) : aiAnalysis ? (
-            <>
-              <PredictionDashboard 
-                aiAnalysis={aiAnalysis}
-                usingCache={usingCache}
-                cacheMetadata={cacheMetadata}
-                forceRefresh={forceRefresh}
-                seasonId={currentSeasonId}
-              />
-              <AIAnalysisInsights analysis={aiAnalysis.analysis} />
-            </>
-          ) : (
-            <div className="ai-fallback-container">
-              <div className="ai-fallback-content">
-                <h3>📊 No Analysis Available</h3>
-                <p>AI analysis is not available. Please try refreshing the page.</p>
+        <div className="ai-content-wrapper">
+          {/* Inline skeleton overlay for initial and AI analysis load */}
+          {(loading || (aiLoading && !aiAnalysis)) && (
+            <div className="ai-skeleton-overlay">
+              <div className="ai-skeleton">
+                <div className="ai-skeleton-bar" />
+                <div className="ai-skeleton-bar wide" />
+                <div className="ai-skeleton-grid">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="ai-skeleton-card" />
+                  ))}
+                </div>
+                <div className="ai-skeleton-note">
+                  <div className="ai-inline-spinner" />
+                  <div className="ai-skeleton-text">
+                    {aiLoading ? 'AI analysis in progress…' : 'Loading predictions…'}
+                  </div>
+                </div>
               </div>
             </div>
           )}
+
+          <div className={`ai-predictions-content ${(loading || (aiLoading && !aiAnalysis)) ? 'ai-fade-dim' : 'ai-fade-in'}`}>
+            {aiAnalysis ? (
+              <>
+                <PredictionDashboard 
+                  aiAnalysis={aiAnalysis}
+                  usingCache={usingCache}
+                  cacheMetadata={cacheMetadata}
+                  forceRefresh={forceRefresh}
+                  seasonId={currentSeasonId}
+                />
+                <AIAnalysisInsights analysis={aiAnalysis.analysis} />
+              </>
+            ) : (
+              !loading && !aiLoading && (
+                <div className="ai-fallback-container">
+                  <div className="ai-fallback-content">
+                    <h3>📊 No Analysis Available</h3>
+                    <p>AI analysis is not available. Please try refreshing the page.</p>
+                  </div>
+                </div>
+              )
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -6,6 +6,7 @@ import { useFilterState, useFilterDispatch } from '../FilterContext';
 import { WOW_SPEC_NAMES } from '../../constants/wow-constants';
 import './styles/MetaHealthPage.css';
 import SEO from '../SEO';
+import { useSeasonLabel } from '../../hooks/useSeasonLabel';
 
   // Local interfaces for meta health data
   interface RoleAnalysis {
@@ -61,6 +62,7 @@ import SEO from '../SEO';
   }
 
 export const MetaHealthPage: React.FC = () => {
+  const { seasonLabel } = useSeasonLabel(useFilterState().season_id);
   const [metaHealthData, setMetaHealthData] = useState<MetaHealthData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,6 +70,7 @@ export const MetaHealthPage: React.FC = () => {
   const dispatch = useFilterDispatch();
   const completedSeasonRef = useRef<number | null>(null);
   const pendingRequestRef = useRef<Promise<any> | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
 
   // Load data when season changes
   useEffect(() => {
@@ -116,6 +119,7 @@ export const MetaHealthPage: React.FC = () => {
 
   const startMetaHealthAnalysis = async (seasonId: number) => {
     const currentSeasonId = filter.season_id;
+    setAiLoading(true);
     
     if (pendingRequestRef.current) {
       try {
@@ -145,6 +149,9 @@ export const MetaHealthPage: React.FC = () => {
       console.error('MetaHealthPage: Failed to get meta health analysis:', err);
       setError('Failed to get meta health analysis');
       pendingRequestRef.current = null;
+    }
+    finally {
+      setAiLoading(false);
     }
   };
 
@@ -188,8 +195,19 @@ export const MetaHealthPage: React.FC = () => {
   return (
     <div className="mh-meta-health-page">
       <SEO
-        title="Meta Health – What the Meta?"
+  title={`Meta Health – ${seasonLabel} – What the Meta?`}
         description="Balance snapshot of the Mythic+ meta by role, composition diversity, and dominant patterns across seasons."
+        keywords={[ 'WoW','Mythic+','meta health','balance','role analysis','composition diversity','dominant patterns' ]}
+        canonicalUrl="/meta-health"
+        image="/og-image.jpg"
+    structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: (typeof window !== 'undefined' ? window.location.origin : 'https://whatthemeta.io') + '/' },
+      { '@type': 'ListItem', position: 2, name: `Meta Health (${seasonLabel})`, item: (typeof window !== 'undefined' ? window.location.origin : 'https://whatthemeta.io') + '/meta-health' }
+          ]
+        }}
       />
       <div className="mh-meta-health-header">
         <h1>Meta Analysis</h1>
@@ -206,11 +224,26 @@ export const MetaHealthPage: React.FC = () => {
         className="mh-meta-health-filter"
       />
 
-      {loading && (
-        <div className="mh-data-loading-section">
-          <AILoadingScreen />
-        </div>
-      )}
+      <div className="mh-content-wrapper" style={{ position: 'relative' }}>
+        {loading && (
+          <div className="mh-skeleton-overlay">
+            <div className="mh-skeleton">
+              <div className="mh-skeleton-bar" />
+              <div className="mh-skeleton-bar wide" />
+              <div className="mh-skeleton-grid">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="mh-skeleton-card" />
+                ))}
+              </div>
+              <div className="ai-skeleton-note">
+                  <div className="ai-inline-spinner" />
+                  <div className="ai-skeleton-text">
+                    {aiLoading ? 'AI analysis in progress…' : 'Loading data…'}
+                  </div>
+              </div>
+            </div>
+          </div>
+        )}
 
       {error && (
         <div className="mh-error-container">
@@ -222,8 +255,8 @@ export const MetaHealthPage: React.FC = () => {
         </div>
       )}
 
-      {metaHealthData && !loading && (
-        <div className="mh-meta-health-content">
+      {metaHealthData && (
+        <div className={`mh-meta-health-content ${loading ? 'mh-fade-dim' : 'mh-fade-in'}`}>
           {/* Meta Summary */}
           <div className="mh-summary-section">
             <div className="mh-summary-header">
@@ -419,7 +452,7 @@ export const MetaHealthPage: React.FC = () => {
         </div>
       )}
 
-      {!filter.season_id && !loading && !error && (
+  {!filter.season_id && !loading && !error && (
         <div className="mh-initial-state">
           <div className="mh-initial-state-content">
             <h2>Select a Season</h2>
@@ -427,6 +460,7 @@ export const MetaHealthPage: React.FC = () => {
           </div>
         </div>
       )}
+  </div>
     </div>
   );
 }; 

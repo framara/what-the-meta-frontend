@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { FilterBar } from '../FilterBar';
 import { MobileAlert } from '../MetaEvolutionPage/components/MobileAlert';
-import LoadingScreen from '../LoadingScreen';
+// Inline skeleton overlays are used instead of a full-screen loader
 import { ChartDescriptionPopover } from '../MetaEvolutionPage/components/ChartDescriptionPopover';
 import { useFilterState } from '../FilterContext';
 import { useRaceBarsData } from './hooks/useRaceBarsData';
@@ -9,9 +9,11 @@ import { RaceBars } from './components/RaceBars';
 import type { ChartView } from '../MetaEvolutionPage/types';
 import './styles/RaceBarsPage.css';
 import SEO from '../SEO';
+import { useSeasonLabel } from '../../hooks/useSeasonLabel';
 
 export const RaceBarsPage: React.FC = () => {
   const filter = useFilterState();
+  const { seasonLabel } = useSeasonLabel(filter.season_id);
   
   // Race bars specific state
   const [currentPeriodIndex, setCurrentPeriodIndex] = useState(0);
@@ -171,23 +173,24 @@ export const RaceBarsPage: React.FC = () => {
     handleRacerReady
   ]);
 
-  // Show loading immediately for better perceived performance
-  if (shouldShowLoading) {
-    return (
-      <div className="race-bars-page">
-        {pageHeaderContent}
-        <FilterBar {...filterBarProps} />
-        {isMobile && <MobileAlert />}
-        <LoadingScreen />
-      </div>
-    );
-  }
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://whatthemeta.io';
 
   return (
     <div className="race-bars-page">
       <SEO
-        title="Race Bars – What the Meta?"
+  title={`Race Bars – ${seasonLabel} – What the Meta?`}
         description="Animated race charts showing spec popularity over time for Mythic+ runs."
+        keywords={['WoW','Mythic+','race bars','animated charts','spec popularity','time series','leaderboard']}
+        canonicalUrl="/race-bars"
+        image="/og-image.jpg"
+    structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: origin + '/' },
+      { '@type': 'ListItem', position: 2, name: `Race Bars (${seasonLabel})`, item: origin + '/race-bars' }
+          ]
+        }}
       />
       {pageHeaderContent}
       
@@ -196,13 +199,29 @@ export const RaceBarsPage: React.FC = () => {
       {/* Mobile Alert - Charts recommended for desktop */}
       {isMobile && <MobileAlert />}
 
-      {hasError ? (
+      <div className="race-bars-content" style={{ position: 'relative' }}>
+        {shouldShowLoading && (
+          <div className="rb-skeleton-overlay">
+            <div className="rb-skeleton">
+              <div className="rb-skeleton-axis" />
+              <div className="rb-skeleton-track" />
+              <div className="rb-skeleton-bars">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="rb-skeleton-bar" />)
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {hasError ? (
         errorContent
       ) : hasNoPeriods ? (
         comingSoonContent
       ) : (
-        raceBarsContent
+        <div className="rb-fade">{raceBarsContent}</div>
       )}
+      </div>
     </div>
   );
 }; 

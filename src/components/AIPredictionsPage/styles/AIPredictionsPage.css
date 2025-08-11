@@ -13,6 +13,82 @@
   overflow: hidden;
 }
 
+/* Inline skeleton overlay (unified with MetaHealthPage) */
+.ai-content-wrapper { position: relative; min-height: 420px; border-radius: 12px; overflow: hidden; }
+.ai-skeleton-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(2, 6, 23, 0.55) 0%, rgba(15,23,42,0.55) 100%);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: inherit;
+}
+.ai-skeleton {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 0;
+  padding: 16px;
+  /* Remove inner border to avoid double framing inside page card */
+  border: none;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(51, 65, 85, 0.8) 100%);
+}
+.ai-skeleton-bar {
+  height: 14px;
+  width: 45%;
+  margin: 8px 0;
+  border-radius: 6px;
+  background: rgba(148,163,184,0.2);
+  position: relative;
+  overflow: hidden;
+}
+.ai-skeleton-bar.wide { width: 75%; }
+.ai-skeleton-bar::after, .ai-skeleton-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.1), rgba(255,255,255,0));
+  animation: aiShimmer 1.6s infinite;
+}
+.ai-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.ai-skeleton-card {
+  height: 120px;
+  border-radius: 10px;
+  background: rgba(148,163,184,0.18);
+  position: relative;
+  overflow: hidden;
+}
+.ai-skeleton-note { margin-top: 12px; text-align: center; }
+.ai-skeleton-text { color: #e5e7eb; font-size: 0.9rem; font-weight: 500; }
+@keyframes aiShimmer { to { transform: translateX(100%); } }
+
+/* Inline spinner for note */
+.ai-inline-spinner {
+  width: 18px; height: 18px; border: 2px solid rgba(148,163,184,0.35); border-top-color: #60a5fa; border-radius: 9999px; animation: aiSpin 0.8s linear infinite; display: inline-block; margin: 0 8px -3px 0;
+}
+@keyframes aiSpin { to { transform: rotate(360deg); } }
+
+/* Fades */
+.ai-fade-in { animation: aiFade 220ms ease-in-out; }
+.ai-fade-dim { opacity: 0.65; transition: opacity 200ms ease-in-out; }
+@keyframes aiFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .ai-skeleton-bar::after,
+  .ai-skeleton-card::after { display: none; animation: none !important; }
+  .ai-inline-spinner { animation: none !important; }
+  .ai-fade-in, .ai-fade-dim { animation: none !important; transition: none !important; }
+}
+
 /* Removed shiny effect and elevate effect on hover */
 
 .page-header {
