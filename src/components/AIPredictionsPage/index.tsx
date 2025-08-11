@@ -8,6 +8,7 @@ import './styles/AIPredictionsPage.css';
 import toast from 'react-hot-toast';
 import SEO from '../SEO';
 import { useSeasonLabel } from '../../hooks/useSeasonLabel';
+import { AffixInsightsPanel } from './components/AffixInsightsPanel';
 
 export const AIPredictionsPage: React.FC = () => {
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysisResponse | null>(null);
@@ -301,6 +302,7 @@ export const AIPredictionsPage: React.FC = () => {
                   forceRefresh={forceRefresh}
                   seasonId={currentSeasonId}
                 />
+                <AffixInsightsPanel seasonId={currentSeasonId} />
                 <AIAnalysisInsights analysis={aiAnalysis.analysis} />
               </>
             ) : (

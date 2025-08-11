@@ -6,6 +6,122 @@ This document outlines realistic, implementable features for the WoW Leaderboard
 
 ---
 
+## 🤖 AI Integration Ideas & Roadmap
+
+### 🎯 Goals
+- **Differentiate** with explainable, actionable AI insights grounded in our data
+- **Stay reliable** via strict JSON schemas, caching, and citations back to periods/runs
+- **Be fast/cost‑aware** using trimmed inputs and per-scope caches
+
+### 🚀 Quick Wins (1–2 weeks)
+1. **Affix‑Aware Insights**
+   - Endpoint: `POST /ai/affix-insights` with `{ seasonId, periodId }`
+   - Output: winners/losers this week, dungeon‑specific swaps, callouts by role
+   - UI: panel on `AIPredictionsPage`; tooltips in `GroupCompositionPage`
+2. **Forecast Overlays**
+   - Use `temporalData` to forecast next 2–4 weeks with confidence bands
+   - UI: overlay in `MetaEvolutionPage/LineChart.tsx` + mini sparkline on prediction cards
+3. **“What Changed This Week” Digest**
+   - Summarize shifts in usage/success and composition diversity; flag anomalies
+   - Cached per `(seasonId, periodId)` for social preview cards
+4. **In‑Place Spec Swap Guidance**
+   - Surface trade‑offs for top comp (`survivability`, `utility`, `damage profile`) and safest replacements by role
+   - UI: expanders on the most popular comp card in `GroupCompositionPage`
+5. **Micro‑Meta Slices**
+   - Filtered AI reads: key‑level bands, region, last N periods
+   - Endpoints accept filters; AI outputs concise deltas
+6. **Grounded Q&A (read‑only)**
+   - Endpoint: `POST /ai/qa` returning strict JSON with citations (period IDs, counts)
+   - UI: “Ask the Meta” mini chat with preset prompts
+
+### 🧭 Bigger Bets (3–6+ weeks)
+1. **Composition Optimizer**
+   - Endpoint: `POST /ai/optimizer` with constraints (player spec, dungeon, key level, affixes)
+   - Output: ranked comps, rationale, role‑consistent alternatives
+2. **Patch Impact Forecaster**
+   - Endpoint: `POST /ai/patch-impact` to ingest patch notes and emit expected deltas by spec/role
+   - UI: sliders to simulate buffs/nerfs and re‑run forecast
+3. **Counter‑Comp Recommender**
+   - Alternatives to counter dominant comps or cover common weaknesses per dungeon/affixes
+4. **Talent/Build Hints per Dungeon**
+   - Mine top runs for common talent/itemization patterns; AI explains the “why”
+5. **Alerts/Watchlists**
+   - Users follow specs/comps; get weekly AI summaries when thresholds are crossed (email/Discord)
+6. **Meta Quality Score**
+   - Single score blending diversity, dominance, and replacement flexibility; tracked weekly
+
+### 🧩 Proposed Endpoints & Schemas
+```ts
+// Affix‑Aware Insights
+POST /ai/affix-insights
+Body: { seasonId: number, periodId?: number, dungeonId?: number }
+Response: {
+  summary: string,
+  winners: Array<{ specId: number, reason: string, confidence: number }>,
+  losers: Array<{ specId: number, reason: string, confidence: number }>,
+  dungeonTips?: Array<{ dungeonId: number, tips: string[] }>,
+  citations: { periodIds: number[] }
+}
+
+// Weekly Digest
+POST /ai/weekly-digest
+Body: { seasonId: number, periodId: number }
+Response: {
+  highlights: string[],
+  shifts: Array<{ specId: number, deltaUsage: number, deltaSuccess: number }>,
+  compositionDiversity: 'High'|'Medium'|'Low',
+  anomalies?: string[],
+  citations: { periodIds: number[] }
+}
+
+// Grounded Q&A
+POST /ai/qa
+Body: { seasonId: number, question: string, filters?: { region?: string, keyBand?: string, dungeonId?: number } }
+Response: {
+  answer: string,
+  bullets: string[],
+  citations: { periodIds: number[], counts?: Record<string, number> }
+}
+
+// Composition Optimizer (MVP)
+POST /ai/optimizer
+Body: { seasonId: number, dungeonId?: number, keyLevel?: number, affixes?: string[], locked?: number[] }
+Response: {
+  recommended: Array<{ specs: number[], rationale: string, confidence: number }>,
+  alternatives: Array<{ replaceSpecId: number, withSpecId: number, rationale: string }>,
+  assumptions: string[]
+}
+```
+
+### 🧠 Prompting & Guardrails
+- Strict JSON response with schemas and validation (reuse existing validators)
+- Include citations: period IDs and count summaries used in reasoning
+- Enforce unique `specId` occurrences and role‑consistent replacements
+
+### 🗄️ Caching & Cost Controls
+- Reuse `ai_analysis` with `analysis_type` in: `affix_insights`, `weekly_digest`, `qa`, `optimizer`, `patch_impact`
+- Cache keys: `(seasonId, periodId, affixSet, filtersHash)` for 24h; invalidate on new periods
+- Trim inputs: cap periods (e.g., last 18), keep top N specs by `totalRuns`, strip unused fields
+
+### 🖥️ Frontend Touchpoints
+- `AIPredictionsPage`
+  - Affix panel; forecast overlays; cache badges (reusing `_cache`)
+- `GroupCompositionPage`
+  - “Optimize my comp” modal; in‑place swap guidance with role‑safe suggestions
+- `MetaEvolutionPage`
+  - Forecast confidence bands; weekly change markers
+- Global
+  - “Ask the Meta” mini chat; shareable Weekly Digest cards
+
+### 📦 Rollout Order
+1) Affix insights + forecast overlays
+2) Swap guidance + Weekly Digest
+3) Grounded Q&A (MVP)
+4) Composition Optimizer (MVP)
+5) Patch Impact Forecaster
+
+---
+
 ## 📊 Data-Driven Features (High Priority)
 
 ### 1. **Advanced Group Composition Analysis**
