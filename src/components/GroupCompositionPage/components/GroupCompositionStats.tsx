@@ -20,8 +20,8 @@ interface SeasonData {
       keystone_level: number;
       score: number;
       members: Array<{
-        spec_id: string;
-        class_id: string;
+        spec_id: number;
+        class_id: number;
         role: string;
       }>;
       [key: string]: any;
