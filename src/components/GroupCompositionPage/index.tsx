@@ -34,17 +34,17 @@ interface SeasonData {
   periods: Array<{
     period_id: number;
     keys_count: number;
-    keys: Array<{
-      id: number;
-      keystone_level: number;
-      score: number;
-      members: Array<{
-        spec_id: string;
-        class_id: string;
-        role: string;
+      keys: Array<{
+        id: number;
+        keystone_level: number;
+        score: number;
+        members: Array<{
+          spec_id: number;
+          class_id: number;
+          role: string;
+        }>;
+        [key: string]: any;
       }>;
-      [key: string]: any;
-    }>;
   }>;
 }
 
@@ -168,8 +168,8 @@ export const GroupCompositionPage: React.FC = () => {
             keystone_level: run.keystone_level,
             score: run.keystone_level * 10, // Generate a score based on key level
             members: run.members.map((member: GroupMember) => ({
-              spec_id: member.spec_id.toString(),
-              class_id: member.class_id.toString(),
+              spec_id: member.spec_id,
+              class_id: member.class_id,
               role: member.role
             }))
           }))
