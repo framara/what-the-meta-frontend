@@ -6,6 +6,7 @@ import { useFilterState, useFilterDispatch } from '../FilterContext';
 import { WOW_SPEC_NAMES } from '../../constants/wow-constants';
 import './styles/MetaHealthPage.css';
 import SEO from '../SEO';
+import { useSeasonLabel } from '../../hooks/useSeasonLabel';
 
   // Local interfaces for meta health data
   interface RoleAnalysis {
@@ -61,6 +62,7 @@ import SEO from '../SEO';
   }
 
 export const MetaHealthPage: React.FC = () => {
+  const { seasonLabel } = useSeasonLabel(useFilterState().season_id);
   const [metaHealthData, setMetaHealthData] = useState<MetaHealthData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -188,8 +190,19 @@ export const MetaHealthPage: React.FC = () => {
   return (
     <div className="mh-meta-health-page">
       <SEO
-        title="Meta Health – What the Meta?"
+  title={`Meta Health – ${seasonLabel} – What the Meta?`}
         description="Balance snapshot of the Mythic+ meta by role, composition diversity, and dominant patterns across seasons."
+        keywords={[ 'WoW','Mythic+','meta health','balance','role analysis','composition diversity','dominant patterns' ]}
+        canonicalUrl="/meta-health"
+        image="/og-image.jpg"
+    structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: (typeof window !== 'undefined' ? window.location.origin : 'https://whatthemeta.io') + '/' },
+      { '@type': 'ListItem', position: 2, name: `Meta Health (${seasonLabel})`, item: (typeof window !== 'undefined' ? window.location.origin : 'https://whatthemeta.io') + '/meta-health' }
+          ]
+        }}
       />
       <div className="mh-meta-health-header">
         <h1>Meta Analysis</h1>

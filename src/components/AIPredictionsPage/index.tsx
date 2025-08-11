@@ -7,6 +7,7 @@ import { AIAnalysisInsights } from './components/AIAnalysisInsights';
 import './styles/AIPredictionsPage.css';
 import toast from 'react-hot-toast';
 import SEO from '../SEO';
+import { useSeasonLabel } from '../../hooks/useSeasonLabel';
 
 export const AIPredictionsPage: React.FC = () => {
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysisResponse | null>(null);
@@ -18,6 +19,7 @@ export const AIPredictionsPage: React.FC = () => {
   const [forceRefresh, setForceRefresh] = useState(false);
   const [currentSeasonId, setCurrentSeasonId] = useState<number | null>(null);
   const fallbackTriedRef = useRef<number | null>(null);
+  const { seasonLabel } = useSeasonLabel(currentSeasonId);
 
   // Check if testing features should be enabled
   const isTestingEnabled = import.meta.env.VITE_ENABLE_TESTING_FEATURES === 'true';
@@ -198,8 +200,19 @@ export const AIPredictionsPage: React.FC = () => {
   return (
     <div className="ai-predictions-page">
       <SEO 
-        title="AI Predictions – What the Meta?"
+        title={`AI Predictions – ${seasonLabel} – What the Meta?`}
         description="Machine‑learning predictions for Mythic+ meta: spec performance, composition trends, and season outlooks."
+        keywords={['WoW','Mythic+','AI predictions','machine learning','spec performance','composition trends','season forecast']}
+        canonicalUrl="/ai-predictions"
+        image="/og-image.jpg"
+        structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: (typeof window !== 'undefined' ? window.location.origin : 'https://whatthemeta.io') + '/' },
+            { '@type': 'ListItem', position: 2, name: 'AI Predictions', item: (typeof window !== 'undefined' ? window.location.origin : 'https://whatthemeta.io') + '/ai-predictions' }
+          ]
+        }}
       />
       {/* Force Refresh Controls */}
       {currentSeasonId && isTestingEnabled && (

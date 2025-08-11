@@ -15,6 +15,7 @@ import './styles/MetaEvolutionPage.css';
 import { ChartDescriptionPopover } from './components/ChartDescriptionPopover';
 import SEO from '../SEO';
 import { useFilterState } from '../FilterContext';
+import { useSeasonLabel } from '../../hooks/useSeasonLabel';
 
 export const MetaEvolutionPage: React.FC = () => {
   const filter = useFilterState();
@@ -43,12 +44,27 @@ export const MetaEvolutionPage: React.FC = () => {
   const currentChart = charts[chartView];
   // Always keep header/filters visible; use inline skeleton overlay while loading
   const isLoading = loading;
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://whatthemeta.io';
+  const { seasonLabel } = useSeasonLabel(filter.season_id);
 
   return (
     <div className="meta-evolution-page">
       <SEO 
-        title="Meta Evolution – What the Meta?"
+        title={`Meta Evolution – ${seasonLabel} – What the Meta?`}
         description="Explore how the Mythic+ meta evolves across seasons with popularity, performance, and composition charts."
+        keywords={[
+          'World of Warcraft','WoW','Mythic+','meta evolution','spec popularity','class trends','composition trends','season trends','charts','analytics'
+        ]}
+        canonicalUrl="/meta-evolution"
+        image="/og-image.jpg"
+    structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: origin + '/' },
+      { '@type': 'ListItem', position: 2, name: `Meta Evolution (${seasonLabel})`, item: origin + '/meta-evolution' }
+          ]
+        }}
       />
 
       <div className="page-header">

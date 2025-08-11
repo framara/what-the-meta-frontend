@@ -6,6 +6,7 @@ import LoadingScreen from '../LoadingScreen';
 import { FilterBar } from '../FilterBar';
 import './styles/GroupCompositionPage.css';
 import SEO from '../SEO';
+import { useSeasonLabel } from '../../hooks/useSeasonLabel';
 
 interface Season {
   season_id: number;
@@ -53,6 +54,7 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 export const GroupCompositionPage: React.FC = () => {
   const filter = useFilterState();
+  const { seasonLabel } = useSeasonLabel(filter.season_id);
   const [runs, setRuns] = useState<Run[]>([]);
   const [seasonData, setSeasonData] = useState<SeasonData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -358,8 +360,19 @@ export const GroupCompositionPage: React.FC = () => {
   return (
     <div className="group-composition-page">
       <SEO
-        title="Group Composition – What the Meta?"
+  title={`Group Composition – ${seasonLabel} – What the Meta?`}
         description="Analyze popular Mythic+ team compositions, roles, and spec synergy across dungeons and seasons."
+        keywords={[ 'WoW','Mythic+','group composition','team comps','roles','spec synergy','dungeon meta','party setup' ]}
+        canonicalUrl="/group-composition"
+        image="/og-image.jpg"
+    structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: (typeof window !== 'undefined' ? window.location.origin : 'https://whatthemeta.io') + '/' },
+      { '@type': 'ListItem', position: 2, name: `Group Composition (${seasonLabel})`, item: (typeof window !== 'undefined' ? window.location.origin : 'https://whatthemeta.io') + '/group-composition' }
+          ]
+        }}
       />
       {pageHeaderContent}
       

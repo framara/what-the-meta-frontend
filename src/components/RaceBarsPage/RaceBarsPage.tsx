@@ -9,9 +9,11 @@ import { RaceBars } from './components/RaceBars';
 import type { ChartView } from '../MetaEvolutionPage/types';
 import './styles/RaceBarsPage.css';
 import SEO from '../SEO';
+import { useSeasonLabel } from '../../hooks/useSeasonLabel';
 
 export const RaceBarsPage: React.FC = () => {
   const filter = useFilterState();
+  const { seasonLabel } = useSeasonLabel(filter.season_id);
   
   // Race bars specific state
   const [currentPeriodIndex, setCurrentPeriodIndex] = useState(0);
@@ -171,11 +173,24 @@ export const RaceBarsPage: React.FC = () => {
     handleRacerReady
   ]);
 
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://whatthemeta.io';
+
   return (
     <div className="race-bars-page">
       <SEO
-        title="Race Bars – What the Meta?"
+  title={`Race Bars – ${seasonLabel} – What the Meta?`}
         description="Animated race charts showing spec popularity over time for Mythic+ runs."
+        keywords={['WoW','Mythic+','race bars','animated charts','spec popularity','time series','leaderboard']}
+        canonicalUrl="/race-bars"
+        image="/og-image.jpg"
+    structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: origin + '/' },
+      { '@type': 'ListItem', position: 2, name: `Race Bars (${seasonLabel})`, item: origin + '/race-bars' }
+          ]
+        }}
       />
       {pageHeaderContent}
       
