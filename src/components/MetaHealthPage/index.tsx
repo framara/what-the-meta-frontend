@@ -227,6 +227,15 @@ export const MetaHealthPage: React.FC = () => {
       <div className="mh-content-wrapper" style={{ position: 'relative' }}>
         {loading && (
           <div className="mh-skeleton-overlay">
+            {/* Playful AI buddy */}
+            <div className="mh-robot-buddy" aria-hidden="true">
+              <div className="mh-robot-emoji" role="img" aria-label="robot">🤖</div>
+              <div className="mh-robot-bubble">
+                <span className="mh-robot-msg mh-robot-msg-1">Scanning roles…</span>
+                <span className="mh-robot-msg mh-robot-msg-2">Measuring balance…</span>
+                <span className="mh-robot-msg mh-robot-msg-3">Spotting patterns…</span>
+              </div>
+            </div>
             <div className="mh-skeleton">
               <div className="mh-skeleton-bar" />
               <div className="mh-skeleton-bar wide" />
@@ -240,6 +249,7 @@ export const MetaHealthPage: React.FC = () => {
                   <div className="ai-skeleton-text">
                     {aiLoading ? 'AI analysis in progress…' : 'Loading data…'}
                   </div>
+                   <div className="ai-skeleton-subtext">This step may take up to 1 minute.</div>
               </div>
             </div>
           </div>

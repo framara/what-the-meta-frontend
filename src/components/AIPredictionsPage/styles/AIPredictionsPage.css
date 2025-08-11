@@ -26,6 +26,94 @@
   z-index: 10;
   border-radius: inherit;
 }
+
+/* Playful AI robot buddy */
+.ai-robot-buddy {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: row-reverse; /* keep bubble inside when anchored at right */
+  align-items: center;
+  gap: 8px;
+  z-index: 11;
+  pointer-events: none;
+}
+
+/* For very small screens, anchor bottom-left to avoid clipping */
+@media (max-width: 480px) {
+  .ai-robot-buddy {
+    top: auto;
+    bottom: 12px;
+    right: auto;
+    left: 12px;
+    flex-direction: row; /* bubble points to the right */
+  }
+  .ai-robot-bubble::after {
+    left: auto;
+    right: 100%;
+    border-color: transparent rgba(59,130,246,0.35) transparent transparent;
+  }
+}
+
+.ai-robot-emoji {
+  font-size: 20px;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35));
+  animation: aiFloat 3.2s ease-in-out infinite;
+}
+
+.ai-robot-bubble {
+  position: relative;
+  background: rgba(17, 24, 39, 0.85);
+  color: #E5E7EB;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  line-height: 1.1;
+  white-space: nowrap;
+  max-width: 60vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 140px;
+  min-height: 28px;
+  display: inline-block;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+}
+
+.ai-robot-bubble::after {
+  content: '';
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent transparent transparent rgba(59,130,246,0.35);
+}
+
+.ai-robot-msg {
+  position: absolute;
+  inset: 6px 10px;
+  opacity: 0;
+  transform: translateY(4px);
+  animation: aiBubbleCycle 6s infinite;
+}
+.ai-robot-msg-2 { animation-delay: 2s; }
+.ai-robot-msg-3 { animation-delay: 4s; }
+
+@keyframes aiFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes aiBubbleCycle {
+  0% { opacity: 0; transform: translateY(4px); }
+  8% { opacity: 1; transform: translateY(0); }
+  25% { opacity: 1; transform: translateY(0); }
+  33% { opacity: 0; transform: translateY(-2px); }
+  100% { opacity: 0; transform: translateY(-2px); }
+}
 .ai-skeleton {
   width: 100%;
   box-sizing: border-box;
@@ -68,6 +156,7 @@
 }
 .ai-skeleton-note { margin-top: 12px; text-align: center; }
 .ai-skeleton-text { color: #e5e7eb; font-size: 0.9rem; font-weight: 500; }
+.ai-skeleton-subtext { color: #9ca3af; font-size: 0.8rem; margin-top: 4px; }
 @keyframes aiShimmer { to { transform: translateX(100%); } }
 
 /* Inline spinner for note */

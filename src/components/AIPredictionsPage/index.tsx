@@ -263,6 +263,15 @@ export const AIPredictionsPage: React.FC = () => {
           {/* Inline skeleton overlay for initial and AI analysis load */}
           {(loading || (aiLoading && !aiAnalysis)) && (
             <div className="ai-skeleton-overlay">
+              {/* Playful AI buddy */}
+              <div className="ai-robot-buddy" aria-hidden="true">
+                <div className="ai-robot-emoji" role="img" aria-label="robot">🤖</div>
+                <div className="ai-robot-bubble">
+                  <span className="ai-robot-msg ai-robot-msg-1">Crunching meta…</span>
+                  <span className="ai-robot-msg ai-robot-msg-2">Assembling comps…</span>
+                  <span className="ai-robot-msg ai-robot-msg-3">Predicting trends…</span>
+                </div>
+              </div>
               <div className="ai-skeleton">
                 <div className="ai-skeleton-bar" />
                 <div className="ai-skeleton-bar wide" />
@@ -276,6 +285,7 @@ export const AIPredictionsPage: React.FC = () => {
                   <div className="ai-skeleton-text">
                     {aiLoading ? 'AI analysis in progress…' : 'Loading predictions…'}
                   </div>
+                  <div className="ai-skeleton-subtext">This step may take up to 1 minute.</div>
                 </div>
               </div>
             </div>
