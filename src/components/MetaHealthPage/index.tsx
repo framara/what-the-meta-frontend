@@ -70,6 +70,7 @@ export const MetaHealthPage: React.FC = () => {
   const dispatch = useFilterDispatch();
   const completedSeasonRef = useRef<number | null>(null);
   const pendingRequestRef = useRef<Promise<any> | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
 
   // Load data when season changes
   useEffect(() => {
@@ -118,6 +119,7 @@ export const MetaHealthPage: React.FC = () => {
 
   const startMetaHealthAnalysis = async (seasonId: number) => {
     const currentSeasonId = filter.season_id;
+    setAiLoading(true);
     
     if (pendingRequestRef.current) {
       try {
@@ -147,6 +149,9 @@ export const MetaHealthPage: React.FC = () => {
       console.error('MetaHealthPage: Failed to get meta health analysis:', err);
       setError('Failed to get meta health analysis');
       pendingRequestRef.current = null;
+    }
+    finally {
+      setAiLoading(false);
     }
   };
 
@@ -229,6 +234,12 @@ export const MetaHealthPage: React.FC = () => {
                 {Array.from({ length: 6 }).map((_, i) => (
                   <div key={i} className="mh-skeleton-card" />
                 ))}
+              </div>
+              <div className="ai-skeleton-note">
+                  <div className="ai-inline-spinner" />
+                  <div className="ai-skeleton-text">
+                    {aiLoading ? 'AI analysis in progress…' : 'Loading data…'}
+                  </div>
               </div>
             </div>
           </div>

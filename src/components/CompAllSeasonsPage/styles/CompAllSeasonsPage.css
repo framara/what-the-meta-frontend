@@ -56,6 +56,91 @@
   min-height: 400px;
 }
 
+/* Inline skeleton overlay + fades for this page */
+.cas-content-wrapper { position: relative; border-radius: 12px; overflow: hidden; }
+.cas-skeleton-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(2, 6, 23, 0.55) 0%, rgba(15,23,42,0.55) 100%);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: inherit;
+}
+.cas-skeleton {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 0;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(51, 65, 85, 0.8) 100%);
+}
+.cas-skeleton-bar {
+  height: 14px;
+  width: 45%;
+  margin: 8px 0;
+  border-radius: 6px;
+  background: rgba(148,163,184,0.2);
+  position: relative;
+  overflow: hidden;
+}
+.cas-skeleton-bar.wide { width: 75%; }
+.cas-skeleton-bar::after,
+.cas-skeleton-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.1), rgba(255,255,255,0));
+  animation: casShimmer 1.6s infinite;
+}
+.cas-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 0.75rem;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.cas-skeleton-card {
+  height: 130px;
+  border-radius: 16px;
+  background: rgba(148,163,184,0.18);
+  position: relative;
+  overflow: hidden;
+}
+.cas-skeleton-note { margin-top: 12px; text-align: center; }
+.cas-skeleton-text { color: #e5e7eb; font-size: 0.9rem; font-weight: 500; }
+@keyframes casShimmer { to { transform: translateX(100%); } }
+
+.cas-inline-spinner {
+  width: 18px; height: 18px; border: 2px solid rgba(148,163,184,0.35); border-top-color: #60a5fa; border-radius: 9999px; animation: casSpin 0.8s linear infinite; display: inline-block; margin: 0 8px -3px 0;
+}
+@keyframes casSpin { to { transform: rotate(360deg); } }
+
+.cas-fade-in { animation: casFade 220ms ease-in-out; }
+.cas-fade-dim { opacity: 0.65; transition: opacity 200ms ease-in-out; }
+@keyframes casFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Responsive: match seasons-grid */
+@media (max-width: 1024px) {
+  .cas-skeleton-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  .cas-skeleton-card { height: 140px; }
+}
+
+@media (max-width: 768px) {
+  .cas-skeleton-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  .cas-skeleton-card { height: 120px; }
+}
+
 .expansion-section {
   margin-bottom: 3rem;
 }

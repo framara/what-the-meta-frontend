@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { fetchTopKeysAllSeasons } from '../../services/api';
-import LoadingScreen from '../LoadingScreen';
+// Inline skeleton overlay replaces full-screen loader on this page
 import { WOW_SPECIALIZATIONS, WOW_CLASS_COLORS, WOW_SPEC_ROLES, WOW_SPEC_TO_CLASS } from '../../constants/wow-constants';
 import { SpecIconImage } from '../../utils/specIconImages';
 import './styles/CompAllSeasonsPage.css';
@@ -279,10 +279,26 @@ export const CompAllSeasonsPage: React.FC = () => {
         </div>
       </div>
 
-      {loading ? (
-        <LoadingScreen />
-      ) : (
-        <div className="comp-all-seasons-content" style={{ position: 'relative' }}>
+      <div className="comp-all-seasons-content cas-content-wrapper" style={{ position: 'relative' }}>
+        {loading && (
+          <div className="cas-skeleton-overlay">
+            <div className="cas-skeleton">
+              <div className="cas-skeleton-bar" />
+              <div className="cas-skeleton-bar wide" />
+              <div className="cas-skeleton-grid">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="cas-skeleton-card" />
+                ))}
+              </div>
+              <div className="cas-skeleton-note">
+                <div className="cas-inline-spinner" />
+                <div className="cas-skeleton-text">Loading historical data… {loadingProgress ? `${loadingProgress}%` : ''}</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className={`cas-page-content ${loading ? 'cas-fade-dim' : 'cas-fade-in'}`}>
           {Object.entries(groupedCompositions)
             .sort(([, seasonsA], [, seasonsB]) => {
               // Sort by the highest season_id in each expansion (newest first)
@@ -355,7 +371,7 @@ export const CompAllSeasonsPage: React.FC = () => {
             </div>
           ))}
           
-          {/* Processing loading overlay */}
+          {/* Processing loading overlay (non-blocking) */}
           {processingLoading && (
             <div style={{
               position: 'absolute',
@@ -383,7 +399,7 @@ export const CompAllSeasonsPage: React.FC = () => {
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }; 
