@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 const AboutPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <SEO title="About – What the Meta?" description="Learn about What the Meta? the Mythic+ leaderboard and meta analysis tool for World of Warcraft." />
+      <SEO title="About – What the Meta?" description="Learn about What the Meta? the Mythic+ leaderboard and meta analysis tool for World of Warcraft." canonicalUrl="/about" />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-8">
           <Link to="/" className="text-blue-400 hover:text-blue-300 mb-4 inline-block">
@@ -91,13 +91,13 @@ const AboutPage: React.FC = () => {
             </p>
             <div className="flex flex-wrap gap-4">
               <Link 
-                to="/leaderboard" 
+                to="/" 
                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
               >
                 View Leaderboards
               </Link>
               <Link 
-                to="/compositions" 
+                to="/group-composition" 
                 className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
               >
                 Analyze Compositions

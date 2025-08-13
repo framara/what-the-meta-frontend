@@ -40,6 +40,14 @@
     <priority>0.7</priority>
   </url>
   
+  <!-- Cutoff Page -->
+  <url>
+    <loc>https://whatthemeta.io/cutoff</loc>
+    <lastmod>2025-08-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
   <!-- AI Predictions Page -->
   <url>
     <loc>https://whatthemeta.io/ai-predictions</loc>

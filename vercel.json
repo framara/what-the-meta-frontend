@@ -9,27 +9,30 @@
       "destination": "https://whatthemeta.io/:path*",
       "permanent": true
     },
-    {
-      "source": "/leaderboard",
-      "destination": "/",
-      "permanent": true
-    },
-    {
-      "source": "/compositions",
-      "destination": "/group-composition",
-      "permanent": true
-    },
-    {
-      "source": "/all-seasons",
-      "destination": "/historical-composition",
-      "permanent": true
-    }
+    
+    { "source": "/meta-evolution/", "destination": "/meta-evolution", "permanent": true },
+    { "source": "/race-bars/", "destination": "/race-bars", "permanent": true },
+    { "source": "/group-composition/", "destination": "/group-composition", "permanent": true },
+    { "source": "/historical-composition/", "destination": "/historical-composition", "permanent": true },
+    { "source": "/cutoff/", "destination": "/cutoff", "permanent": true },
+    { "source": "/ai-predictions/", "destination": "/ai-predictions", "permanent": true },
+    { "source": "/meta-health/", "destination": "/meta-health", "permanent": true },
+    { "source": "/about/", "destination": "/about", "permanent": true },
+    { "source": "/privacy/", "destination": "/privacy", "permanent": true },
+    { "source": "/terms/", "destination": "/terms", "permanent": true }
   ],
   "rewrites": [
-    {
-      "source": "/((?!api|_next|.*\\..*).*)",
-      "destination": "/index.html"
-    }
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/meta-evolution", "destination": "/index.html" },
+    { "source": "/race-bars", "destination": "/index.html" },
+    { "source": "/group-composition", "destination": "/index.html" },
+    { "source": "/historical-composition", "destination": "/index.html" },
+    { "source": "/cutoff", "destination": "/index.html" },
+    { "source": "/ai-predictions", "destination": "/index.html" },
+    { "source": "/meta-health", "destination": "/index.html" },
+    { "source": "/about", "destination": "/index.html" },
+    { "source": "/privacy", "destination": "/index.html" },
+    { "source": "/terms", "destination": "/index.html" }
   ],
   "headers": [
     {
