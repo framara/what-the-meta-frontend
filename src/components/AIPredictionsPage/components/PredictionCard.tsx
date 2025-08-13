@@ -84,6 +84,26 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({ prediction, type
             strokeWidth="2"
             points={points}
           />
+          {/* Simple last-point projection */}
+          {data.length >= 3 && (() => {
+            const last = data[data.length - 1];
+            const prev = data[data.length - 2];
+            const prev2 = data[data.length - 3];
+            const slope = (last - prev + prev - prev2) / 2;
+            const proj = Math.max(0, last + slope);
+            const xLast = 200;
+            const xProj = 220; // extend to the edge
+            const maxValue2 = Math.max(maxValue, proj);
+            const range2 = (maxValue2 - minValue) || 1;
+            const yLast = 80 - ((last - minValue) / range2) * 60;
+            const yProj = 80 - ((proj - minValue) / range2) * 60;
+            return (
+              <g>
+                <line x1={xLast} y1={yLast} x2={xProj} y2={yProj} stroke={color} strokeDasharray="3 3" strokeWidth="1.5" />
+                <circle cx={xProj} cy={yProj} r="2" fill={color} opacity="0.8" />
+              </g>
+            );
+          })()}
           {data.map((value, index) => {
             const x = (index / (data.length - 1)) * 200;
             const y = 80 - ((value - minValue) / range) * 60;

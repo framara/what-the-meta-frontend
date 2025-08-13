@@ -92,6 +92,28 @@ export interface MetaHealthResponse {
   }>;
 }
 
+export interface AffixInsightsRequest {
+  seasonId: number;
+  periodId?: number;
+  dungeonId?: number;
+}
+
+export interface AffixInsightsResponse {
+  summary: string;
+  winners: Array<{ specId: number; reason: string; confidence: number }>;
+  losers: Array<{ specId: number; reason: string; confidence: number }>;
+  dungeonTips?: Array<{ dungeonId: number; tips: string[] }>;
+  citations: { periodIds: number[] };
+  _cache?: { created_at: string; age_hours: number; max_age_hours: number };
+}
+
+export async function getAffixInsights(request: AffixInsightsRequest): Promise<AffixInsightsResponse> {
+  const response = await axios.post(`${API_BASE_URL}/ai/affix-insights`, request, {
+    headers: { 'Content-Type': 'application/json' },
+  });
+  return response.data as AffixInsightsResponse;
+}
+
 export interface RoleAnalysis {
   dominantSpecs: Array<{ specId: number; usage: number; name: string }>; // Top 3 most used specs
   underusedSpecs: Array<{ specId: number; usage: number; name: string }>;
