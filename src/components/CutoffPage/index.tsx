@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import SEO from '../SEO';
 import { fetchCutoffLatest } from '../../services/api';
 import type { CutoffSnapshot } from '../../services/api';
 import { FilterBar } from '../FilterBar';
@@ -114,6 +115,7 @@ export default function CutoffPage() {
 
   return (
     <div className="cutoff-page">
+      <SEO title="0.1% Cutoff – What the Meta?" description="Class and role distribution for players at or above Raider.IO 0.1% cutoff." canonicalUrl="/cutoff" />
       <div className="cutoff-page-header">
         <div className="cp-header-content">
           <h1 className="cutoff-page-title">Top 0.1% Cutoff</h1>

@@ -248,6 +248,7 @@ export const CompAllSeasonsPage: React.FC = () => {
       <SEO
         title="Historical Composition – What the Meta?"
         description="Top Mythic+ compositions across all seasons with trends by expansion and patch."
+        canonicalUrl="/historical-composition"
       />
       <div className="page-header">
         <div className="header-content">

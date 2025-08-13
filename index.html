@@ -131,30 +131,14 @@
     }
     </script>
     
-    <!-- Breadcrumb Schema -->
+    <!-- Breadcrumb Schema (site-level, only include valid live URLs) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://whatthemeta.io"
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "Leaderboard",
-          "item": "https://whatthemeta.io/leaderboard"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Meta Analysis",
-          "item": "https://whatthemeta.io/meta-evolution"
-        }
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://whatthemeta.io/"},
+        {"@type": "ListItem", "position": 2, "name": "Meta Analysis", "item": "https://whatthemeta.io/meta-evolution"}
       ]
     }
     </script>
@@ -163,7 +147,7 @@
     <script>
       (function () {
         try {
-          var href = window.location.origin + window.location.pathname + window.location.search;
+          var href = window.location.origin + window.location.pathname; // exclude query to avoid duplicate canonicals
           // Canonical
           var canonical = document.querySelector('link[rel="canonical"]');
           if (!canonical) {
