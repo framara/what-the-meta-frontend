@@ -7,6 +7,7 @@ const Navigation = () => {
   const [metaDropdownOpen, setMetaDropdownOpen] = useState(false);
   const [groupCompositionDropdownOpen, setGroupCompositionDropdownOpen] = useState(false);
   const location = useLocation();
+  // Cutoff is a direct link now; remove dropdown state
   
   // Refs to track timeout IDs for each dropdown
   const metaTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -78,6 +79,15 @@ const Navigation = () => {
         >
           Dashboard
         </Link>
+
+        {/* 0.1% Cutoff - direct link (second item) */}
+        <Link
+          to="/cutoff"
+          className={getLinkClasses('/cutoff')}
+          onClick={() => setNavOpen(false)}
+        >
+          0.1% Cutoff
+        </Link>
         
         {/* Spec Evolution dropdown - desktop */}
         <div 
@@ -143,6 +153,19 @@ const Navigation = () => {
               </Link>
             </div>
           )}
+        </div>
+
+        {/* Removed Cutoff dropdown for desktop; direct link added above */}
+
+        {/* 0.1% Cutoff - mobile direct link (placed second) */}
+        <div className="md:hidden">
+          <Link 
+            to="/cutoff" 
+            className={getLinkClasses('/cutoff')} 
+            onClick={() => setNavOpen(false)}
+          >
+            0.1% Cutoff
+          </Link>
         </div>
         
         {/* Spec Evolution dropdown - mobile */}

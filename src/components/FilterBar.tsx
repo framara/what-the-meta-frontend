@@ -11,6 +11,15 @@ interface FilterBarProps {
   showDungeon?: boolean;
   showLimit?: boolean;
   className?: string;
+  // Optional Region control (for CutoffPage). This is a controlled input owned by the page.
+  showRegion?: boolean;
+  region?: string;
+  onRegionChange?: (region: string) => void;
+  // Optional Season (slug) control (for CutoffPage). Controlled by the page.
+  showSeasonSlug?: boolean;
+  seasonSlug?: string;
+  seasonSlugOptions?: string[];
+  onSeasonSlugChange?: (slug: string) => void;
 }
 
 export const FilterBar: React.FC<FilterBarProps> = ({
@@ -18,7 +27,14 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   showPeriod = true,
   showDungeon = true,
   showLimit = true,
-  className = ''
+  className = '',
+  showRegion = false,
+  region,
+  onRegionChange,
+  showSeasonSlug = false,
+  seasonSlug,
+  seasonSlugOptions = [],
+  onSeasonSlugChange,
 }) => {
   const filter = useFilterState();
   const dispatch = useFilterDispatch();
@@ -202,7 +218,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   }, [filter.season_id, showPeriod, showDungeon, latestSeasonId, seasonOptions, dispatch]);
 
   // Count visible filters
-  const visibleFiltersCount = [showExpansion, true, showPeriod, showDungeon, showLimit].filter(Boolean).length;
+  const visibleFiltersCount = [showExpansion, true, showPeriod, showDungeon, showLimit, showRegion, showSeasonSlug].filter(Boolean).length;
   const shouldCenterFilters = visibleFiltersCount < 4;
 
   return (
@@ -253,30 +269,42 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
         <div className="filter-label">
           <span>Season:</span>
-          <select
-            className="filter-select"
-            value={filter.season_id || ''}
-            onChange={e => {
-              const value = e.target.value;
-              if (typeof value === 'string' && value.startsWith('separator-')) {
-                return; // Don't allow selecting separators
-              }
-              dispatch({ type: 'SET_SEASON', season_id: value ? Number(value) : undefined });
-            }}
-            disabled={loading || (showExpansion && !filter.expansion_id)}
-          >
-            {showExpansion && <option value="" className="filter-option">All Seasons</option>}
-            {getSeasonOptionsWithSeparators().map(opt => (
-              <option 
-                key={opt.value} 
-                value={opt.value}
-                disabled={opt.isSeparator}
-                className={opt.isSeparator ? 'expansion-separator' : ''}
-              >
-                {opt.label}
-              </option>
-            ))}
-          </select>
+          {showSeasonSlug ? (
+            <select
+              className="filter-select"
+              value={seasonSlug || ''}
+              onChange={e => onSeasonSlugChange && onSeasonSlugChange(e.target.value)}
+            >
+              {seasonSlugOptions.map(s => (
+                <option key={s} value={s} className="filter-option">{s}</option>
+              ))}
+            </select>
+          ) : (
+            <select
+              className="filter-select"
+              value={filter.season_id || ''}
+              onChange={e => {
+                const value = e.target.value;
+                if (typeof value === 'string' && value.startsWith('separator-')) {
+                  return; // Don't allow selecting separators
+                }
+                dispatch({ type: 'SET_SEASON', season_id: value ? Number(value) : undefined });
+              }}
+              disabled={loading || (showExpansion && !filter.expansion_id)}
+            >
+              {showExpansion && <option value="" className="filter-option">All Seasons</option>}
+              {getSeasonOptionsWithSeparators().map(opt => (
+                <option 
+                  key={opt.value} 
+                  value={opt.value}
+                  disabled={opt.isSeparator}
+                  className={opt.isSeparator ? 'expansion-separator' : ''}
+                >
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
 
         {showPeriod && (
@@ -325,6 +353,21 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               <option value={250} className="filter-option">Top 250</option>
               <option value={500} className="filter-option">Top 500</option>
               <option value={1000} className="filter-option">Top 1000</option>
+            </select>
+          </div>
+        )}
+
+        {showRegion && (
+          <div className="filter-label">
+            <span>Region:</span>
+            <select
+              className="filter-select"
+              value={region || 'us'}
+              onChange={e => onRegionChange && onRegionChange(e.target.value)}
+            >
+              {['us','eu','kr','tw'].map(r => (
+                <option key={r} value={r} className="filter-option">{r.toUpperCase()}</option>
+              ))}
             </select>
           </div>
         )}

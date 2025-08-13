@@ -169,3 +169,19 @@ export const SEASON_METADATA: Record<number, { expansion: string; patch: string;
   14: { expansion: 'The War Within', patch: '11.1', name: 'TWW S2' },
   15: { expansion: 'The War Within', patch: '11.2', name: 'TWW S3' }
 };
+
+/**
+ * Compute Raider.IO season slug (e.g., "season-tww-3") from an internal season_id.
+ * This derives the slug using the expansion short name and the season index within that expansion.
+ * Example: season_id 15 (TWW S3) -> season-tww-3
+ */
+export function getRaiderIoSeasonSlug(seasonId?: number | null): string | undefined {
+  if (!seasonId) return undefined;
+  const expansion = WOW_EXPANSIONS.find(exp => exp.seasons?.includes(seasonId));
+  if (!expansion) return undefined;
+  const indexWithinExpansion = (expansion.seasons?.indexOf(seasonId) ?? -1) + 1;
+  if (indexWithinExpansion <= 0) return undefined;
+  const prefix = (expansion.shortName || expansion.name || '').toLowerCase();
+  if (!prefix) return undefined;
+  return `season-${prefix}-${indexWithinExpansion}`;
+}
