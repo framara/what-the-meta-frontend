@@ -155,6 +155,39 @@ export async function fetchSeasonInfo(seasonId: number) {
   };
 }
 
+// Cutoff snapshots
+export type CutoffSnapshot = {
+  id: number;
+  created_at: string;
+  season_slug: string;
+  region: string;
+  cutoff_score: number;
+  target_count: number;
+  total_qualifying: number;
+  source_pages: number;
+  dungeon_count: number;
+  distribution: Record<string, { total: number; specs: Record<string, number> }>;
+  allColor?: string; // optional color hint for overall/cutoff visuals
+};
+
+export async function fetchCutoffLatest(season: string, region: string) {
+  const url = `${API_BASE_URL}/raiderio/cutoff-snapshots/latest?season=${encodeURIComponent(season)}&region=${encodeURIComponent(region)}`;
+  const resp = await axios.get(url);
+  return resp.data as CutoffSnapshot;
+}
+
+export async function fetchCutoffIndex() {
+  const url = `${API_BASE_URL}/raiderio/cutoff-snapshots/index`;
+  const resp = await axios.get(url);
+  return resp.data as Array<Pick<CutoffSnapshot, 'season_slug' | 'region' | 'id' | 'created_at' | 'cutoff_score' | 'target_count' | 'total_qualifying'>>;
+}
+
+export async function fetchCutoffBySeason(season: string) {
+  const url = `${API_BASE_URL}/raiderio/cutoff-snapshots/by-season?season=${encodeURIComponent(season)}`;
+  const resp = await axios.get(url);
+  return resp.data as CutoffSnapshot[];
+}
+
 export async function fetchSpecEvolution(seasonId?: number) {
   console.log('API: fetchSpecEvolution called with seasonId:', seasonId);
   const url = seasonId 

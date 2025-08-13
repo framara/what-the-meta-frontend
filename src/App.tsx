@@ -19,6 +19,7 @@ import TermsPage from './components/TermsPage';
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
 import toast from 'react-hot-toast';
+import CutoffPage from './components/CutoffPage';
 
 function App() {
   const [apiData, setApiData] = useState<any>(null);
@@ -155,6 +156,7 @@ function App() {
             <Route path="/historical-composition" element={<CompAllSeasonsPage />} />
             <Route path="/ai-predictions" element={<AIPredictionsPage />} />
             <Route path="/meta-health" element={<MetaHealthPage />} />
+            <Route path="/cutoff" element={<CutoffPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
