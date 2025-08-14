@@ -62,6 +62,11 @@
   background-clip: text;
 }
 
+/* Smaller numbers only for the cutoff summary card */
+.stats-card.cutoff-card .value {
+  font-size: 1.2rem;
+}
+
 /* Spec role sections */
 .spec-role-section {
   background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%);
