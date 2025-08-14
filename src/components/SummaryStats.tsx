@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_SPEC_ROLES } from '../constants/wow-constants';
 import { SpecIconImage } from '../utils/specIconImages';
 import './styles/SummaryStats.css';
+import { useFilterState } from './FilterContext';
+import { fetchCutoffLatest } from '../services/api';
+import { getRaiderIoSeasonSlug } from '../constants/wow-constants';
 
 interface GroupMember {
   character_name: string;
@@ -28,23 +31,41 @@ interface SummaryStatsProps {
   dungeons: Dungeon[];
 }
 
-function msToTime(ms: number): string {
-  const totalSeconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-}
-
 export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) => {
+  const filter = useFilterState();
+  const [cutoffScores, setCutoffScores] = useState<{ us: number | null; eu: number | null }>({ us: null, eu: null });
+  const [cutoffLoading, setCutoffLoading] = useState<boolean>(false);
+
+  // Load latest cutoff snapshot for current season (default region: US)
+  useEffect(() => {
+    const seasonSlug = getRaiderIoSeasonSlug(filter?.season_id);
+    if (!seasonSlug) {
+      setCutoffScores({ us: null, eu: null });
+      return;
+    }
+    setCutoffLoading(true);
+    Promise.allSettled([
+      fetchCutoffLatest(seasonSlug, 'us'),
+      fetchCutoffLatest(seasonSlug, 'eu')
+    ])
+      .then(results => {
+        const parse = (v: any): number | null => {
+          const num = v?.cutoff_score == null ? null : Number(v.cutoff_score);
+          return typeof num === 'number' && Number.isFinite(num) ? num : null;
+        };
+        const us = results[0].status === 'fulfilled' ? parse(results[0].value) : null;
+        const eu = results[1].status === 'fulfilled' ? parse(results[1].value) : null;
+        setCutoffScores({ us, eu });
+      })
+      .catch(() => setCutoffScores({ us: null, eu: null }))
+      .finally(() => setCutoffLoading(false));
+  }, [filter?.season_id]);
+
   // Top runs
   const totalRuns = runs.length;
 
   // Highest keystone
   const highestKeystone = runs.length ? Math.max(...runs.map(r => r.keystone_level)) : '-';
-
-  // Fastest time
-  const fastestRun = runs.length ? runs.reduce((min, r) => (r.duration_ms < min.duration_ms ? r : min), runs[0]) : null;
-  const fastestTime = fastestRun ? msToTime(fastestRun.duration_ms) : '-';
 
   // Most popular dungeon
   const dungeonCounts: Record<number, number> = {};
@@ -187,12 +208,26 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
           <div className="value">{highestKeystone}</div>
         </div>
         <div className="stats-card">
-          <div className="label">Fastest Time</div>
-          <div className="value">{fastestTime}</div>
-        </div>
-        <div className="stats-card">
           <div className="label">Most Popular Dungeon</div>
           <div className="value">{mostPopularDungeon}</div>
+        </div>
+        <div className="stats-card cutoff-card">
+          <div className="label">Current 0.1% Cutoff</div>
+          <div className="value">
+            {cutoffLoading ? '…' : `US: ${cutoffScores.us != null ? Math.round(cutoffScores.us) : '-'}`}
+          </div>
+          <div className="value" style={{ marginTop: '0.25rem' }}>
+            {cutoffLoading ? '' : `EU: ${cutoffScores.eu != null ? Math.round(cutoffScores.eu) : '-'}`}
+          </div>
+          <div style={{ marginTop: '0.75rem' }}>
+            <button 
+              className="meta-evolution-link"
+              onClick={() => { window.location.href = '/cutoff'; }}
+              title="View current cutoff details"
+            >
+              View Cutoff
+            </button>
+          </div>
         </div>
       </div>
 

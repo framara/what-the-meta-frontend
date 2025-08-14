@@ -343,7 +343,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
         {showLimit && (
           <div className="filter-label">
-            <span>Top N:</span>
+            <span>Top N runs:</span>
             <select
               className="filter-select"
               value={filter.limit}
