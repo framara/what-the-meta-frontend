@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_CLASS_NAMES, WOW_SPEC_TO_CLASS } from '../constants/wow-constants';
+import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_CLASS_NAMES, WOW_SPEC_TO_CLASS, WOW_DUNGEON_TIMERS } from '../constants/wow-constants';
 import { SpecIconImage } from '../utils/specIconImages';
 import './styles/LeaderboardTable.css';
 
@@ -178,8 +178,11 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
                 </tr>
               ))
             )}
-            {!loading && pagedRuns.map((run, i) => (
-              <tr key={run.id}>
+            {!loading && pagedRuns.map((run, i) => {
+              const timer = WOW_DUNGEON_TIMERS[run.dungeon_id as number];
+              const isDepleted = timer ? run.duration_ms > timer : false;
+              return (
+              <tr key={run.id} className={isDepleted ? 'depleted-row' : undefined}>
                 <td className="table-cell rank-cell">{page * PAGE_SIZE + i + 1}</td>
                 <td className="md:hidden">{run.keystone_level} {dungeonMap[run.dungeon_id] ? dungeonMap[run.dungeon_id].shortname : run.dungeon_id}</td>
                 <td className="hidden md:table-cell">{run.keystone_level}</td>
@@ -228,7 +231,7 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
                   </div>
                 </td>
               </tr>
-            ))}
+            );})}
           </tbody>
         </table>
 

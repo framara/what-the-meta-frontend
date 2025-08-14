@@ -153,6 +153,16 @@
   color: #f59e0b;
 }
 
+/* Depleted time style */
+/* Depleted row: desaturate text and reduce contrast */
+.depleted-row td {
+  color: #94a3b8; /* slate-400 */
+}
+
+.depleted-row .rank-cell {
+  color: #64748b; /* slate-500 for rank */
+}
+
 /* Enhanced group squares */
 .saas-group-squares {
   display: flex;
