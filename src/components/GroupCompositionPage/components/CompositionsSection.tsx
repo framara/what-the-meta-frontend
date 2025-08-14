@@ -32,6 +32,7 @@ interface CompositionsSectionProps {
   setSpecTooltip: (tooltip: TooltipState | null) => void;
   seasonData: SeasonData | null;
   trendLoading?: boolean;
+  isLoading?: boolean;
 }
 
 export const CompositionsSection: React.FC<CompositionsSectionProps> = ({
@@ -41,7 +42,8 @@ export const CompositionsSection: React.FC<CompositionsSectionProps> = ({
   specTooltip,
   setSpecTooltip,
   seasonData,
-  trendLoading = false
+  trendLoading = false,
+  isLoading = false
 }) => {
   return (
     <div className="compositions-section">
@@ -59,6 +61,8 @@ export const CompositionsSection: React.FC<CompositionsSectionProps> = ({
               trendLoading={trendLoading}
             />
           ))
+        ) : isLoading || !seasonData || (seasonData.total_keys ?? 0) === 0 ? (
+          null
         ) : (
           <div className="no-compositions">
             <p>No love for that spec during that season :(</p>
