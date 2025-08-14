@@ -154,13 +154,13 @@ export default function CutoffPage() {
               ? (
                 <SimpleBarChart 
                   data={specRows.map(r => ({ name: r.name, value: r.total, color: r.color }))} 
-                  metrics={{ cutoffScore: snapshot?.cutoff_score, characters: snapshot?.total_qualifying, cutoffColor: snapshot?.allColor }}
+                  metrics={{ cutoffScore: snapshot?.cutoff_score, characters: snapshot?.total_qualifying, cutoffColor: snapshot?.allColor, timestampISO: snapshot?.created_at }}
                 />
               ) : (
                 <TwoLevelSpecPieChart 
                   classData={classOnlyRows} 
                   specData={specOnlyRows}
-                  metrics={{ cutoffScore: snapshot?.cutoff_score, characters: snapshot?.total_qualifying, cutoffColor: snapshot?.allColor }}
+                  metrics={{ cutoffScore: snapshot?.cutoff_score, characters: snapshot?.total_qualifying, cutoffColor: snapshot?.allColor, timestampISO: snapshot?.created_at }}
                 />
               )}
           </div>
