@@ -33,9 +33,10 @@ interface GroupCompositionStatsProps {
   runs: Run[];
   seasonData: SeasonData | null;
   trendLoading?: boolean;
+  isLoading?: boolean;
 }
 
-export const GroupCompositionStats: React.FC<GroupCompositionStatsProps> = ({ runs, seasonData, trendLoading = false }) => {
+export const GroupCompositionStats: React.FC<GroupCompositionStatsProps> = ({ runs, seasonData, trendLoading = false, isLoading = false }) => {
   const { selectedClass, selectedSpec, handleClassChange, handleSpecChange, clearFilter } = useSpecFilter();
   const { isDropdownOpen, setIsDropdownOpen, hoveredClass, setHoveredClass, dropdownRef } = useDropdown();
   const { specTooltip, setSpecTooltip } = useTooltip();
@@ -84,8 +85,9 @@ export const GroupCompositionStats: React.FC<GroupCompositionStatsProps> = ({ ru
     specTooltip,
     setSpecTooltip,
     seasonData,
-    trendLoading
-  }), [topCompositions, selectedSpec, handleSpecChange, specTooltip, setSpecTooltip, seasonData, trendLoading]);
+    trendLoading,
+    isLoading
+  }), [topCompositions, selectedSpec, handleSpecChange, specTooltip, setSpecTooltip, seasonData, trendLoading, isLoading]);
 
   return (
     <div className="group-composition-stats">

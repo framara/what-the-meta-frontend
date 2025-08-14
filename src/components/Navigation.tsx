@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 
 const Navigation = () => {
   const [navOpen, setNavOpen] = useState(false);
@@ -13,6 +13,8 @@ const Navigation = () => {
   const metaTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const groupCompositionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const aiTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Ref to detect outside clicks
+  const navContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Helper function to check if a link is active
   const isActive = (path: string) => {
@@ -38,7 +40,7 @@ const Navigation = () => {
       clearTimeout(timeoutRef.current);
     }
     // Start new timeout
-    timeoutRef.current = setTimeout(() => setDropdownOpen(false), 300);
+    timeoutRef.current = setTimeout(() => setDropdownOpen(false), 200);
   };
 
   const clearDropdownTimeout = (timeoutRef: React.MutableRefObject<NodeJS.Timeout | null>) => {
@@ -48,12 +50,65 @@ const Navigation = () => {
     }
   };
 
+  // Close menus on outside click
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent | TouchEvent) => {
+      if (!navContainerRef.current) return;
+      const target = event.target as Node;
+      if (!navContainerRef.current.contains(target)) {
+        setNavOpen(false);
+        setAiDropdownOpen(false);
+        setMetaDropdownOpen(false);
+        setGroupCompositionDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('touchstart', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('touchstart', handleOutsideClick);
+    };
+  }, []);
+
+  // Close menus when route changes
+  useEffect(() => {
+    setNavOpen(false);
+    setAiDropdownOpen(false);
+    setMetaDropdownOpen(false);
+    setGroupCompositionDropdownOpen(false);
+  }, [location.pathname]);
+
+  // Prevent background scroll when mobile menu is open
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    if (navOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = originalOverflow || '';
+    }
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [navOpen]);
+
+  // Keyboard: Escape closes any open menu
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      setNavOpen(false);
+      setAiDropdownOpen(false);
+      setMetaDropdownOpen(false);
+      setGroupCompositionDropdownOpen(false);
+    }
+  }, []);
+
   return (
-    <nav className="flex items-center">
+    <nav className="flex items-center" role="navigation" aria-label="Primary" onKeyDown={handleKeyDown}>
       {/* Hamburger menu for mobile */}
       <button
         className="md:hidden block p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         aria-label="Open navigation menu"
+        aria-expanded={navOpen}
+        aria-controls="primary-mobile-menu"
         onClick={() => setNavOpen(v => !v)}
       >
         {/* Hamburger icon */}
@@ -63,31 +118,47 @@ const Navigation = () => {
           <line x1="3" y1="18" x2="21" y2="18" />
         </svg>
       </button>
+      {/* Mobile backdrop */}
+      {navOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => setNavOpen(false)}
+          aria-hidden="true"
+        />
+      )}
       
       {/* Nav links - hidden on mobile unless menu open, always visible on md+ */}
       <div 
+        ref={navContainerRef}
+        id="primary-mobile-menu"
         className={`flex-col md:flex md:flex-row md:gap-6 md:static absolute top-full right-0 w-72 bg-gray-900 md:bg-transparent z-50 transition-all duration-200 ${navOpen ? 'flex' : 'hidden'} md:!flex`} 
         style={{ 
           boxShadow: navOpen ? '0 4px 16px 0 rgba(0,0,0,0.18)' : undefined, 
           marginTop: navOpen ? '0.5rem' : undefined 
         }}
       >
-        <Link 
+        <NavLink 
           to="/" 
-          className={getLinkClasses('/')} 
+          className={({ isActive }: { isActive: boolean }) => {
+            const base = "font-bold text-lg transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap";
+            return `${base} ${isActive ? 'text-blue-400 border-b-2 border-blue-400 md:border-b-2' : 'hover:text-blue-400'}`;
+          }}
           onClick={() => setNavOpen(false)}
         >
           Dashboard
-        </Link>
+        </NavLink>
 
         {/* 0.1% Cutoff - direct link (second item) */}
-        <Link
+        <NavLink
           to="/cutoff"
-          className={getLinkClasses('/cutoff')}
+          className={({ isActive }: { isActive: boolean }) => {
+            const base = "font-bold text-lg transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap";
+            return `${base} ${isActive ? 'text-blue-400 border-b-2 border-blue-400 md:border-b-2' : 'hover:text-blue-400'}`;
+          }}
           onClick={() => setNavOpen(false)}
         >
           0.1% Cutoff
-        </Link>
+        </NavLink>
         
         {/* Spec Evolution dropdown - desktop */}
         <div 
@@ -106,6 +177,10 @@ const Navigation = () => {
                 ? 'text-blue-400 border-b-2 border-blue-400 md:border-b-2'
                 : 'hover:text-blue-400'
             }`}
+            id="meta-menu-button-desktop"
+            aria-haspopup="true"
+            aria-expanded={metaDropdownOpen}
+            aria-controls="meta-menu-desktop"
             onClick={() => setMetaDropdownOpen(!metaDropdownOpen)}
           >
             Spec Evolution
@@ -120,6 +195,9 @@ const Navigation = () => {
           </button>
           {metaDropdownOpen && (
             <div 
+              id="meta-menu-desktop"
+              role="menu"
+              aria-labelledby="meta-menu-button-desktop"
               className="absolute top-full left-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg border border-gray-700 z-50"
               onMouseEnter={() => {
                 clearDropdownTimeout(metaTimeoutRef);
@@ -129,44 +207,29 @@ const Navigation = () => {
                 startDropdownTimeout(metaTimeoutRef, setMetaDropdownOpen);
               }}
             >
-              <Link 
+              <NavLink 
                 to="/meta-evolution" 
-                className={`block px-4 py-2 transition-colors rounded-t-lg ${
-                  isActive('/meta-evolution')
-                    ? 'text-blue-400 bg-gray-700'
-                    : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'
-                }`}
+                className={({ isActive }: { isActive: boolean }) => `block px-4 py-2 transition-colors rounded-t-lg ${isActive ? 'text-blue-400 bg-gray-700' : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'}`}
+                role="menuitem"
                 onClick={() => setMetaDropdownOpen(false)}
               >
                 Charts
-              </Link>
-              <Link 
+              </NavLink>
+              <NavLink 
                 to="/race-bars" 
-                className={`block px-4 py-2 transition-colors rounded-b-lg ${
-                  isActive('/race-bars')
-                    ? 'text-blue-400 bg-gray-700'
-                    : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'
-                }`}
+                className={({ isActive }: { isActive: boolean }) => `block px-4 py-2 transition-colors rounded-b-lg ${isActive ? 'text-blue-400 bg-gray-700' : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'}`}
+                role="menuitem"
                 onClick={() => setMetaDropdownOpen(false)}
               >
                 Race Bars
-              </Link>
+              </NavLink>
             </div>
           )}
         </div>
 
         {/* Removed Cutoff dropdown for desktop; direct link added above */}
 
-        {/* 0.1% Cutoff - mobile direct link (placed second) */}
-        <div className="md:hidden">
-          <Link 
-            to="/cutoff" 
-            className={getLinkClasses('/cutoff')} 
-            onClick={() => setNavOpen(false)}
-          >
-            0.1% Cutoff
-          </Link>
-        </div>
+        {/* 0.1% Cutoff - duplicate mobile link removed to avoid double entry */}
         
         {/* Spec Evolution dropdown - mobile */}
         <div className="md:hidden">
@@ -176,6 +239,10 @@ const Navigation = () => {
                 ? 'text-blue-400 border-b-2 border-blue-400'
                 : 'hover:text-blue-400'
             }`}
+            id="meta-menu-button-mobile"
+            aria-haspopup="true"
+            aria-expanded={metaDropdownOpen}
+            aria-controls="meta-menu-mobile"
             onClick={() => setMetaDropdownOpen(!metaDropdownOpen)}
           >
             <span>Spec Evolution</span>
@@ -189,35 +256,29 @@ const Navigation = () => {
             </svg>
           </button>
           {metaDropdownOpen && (
-            <div className="pl-6 bg-gray-800 border-l-2 border-blue-500">
-              <Link 
+            <div id="meta-menu-mobile" role="menu" aria-labelledby="meta-menu-button-mobile" className="pl-6 bg-gray-800 border-l-2 border-blue-500">
+              <NavLink 
                 to="/meta-evolution" 
-                className={`block px-4 py-2 transition-colors ${
-                  isActive('/meta-evolution')
-                    ? 'text-blue-400 bg-gray-700'
-                    : 'text-gray-300 hover:text-blue-400'
-                }`}
+                className={({ isActive }: { isActive: boolean }) => `block px-4 py-2 transition-colors ${isActive ? 'text-blue-400 bg-gray-700' : 'text-gray-300 hover:text-blue-400'}`}
+                role="menuitem"
                 onClick={() => {
                   setMetaDropdownOpen(false);
                   setNavOpen(false);
                 }}
               >
                 Charts
-              </Link>
-              <Link 
+              </NavLink>
+              <NavLink 
                 to="/race-bars" 
-                className={`block px-4 py-2 transition-colors ${
-                  isActive('/race-bars')
-                    ? 'text-blue-400 bg-gray-700'
-                    : 'text-gray-300 hover:text-blue-400'
-                }`}
+                className={({ isActive }: { isActive: boolean }) => `block px-4 py-2 transition-colors ${isActive ? 'text-blue-400 bg-gray-700' : 'text-gray-300 hover:text-blue-400'}`}
+                role="menuitem"
                 onClick={() => {
                   setMetaDropdownOpen(false);
                   setNavOpen(false);
                 }}
               >
                 Race Bars
-              </Link>
+              </NavLink>
             </div>
           )}
         </div>
@@ -239,6 +300,10 @@ const Navigation = () => {
                 ? 'text-blue-400 border-b-2 border-blue-400 md:border-b-2'
                 : 'hover:text-blue-400'
             }`}
+            id="group-menu-button-desktop"
+            aria-haspopup="true"
+            aria-expanded={groupCompositionDropdownOpen}
+            aria-controls="group-menu-desktop"
             onClick={() => setGroupCompositionDropdownOpen(!groupCompositionDropdownOpen)}
           >
             Group Composition
@@ -253,6 +318,9 @@ const Navigation = () => {
           </button>
           {groupCompositionDropdownOpen && (
             <div 
+              id="group-menu-desktop"
+              role="menu"
+              aria-labelledby="group-menu-button-desktop"
               className="absolute top-full left-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg border border-gray-700 z-50"
               onMouseEnter={() => {
                 clearDropdownTimeout(groupCompositionTimeoutRef);
@@ -262,28 +330,22 @@ const Navigation = () => {
                 startDropdownTimeout(groupCompositionTimeoutRef, setGroupCompositionDropdownOpen);
               }}
             >
-              <Link 
+              <NavLink 
                 to="/group-composition" 
-                className={`block px-4 py-2 transition-colors rounded-t-lg ${
-                  isActive('/group-composition')
-                    ? 'text-blue-400 bg-gray-700'
-                    : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'
-                }`}
+                className={({ isActive }: { isActive: boolean }) => `block px-4 py-2 transition-colors rounded-t-lg ${isActive ? 'text-blue-400 bg-gray-700' : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'}`}
+                role="menuitem"
                 onClick={() => setGroupCompositionDropdownOpen(false)}
               >
                 Composition Details
-              </Link>
-              <Link 
+              </NavLink>
+              <NavLink 
                 to="/historical-composition" 
-                className={`block px-4 py-2 transition-colors rounded-b-lg ${
-                  isActive('/historical-composition')
-                    ? 'text-blue-400 bg-gray-700'
-                    : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'
-                }`}
+                className={({ isActive }: { isActive: boolean }) => `block px-4 py-2 transition-colors rounded-b-lg ${isActive ? 'text-blue-400 bg-gray-700' : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'}`}
+                role="menuitem"
                 onClick={() => setGroupCompositionDropdownOpen(false)}
               >
                 Historical Overview
-              </Link>
+              </NavLink>
             </div>
           )}
         </div>
@@ -296,6 +358,10 @@ const Navigation = () => {
                 ? 'text-blue-400 border-b-2 border-blue-400'
                 : 'hover:text-blue-400'
             }`}
+            id="group-menu-button-mobile"
+            aria-haspopup="true"
+            aria-expanded={groupCompositionDropdownOpen}
+            aria-controls="group-menu-mobile"
             onClick={() => setGroupCompositionDropdownOpen(!groupCompositionDropdownOpen)}
           >
             <span>Group Composition</span>
@@ -309,35 +375,29 @@ const Navigation = () => {
             </svg>
           </button>
           {groupCompositionDropdownOpen && (
-            <div className="pl-6 bg-gray-800 border-l-2 border-blue-500">
-              <Link 
+            <div id="group-menu-mobile" role="menu" aria-labelledby="group-menu-button-mobile" className="pl-6 bg-gray-800 border-l-2 border-blue-500">
+              <NavLink 
                 to="/group-composition" 
-                className={`block px-4 py-2 transition-colors ${
-                  isActive('/group-composition')
-                    ? 'text-blue-400 bg-gray-700'
-                    : 'text-gray-300 hover:text-blue-400'
-                }`}
+                className={({ isActive }: { isActive: boolean }) => `block px-4 py-2 transition-colors ${isActive ? 'text-blue-400 bg-gray-700' : 'text-gray-300 hover:text-blue-400'}`}
+                role="menuitem"
                 onClick={() => {
                   setGroupCompositionDropdownOpen(false);
                   setNavOpen(false);
                 }}
               >
                 Composition Details
-              </Link>
-              <Link 
+              </NavLink>
+              <NavLink 
                 to="/historical-composition"     
-                className={`block px-4 py-2 transition-colors ${
-                  isActive('/historical-composition')
-                    ? 'text-blue-400 bg-gray-700'
-                    : 'text-gray-300 hover:text-blue-400'
-                }`}
+                className={({ isActive }: { isActive: boolean }) => `block px-4 py-2 transition-colors ${isActive ? 'text-blue-400 bg-gray-700' : 'text-gray-300 hover:text-blue-400'}`}
+                role="menuitem"
                 onClick={() => {
                   setGroupCompositionDropdownOpen(false);
                   setNavOpen(false);
                 }}
               >
                 Historical Overview
-              </Link>
+              </NavLink>
             </div>
           )}
         </div>
@@ -359,6 +419,10 @@ const Navigation = () => {
                 ? 'text-blue-400 border-b-2 border-blue-400 md:border-b-2'
                 : 'hover:text-blue-400'
             }`}
+            id="ai-menu-button-desktop"
+            aria-haspopup="true"
+            aria-expanded={aiDropdownOpen}
+            aria-controls="ai-menu-desktop"
             onClick={() => setAiDropdownOpen(!aiDropdownOpen)}
           >
             AI Analysis
@@ -373,6 +437,9 @@ const Navigation = () => {
           </button>
           {aiDropdownOpen && (
             <div 
+              id="ai-menu-desktop"
+              role="menu"
+              aria-labelledby="ai-menu-button-desktop"
               className="absolute top-full left-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg border border-gray-700 z-50"
               onMouseEnter={() => {
                 clearDropdownTimeout(aiTimeoutRef);
@@ -382,28 +449,22 @@ const Navigation = () => {
                 startDropdownTimeout(aiTimeoutRef, setAiDropdownOpen);
               }}
             >
-              <Link 
+              <NavLink 
                 to="/ai-predictions" 
-                className={`block px-4 py-2 transition-colors rounded-t-lg ${
-                  isActive('/ai-predictions')
-                    ? 'text-blue-400 bg-gray-700'
-                    : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'
-                }`}
+                className={({ isActive }: { isActive: boolean }) => `block px-4 py-2 transition-colors rounded-t-lg ${isActive ? 'text-blue-400 bg-gray-700' : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'}`}
+                role="menuitem"
                 onClick={() => setAiDropdownOpen(false)}
               >
                 AI Predictions
-              </Link>
-              <Link 
+              </NavLink>
+              <NavLink 
                 to="/meta-health" 
-                className={`block px-4 py-2 transition-colors rounded-b-lg ${
-                  isActive('/meta-health')
-                    ? 'text-blue-400 bg-gray-700'
-                    : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'
-                }`}
+                className={({ isActive }: { isActive: boolean }) => `block px-4 py-2 transition-colors rounded-b-lg ${isActive ? 'text-blue-400 bg-gray-700' : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'}`}
+                role="menuitem"
                 onClick={() => setAiDropdownOpen(false)}
               >
                 Meta Health
-              </Link>
+              </NavLink>
             </div>
           )}
         </div>
@@ -412,10 +473,14 @@ const Navigation = () => {
         <div className="md:hidden">
           <button
             className={`font-bold text-lg transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap flex items-center justify-between w-full ${
-              isActive('/ai-predictions') || isActive('/ai-analysis') || isActive('/ai-insights')
+              isActive('/ai-predictions') || isActive('/meta-health') || isActive('/ai-analysis') || isActive('/ai-insights')
                 ? 'text-blue-400 border-b-2 border-blue-400'
                 : 'hover:text-blue-400'
             }`}
+            id="ai-menu-button-mobile"
+            aria-haspopup="true"
+            aria-expanded={aiDropdownOpen}
+            aria-controls="ai-menu-mobile"
             onClick={() => setAiDropdownOpen(!aiDropdownOpen)}
           >
             <span>AI Analysis</span>
@@ -429,24 +494,29 @@ const Navigation = () => {
             </svg>
           </button>
           {aiDropdownOpen && (
-            <div className="pl-6 bg-gray-800 border-l-2 border-blue-500">
-              <Link 
+            <div id="ai-menu-mobile" role="menu" aria-labelledby="ai-menu-button-mobile" className="pl-6 bg-gray-800 border-l-2 border-blue-500">
+              <NavLink 
                 to="/ai-predictions" 
-                className={`block px-4 py-2 transition-colors ${
-                  isActive('/ai-predictions')
-                    ? 'text-blue-400 bg-gray-700'
-                    : 'text-gray-300 hover:text-blue-400'
-                }`}
+                className={({ isActive }: { isActive: boolean }) => `block px-4 py-2 transition-colors ${isActive ? 'text-blue-400 bg-gray-700' : 'text-gray-300 hover:text-blue-400'}`}
+                role="menuitem"
                 onClick={() => {
                   setAiDropdownOpen(false);
                   setNavOpen(false);
                 }}
               >
                 AI Predictions
-              </Link>
-              <div className="px-4 py-2 text-gray-500 text-sm italic">
-                More coming soon...
-              </div>
+              </NavLink>
+              <NavLink 
+                to="/meta-health" 
+                className={({ isActive }: { isActive: boolean }) => `block px-4 py-2 transition-colors ${isActive ? 'text-blue-400 bg-gray-700' : 'text-gray-300 hover:text-blue-400'}`}
+                role="menuitem"
+                onClick={() => {
+                  setAiDropdownOpen(false);
+                  setNavOpen(false);
+                }}
+              >
+                Meta Health
+              </NavLink>
             </div>
           )}
         </div>

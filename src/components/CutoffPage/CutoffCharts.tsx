@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, PieChart, Pie, Cell } from 'recharts';
 
 export type ChartItem = { name: string; value: number; color?: string };
@@ -9,18 +9,22 @@ type CutoffTooltipProps = {
   payload?: any[];
   total?: number; // legacy
   totals?: { inner: number; outer: number };
+  activeRing?: 'inner' | 'outer' | null;
 };
 
-const CutoffTooltip: React.FC<CutoffTooltipProps> = ({ active, label, payload, total = 0, totals }) => {
+const CutoffTooltip: React.FC<CutoffTooltipProps> = ({ active, label, payload, total = 0, totals, activeRing }) => {
   if (!active || !payload || payload.length === 0) return null as any;
   const items = Array.isArray(payload) ? payload : [];
-  // Prefer outer slice when present (has parent)
+  // Choose target based on the ring being hovered to avoid cross-ring mixups
+  const innerItem = items.find(it => it && it.payload && !(it.payload as any).parent);
   const outerItem = items.find(it => it && it.payload && (it.payload as any).parent);
-  const target = outerItem || items[0];
+  const target = activeRing === 'inner' ? (innerItem || items[0])
+    : activeRing === 'outer' ? (outerItem || items[0])
+    : (outerItem || items[0]);
   const p = target?.payload || {};
   const value = Number(target?.value ?? 0);
   const color = p.color || p.fill || target?.color || '#60a5fa';
-  const effectiveTotal = totals ? (outerItem ? totals.outer : totals.inner) : total;
+  const effectiveTotal = totals ? ((activeRing === 'outer') ? totals.outer : totals.inner) : total;
   const pct = effectiveTotal > 0 ? (value / effectiveTotal) * 100 : 0;
   const baseName = target?.name ?? p.name ?? (typeof label !== 'undefined' ? String(label) : '');
   const title = p.parent ? `${baseName} – ${p.parent}` : baseName;
@@ -38,7 +42,18 @@ const CutoffTooltip: React.FC<CutoffTooltipProps> = ({ active, label, payload, t
   );
 };
 
-type ChartMetrics = { cutoffScore?: number; characters?: number; cutoffColor?: string };
+type ChartMetrics = { cutoffScore?: number; characters?: number; cutoffColor?: string; timestampISO?: string };
+
+const formatLocalTimestamp = (iso?: string) => {
+  if (!iso) return '';
+  try {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleString();
+  } catch {
+    return '';
+  }
+};
 
 export const SimpleBarChart: React.FC<{ data: ChartItem[]; metrics?: ChartMetrics }> = ({ data, metrics }) => {
   const total = data.reduce((sum, d) => sum + (d.value || 0), 0);
@@ -50,7 +65,7 @@ export const SimpleBarChart: React.FC<{ data: ChartItem[]; metrics?: ChartMetric
     return spec || name;
   };
   return (
-    <div style={{ width: '100%', height: 800, position: 'relative' }}>
+    <div className="cp-chart-wrapper">
       <ResponsiveContainer>
         <BarChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: bottomMargin }}>
           {showTicks ? (
@@ -83,6 +98,11 @@ export const SimpleBarChart: React.FC<{ data: ChartItem[]; metrics?: ChartMetric
           {typeof metrics.characters !== 'undefined' && (
             <div className="cp-chart-metric"><span className="label">Characters</span><span className="value">{metrics.characters}</span></div>
           )}
+        </div>
+      )}
+      {metrics?.timestampISO && (
+        <div className="cp-chart-timestamp">
+          <span className="label">Snapshot:</span> {formatLocalTimestamp(metrics.timestampISO)}
         </div>
       )}
     </div>
@@ -217,8 +237,11 @@ export const TwoLevelSpecPieChart: React.FC<{ classData: ChartItem[]; specData: 
   const totalInner = classData.reduce((s, d) => s + (d.value || 0), 0);
   const totalOuter = specData.reduce((s, d) => s + (d.value || 0), 0);
 
+  // Track which ring is currently hovered so tooltip can disambiguate
+  const [activeRing, setActiveRing] = useState<'inner' | 'outer' | null>(null);
+
   return (
-    <div style={{ width: '100%', height: 800, position: 'relative' }}>
+    <div className="cp-chart-wrapper">
       <ResponsiveContainer>
         <PieChart>
           <Tooltip
@@ -227,6 +250,7 @@ export const TwoLevelSpecPieChart: React.FC<{ classData: ChartItem[]; specData: 
               <CutoffTooltip
                 {...(props as any)}
                 totals={{ inner: totalInner, outer: totalOuter }}
+                activeRing={activeRing}
               />
             )}
           />
@@ -244,6 +268,8 @@ export const TwoLevelSpecPieChart: React.FC<{ classData: ChartItem[]; specData: 
             startAngle={90}
             endAngle={-270}
             paddingAngle={0}
+            onMouseEnter={() => setActiveRing('inner')}
+            onMouseLeave={() => setActiveRing(null)}
           >
             {classData.map((entry, index) => (
               <Cell 
@@ -270,6 +296,8 @@ export const TwoLevelSpecPieChart: React.FC<{ classData: ChartItem[]; specData: 
             startAngle={90}
             endAngle={-270}
             paddingAngle={0}
+            onMouseEnter={() => setActiveRing('outer')}
+            onMouseLeave={() => setActiveRing(null)}
           >
             {shadedOuterData.map((entry, index) => (
               <Cell 
@@ -291,6 +319,11 @@ export const TwoLevelSpecPieChart: React.FC<{ classData: ChartItem[]; specData: 
           {typeof metrics.characters !== 'undefined' && (
             <div className="cp-chart-metric"><span className="label">Characters</span><span className="value">{metrics.characters}</span></div>
           )}
+        </div>
+      )}
+      {metrics?.timestampISO && (
+        <div className="cp-chart-timestamp">
+          <span className="label">Snapshot:</span> {formatLocalTimestamp(metrics.timestampISO)}
         </div>
       )}
     </div>

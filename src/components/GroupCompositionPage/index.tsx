@@ -78,7 +78,6 @@ export const GroupCompositionPage: React.FC = () => {
   const fetchData = useCallback(async () => {
     const startTime = performance.now();
     const requestId = `fetch-${filter.season_id}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-    fetchRequestIdRef.current = requestId;
     
     if (!filter.season_id) return;
 
@@ -87,9 +86,8 @@ export const GroupCompositionPage: React.FC = () => {
     const richCached = dataCache.get(`rich-${cacheKey}`);
     
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-  if (fetchRequestIdRef.current !== requestId) return;
-  setRuns(cached.runs);
-  setSeasonData(cached.seasonData);
+      setRuns(cached.runs);
+      setSeasonData(cached.seasonData);
       setLoading(false);
       setIsInitialLoad(false);
       
@@ -109,6 +107,8 @@ export const GroupCompositionPage: React.FC = () => {
     }
 
     isFetchingRef.current = true;
+    // Only set the active request ID once we've claimed the fetch lock
+    fetchRequestIdRef.current = requestId;
     setLoading(true);
     setError(null);
     setLoadingProgress(0);
@@ -121,7 +121,7 @@ export const GroupCompositionPage: React.FC = () => {
       const topKeysStart = performance.now();
       
       // Fetch top keys first (this is the heaviest call)
-  const runsData = await fetchTopKeys({
+      const runsData = await fetchTopKeys({
         season_id: filter.season_id,
         period_id: filter.period_id,
         dungeon_id: filter.dungeon_id,
@@ -130,9 +130,9 @@ export const GroupCompositionPage: React.FC = () => {
       
       const topKeysTime = performance.now() - topKeysStart;
       
-  setLoadingProgress(60);
-  if (fetchRequestIdRef.current !== requestId) return;
-  setRuns(runsData); // Show initial data immediately
+      setLoadingProgress(60);
+      if (fetchRequestIdRef.current !== requestId) return;
+      setRuns(runsData); // Show initial data immediately
       
       // If we fetched less than the full limit, fetch the rest
       let finalRuns = runsData;
@@ -140,7 +140,7 @@ export const GroupCompositionPage: React.FC = () => {
         const remainingLimit = (filter.limit || 1000) - initialLimit;
         
         const additionalStart = performance.now();
-  const additionalRuns = await fetchTopKeys({
+        const additionalRuns = await fetchTopKeys({
           season_id: filter.season_id,
           period_id: filter.period_id,
           dungeon_id: filter.dungeon_id,
@@ -197,11 +197,17 @@ export const GroupCompositionPage: React.FC = () => {
     } catch (err) {
       const errorTime = performance.now() - startTime;
       console.error(`❌ [${new Date().toISOString()}] Error after ${errorTime.toFixed(2)}ms:`, err);
-      setError('Failed to load group composition data');
+      // Only surface the error if this request is still current
+      if (fetchRequestIdRef.current === requestId) {
+        setError('Failed to load group composition data');
+      }
     } finally {
-      isFetchingRef.current = false;
-      setLoading(false);
-      setLoadingProgress(0);
+      // Only clear loading state if this request is still the latest
+      if (fetchRequestIdRef.current === requestId) {
+        isFetchingRef.current = false;
+        setLoading(false);
+        setLoadingProgress(0);
+      }
     }
   }, [filter.season_id, filter.period_id, filter.dungeon_id, filter.limit, cacheKey]);
 
@@ -280,6 +286,14 @@ export const GroupCompositionPage: React.FC = () => {
   // Fetch data when filters change
   useEffect(() => {
     fetchData();
+    // On hard reload, the worker may start before initialSeasonData is ready.
+    // Delay worker kickoff slightly to avoid racing with first render.
+    const timer = setTimeout(() => {
+      if (!trendLoading && runs.length > 0 && !seasonData) {
+        startCompositionWorker();
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchData]);
 
   // Clean up old cache entries periodically
@@ -349,9 +363,9 @@ export const GroupCompositionPage: React.FC = () => {
   // Memoize main content
   const mainContent = useMemo(() => (
     <div className="group-composition-content">
-      <GroupCompositionStats runs={runs} seasonData={seasonData} trendLoading={trendLoading} />
+      <GroupCompositionStats runs={runs} seasonData={seasonData} trendLoading={trendLoading} isLoading={loading} />
     </div>
-  ), [runs, seasonData, trendLoading]);
+  ), [runs, seasonData, trendLoading, loading]);
 
   if (error) {
     return errorContent;
