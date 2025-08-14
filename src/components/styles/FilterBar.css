@@ -268,7 +268,7 @@
 @media (max-width: 768px) {
   .filter-bar {
     padding: 1rem;
-    border-radius: 12px;
+    border-radius: 16px;
   }
   
   .filterbar-controls {

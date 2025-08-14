@@ -414,6 +414,7 @@
   background-color: #1F2937;
   border-radius: 0.5rem;
   padding: 1rem;
+  border-radius: 16px;
 }
 
 .cutoff-page-filter .filterbar-controls {
