@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_SPEC_ROLES } from '../constants/wow-constants';
 import { SpecIconImage } from '../utils/specIconImages';
 import './styles/SummaryStats.css';
@@ -33,6 +34,7 @@ interface SummaryStatsProps {
 
 export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) => {
   const filter = useFilterState();
+  const navigate = useNavigate();
   const [cutoffScores, setCutoffScores] = useState<{ us: number | null; eu: number | null }>({ us: null, eu: null });
   const [cutoffLoading, setCutoffLoading] = useState<boolean>(false);
 
@@ -222,7 +224,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
           <div style={{ marginTop: '0.75rem' }}>
             <button 
               className="meta-evolution-link"
-              onClick={() => { window.location.href = '/cutoff'; }}
+              onClick={() => { navigate('/cutoff'); }}
               title="View current cutoff details"
             >
               View Cutoff
@@ -333,7 +335,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
             className="meta-evolution-link"
             onClick={() => {
               // Navigate to the meta evolution page
-              window.location.href = '/meta-evolution';
+              navigate('/meta-evolution');
             }}
             title="View Meta Evolution Charts"
           >
@@ -390,7 +392,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
             className="meta-evolution-link"
             onClick={() => {
               // Navigate to the group composition page
-              window.location.href = '/group-composition';
+              navigate('/group-composition');
             }}
             title="View Group Composition Analysis"
           >
