@@ -157,16 +157,7 @@ const Navigation = () => {
 
         {/* Removed Cutoff dropdown for desktop; direct link added above */}
 
-        {/* 0.1% Cutoff - mobile direct link (placed second) */}
-        <div className="md:hidden">
-          <Link 
-            to="/cutoff" 
-            className={getLinkClasses('/cutoff')} 
-            onClick={() => setNavOpen(false)}
-          >
-            0.1% Cutoff
-          </Link>
-        </div>
+        {/* 0.1% Cutoff - duplicate mobile link removed to avoid double entry */}
         
         {/* Spec Evolution dropdown - mobile */}
         <div className="md:hidden">
@@ -412,7 +403,7 @@ const Navigation = () => {
         <div className="md:hidden">
           <button
             className={`font-bold text-lg transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap flex items-center justify-between w-full ${
-              isActive('/ai-predictions') || isActive('/ai-analysis') || isActive('/ai-insights')
+              isActive('/ai-predictions') || isActive('/meta-health') || isActive('/ai-analysis') || isActive('/ai-insights')
                 ? 'text-blue-400 border-b-2 border-blue-400'
                 : 'hover:text-blue-400'
             }`}
@@ -444,9 +435,20 @@ const Navigation = () => {
               >
                 AI Predictions
               </Link>
-              <div className="px-4 py-2 text-gray-500 text-sm italic">
-                More coming soon...
-              </div>
+              <Link 
+                to="/meta-health" 
+                className={`block px-4 py-2 transition-colors ${
+                  isActive('/meta-health')
+                    ? 'text-blue-400 bg-gray-700'
+                    : 'text-gray-300 hover:text-blue-400'
+                }`}
+                onClick={() => {
+                  setAiDropdownOpen(false);
+                  setNavOpen(false);
+                }}
+              >
+                Meta Health
+              </Link>
             </div>
           )}
         </div>
