@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, PieChart, Pie, Cell } from 'recharts';
 
 export type ChartItem = { name: string; value: number; color?: string };
@@ -125,6 +125,46 @@ const renderCustomizedLabel = (props: any) => {
 
 export const TwoLevelSpecPieChart: React.FC<{ classData: ChartItem[]; specData: (ChartItem & { parent: string })[]; metrics?: ChartMetrics }> = ({ classData, specData, metrics }) => {
 
+  // Measure container width to apply mobile-only sizing without affecting desktop
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const update = () => setContainerWidth(Math.round(el.getBoundingClientRect().width));
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(update);
+      ro.observe(el);
+    } else {
+      window.addEventListener('resize', update);
+    }
+    update();
+    return () => {
+      if (ro) ro.disconnect();
+      else window.removeEventListener('resize', update);
+    };
+  }, []);
+  const isMobile = containerWidth > 0 && containerWidth < 480;
+
+  // Compute radii only for mobile; keep desktop constants to preserve existing look
+  const mobileRadii = useMemo(() => {
+    if (!isMobile) return null as null | { innerInner: number; innerOuter: number; outerInner: number; outerOuter: number; labelOffset: number };
+    const maxR = Math.max(100, Math.floor(containerWidth / 2) - 8);
+    const outerOuter = Math.min(Math.max(120, maxR), 190); // allow a bit larger to better fill mobile width
+    const thickness = Math.max(22, Math.min(36, Math.floor(containerWidth * 0.10)));
+    const gap = 6;
+    const outerInner = outerOuter - thickness;
+    const innerOuter = outerInner - gap;
+    const innerInner = Math.max(44, innerOuter - thickness);
+    const labelOffset = 8; // tighter labels on mobile
+    return { innerInner, innerOuter, outerInner, outerOuter, labelOffset };
+  }, [isMobile, containerWidth]);
+  const mobileCx = useMemo(() => {
+    if (!isMobile) return '50%';
+    return containerWidth < 380 ? '56%' : '55%';
+  }, [isMobile, containerWidth]);
+
   // Build quick lookups
   const classColorByName = useMemo(() => {
     const map = new Map<string, string>();
@@ -208,11 +248,11 @@ export const TwoLevelSpecPieChart: React.FC<{ classData: ChartItem[]; specData: 
     return map;
   }, [classData]);
 
-  const manySpecs = specData.length > 40;
+  const manySpecs = specData.length > 40 || isMobile; // reduce label clutter on small screens
   const outerLabel = (props: any) => {
     const { name, cx, cy, midAngle, outerRadius, percent, index, payload } = props;
     const RAD = Math.PI / 180;
-    const r = outerRadius + 16;
+    const r = outerRadius + (isMobile ? (mobileRadii?.labelOffset ?? 8) : 16);
     const x = cx + r * Math.cos(-midAngle * RAD);
     const y = cy + r * Math.sin(-midAngle * RAD);
     const isRight = x >= cx;
@@ -240,9 +280,7 @@ export const TwoLevelSpecPieChart: React.FC<{ classData: ChartItem[]; specData: 
   // Track which ring is currently hovered so tooltip can disambiguate
   const [activeRing, setActiveRing] = useState<'inner' | 'outer' | null>(null);
 
-  return (
-    <div className="cp-chart-wrapper">
-      <ResponsiveContainer>
+  const chartBody = (
         <PieChart>
           <Tooltip
             wrapperStyle={{ outline: 'none' }}
@@ -259,10 +297,10 @@ export const TwoLevelSpecPieChart: React.FC<{ classData: ChartItem[]; specData: 
             data={classData}
             dataKey="value"
             nameKey="name"
-            cx="50%"
-            cy="50%"
-            innerRadius={100}
-            outerRadius={180}
+            cx={isMobile ? mobileCx : "50%"}
+            cy={isMobile ? "52%" : "50%"}
+            innerRadius={isMobile && mobileRadii ? mobileRadii.innerInner : 100}
+            outerRadius={isMobile && mobileRadii ? mobileRadii.innerOuter : 180}
             labelLine={false}
             isAnimationActive={false}
             startAngle={90}
@@ -286,12 +324,12 @@ export const TwoLevelSpecPieChart: React.FC<{ classData: ChartItem[]; specData: 
             data={shadedOuterData}
             dataKey="value"
             nameKey="name"
-            cx="50%"
-            cy="50%"
-            innerRadius={200}
-            outerRadius={300}
+            cx={isMobile ? mobileCx : "50%"}
+            cy={isMobile ? "52%" : "50%"}
+            innerRadius={isMobile && mobileRadii ? mobileRadii.outerInner : 200}
+            outerRadius={isMobile && mobileRadii ? mobileRadii.outerOuter : 300}
             labelLine={false}
-            label={outerLabel}
+            label={isMobile ? false : outerLabel}
             isAnimationActive={false}
             startAngle={90}
             endAngle={-270}
@@ -310,7 +348,20 @@ export const TwoLevelSpecPieChart: React.FC<{ classData: ChartItem[]; specData: 
             ))}
           </Pie>
         </PieChart>
-      </ResponsiveContainer>
+  );
+  return (
+    <div className="cp-chart-wrapper" ref={containerRef}>
+      {isMobile ? (
+        <div className="cp-chart-rc-wrapper">
+          <ResponsiveContainer width="100%" height="100%">
+            {chartBody}
+          </ResponsiveContainer>
+        </div>
+      ) : (
+  <ResponsiveContainer>
+          {chartBody}
+        </ResponsiveContainer>
+      )}
       {metrics && (
         <div className="cp-chart-metrics-overlay" style={{ ['--cutoff-color' as any]: metrics.cutoffColor || '#f77149' }}>
           {typeof metrics.cutoffScore !== 'undefined' && (

@@ -261,6 +261,7 @@
   color: #cbd5e1;
   margin-right: 6px;
 }
+.cp-chart-rc-wrapper { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
 .cp-chart-container::before { 
   content: ''; 
   position: absolute; 
@@ -379,6 +380,18 @@
     align-items: stretch;
   }
 
+  /* Keep chart view selector in one row using emojis */
+  .cutoff-page .chart-view-selector {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    max-width: 100%;
+    gap: 0;
+  }
+  .cutoff-page .chart-view-selector .chart-view-button {
+    padding: 0.5rem 0.25rem;
+    font-size: 1.1rem; /* emoji size */
+  }
+
   .cutoff-page .chart-view-button {
     padding: 0.75rem 1rem;
     font-size: 0.8rem;
@@ -412,9 +425,25 @@
     padding: 0.625rem 0.875rem;
     font-size: 0.75rem;
   }
+  /* Even tighter on very small screens */
+  .cutoff-page .chart-view-selector {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    max-width: 100%;
+    gap: 0;
+  }
+  .cutoff-page .chart-view-selector .chart-view-button {
+    padding: 0.45rem 0.2rem;
+    font-size: 1.05rem; /* emoji */
+  }
   .cp-chart-container {
     padding: 1rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
   }
+  .cp-chart-wrapper { height: 400px; }
+  .cp-chart-rc-wrapper { max-width: 100%; margin: 0 auto; }
 }
 
 @media (max-width: 900px) {

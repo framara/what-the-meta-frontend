@@ -227,6 +227,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       <button
         className="filterbar-toggle-btn md:hidden"
         onClick={() => setMobileCollapsed((c) => !c)}
+        type="button"
+        aria-expanded={!mobileCollapsed}
+        aria-controls="filterbar-controls"
       >
         {mobileCollapsed 
           ? (filter.season_id 
@@ -237,7 +240,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       </button>
 
       {/* Filter controls */}
-      <div className={`filterbar-controls ${mobileCollapsed ? 'collapsed' : 'expanded'} md:!flex ${shouldCenterFilters ? 'center-filters' : ''}`}>
+  <div id="filterbar-controls" className={`filterbar-controls ${mobileCollapsed ? 'collapsed' : 'expanded'} md:!flex ${shouldCenterFilters ? 'center-filters' : ''}`}>
         {showExpansion && (
           <div className="filter-label">
             <span>Expansion:</span>
