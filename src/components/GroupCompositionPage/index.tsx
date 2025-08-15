@@ -4,6 +4,7 @@ import { fetchTopKeys, fetchCompositionData } from '../../services/api';
 import { GroupCompositionStats } from './components/GroupCompositionStats';
 import LoadingScreen from '../LoadingScreen';
 import { FilterBar } from '../FilterBar';
+import { MobileAlert } from '../MetaEvolutionPage/components/MobileAlert';
 import './styles/GroupCompositionPage.css';
 import SEO from '../SEO';
 import { useSeasonLabel } from '../../hooks/useSeasonLabel';
@@ -55,6 +56,7 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 export const GroupCompositionPage: React.FC = () => {
   const filter = useFilterState();
   const { seasonLabel } = useSeasonLabel(filter.season_id);
+  const isMobile = useMemo(() => (typeof window !== 'undefined' && window.innerWidth <= 768), []);
   const [runs, setRuns] = useState<Run[]>([]);
   const [seasonData, setSeasonData] = useState<SeasonData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -390,7 +392,10 @@ export const GroupCompositionPage: React.FC = () => {
       />
       {pageHeaderContent}
       
-      <FilterBar {...filterBarProps} />
+  <FilterBar {...filterBarProps} />
+
+  {/* Mobile Alert - Charts recommended for desktop */}
+  {isMobile && <MobileAlert />}
 
       <div className="gc-content-wrapper">
         {/* Inline skeleton overlay for data loading */}

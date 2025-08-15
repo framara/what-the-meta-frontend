@@ -24,13 +24,16 @@ export const ChartViewSelector: React.FC<ChartViewSelectorProps> = ({
   loading
 }) => {
   return (
-    <div className="button-group chart-view-selector">
+  <div className="button-group chart-view-selector" role="group" aria-label="Chart view">
       {CHART_VIEWS.map(({ key, label, mobileIcon, title }) => (
         <button
           key={key}
           className={`chart-view-button ${chartView === key ? 'active' : ''}`}
           onClick={() => setChartView(key)}
+      type="button"
           title={title}
+      aria-label={title}
+      aria-pressed={chartView === key}
           disabled={loading}
         >
           {isMobile ? mobileIcon : label}

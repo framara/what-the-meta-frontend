@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { getMetaHealthAnalysis } from '../../services/aiService';
 import AILoadingScreen from '../AILoadingScreen';
 import { FilterBar } from '../FilterBar';
@@ -7,6 +7,7 @@ import { WOW_SPEC_NAMES } from '../../constants/wow-constants';
 import './styles/MetaHealthPage.css';
 import SEO from '../SEO';
 import { useSeasonLabel } from '../../hooks/useSeasonLabel';
+import { MobileAlert } from '../MetaEvolutionPage/components/MobileAlert';
 
   // Local interfaces for meta health data
   interface RoleAnalysis {
@@ -63,6 +64,7 @@ import { useSeasonLabel } from '../../hooks/useSeasonLabel';
 
 export const MetaHealthPage: React.FC = () => {
   const { seasonLabel } = useSeasonLabel(useFilterState().season_id);
+  const isMobile = useMemo(() => (typeof window !== 'undefined' && window.innerWidth <= 768), []);
   const [metaHealthData, setMetaHealthData] = useState<MetaHealthData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -223,6 +225,9 @@ export const MetaHealthPage: React.FC = () => {
         showLimit={false}
         className="mh-meta-health-filter"
       />
+
+  {/* Mobile Alert - Charts recommended for desktop */}
+  {isMobile && <MobileAlert />}
 
       <div className="mh-content-wrapper" style={{ position: 'relative' }}>
         {loading && (
