@@ -4,6 +4,7 @@ import { fetchCutoffLatest } from '../../services/api';
 import type { CutoffSnapshot } from '../../services/api';
 import { FilterBar } from '../FilterBar';
 import { ChartViewSelector } from '../MetaEvolutionPage/components/ChartViewSelector';
+import { MobileAlert } from '../MetaEvolutionPage/components/MobileAlert';
 import { SimpleBarChart, TwoLevelSpecPieChart } from './CutoffCharts';
 import { WOW_CLASS_NAMES, WOW_CLASS_COLORS, WOW_SPEC_NAMES, WOW_SPEC_ROLES, WOW_MELEE_SPECS, WOW_RANGED_SPECS, getRaiderIoSeasonSlug } from '../../constants/wow-constants';
 import { useFilterState } from '../FilterContext';
@@ -20,6 +21,15 @@ export default function CutoffPage() {
   const [error, setError] = useState<string | null>(null);
   const [chartView, setChartView] = useState<ChartView>('all');
   const [chartKind, setChartKind] = useState<ChartKind>('pie');
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+
+  useEffect(() => {
+    const compute = () => typeof window !== 'undefined' && window.innerWidth <= 768;
+    const update = () => setIsMobile(compute());
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
 
   useEffect(() => {
     const seasonSlug = getRaiderIoSeasonSlug(filter.season_id);
@@ -134,11 +144,28 @@ export default function CutoffPage() {
         className="cutoff-page-filter"
       />
 
+  {/* Mobile Alert - Charts recommended for desktop */}
+  {isMobile && <MobileAlert />}
+
         <div className="cp-controls-section">
-          <ChartViewSelector chartView={chartView as any} setChartView={(v) => setChartView(v as ChartView)} isMobile={false} loading={loading} />
+          <ChartViewSelector chartView={chartView as any} setChartView={(v) => setChartView(v as ChartView)} isMobile={isMobile} loading={loading} />
           <div className="button-group chart-type-toggle">
-            <button className={`chart-view-button ${chartKind === 'pie' ? 'active' : ''}`} onClick={() => setChartKind('pie')}>Pie</button>
-            <button className={`chart-view-button ${chartKind === 'bar' ? 'active' : ''}`} onClick={() => setChartKind('bar')}>Bar</button>
+            <button
+              className={`chart-view-button ${chartKind === 'pie' ? 'active' : ''}`}
+              onClick={() => setChartKind('pie')}
+              title="Pie"
+              aria-label="Pie"
+            >
+              {isMobile ? '🥧' : 'Pie'}
+            </button>
+            <button
+              className={`chart-view-button ${chartKind === 'bar' ? 'active' : ''}`}
+              onClick={() => setChartKind('bar')}
+              title="Bar"
+              aria-label="Bar"
+            >
+              {isMobile ? '📊' : 'Bar'}
+            </button>
           </div>
         </div>
         
