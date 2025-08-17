@@ -1,5 +1,9 @@
 import { useEffect } from 'react';
 
+// JSON value types for structured data
+type JSONValue = string | number | boolean | null | { [k: string]: JSONValue } | JSONValue[];
+type JSONObject = { [k: string]: JSONValue };
+
 type SEOProps = {
   title: string;
   description: string;
@@ -9,7 +13,7 @@ type SEOProps = {
   ogType?: string; // e.g. 'website' | 'article'
   twitterCard?: 'summary' | 'summary_large_image';
   noindex?: boolean;
-  structuredData?: Record<string, any> | Array<Record<string, any>>; // JSON-LD object(s)
+  structuredData?: JSONObject | Array<JSONObject>; // JSON-LD object(s)
 };
 
 // SEO helper for SPA routes: updates title, description, social tags, canonical, and JSON-LD.
@@ -83,7 +87,7 @@ export default function SEO({
     setMeta('twitter:card', twitterCard);
 
     // Canonical + URL + images
-    try {
+  try {
       const toAbs = (src?: string) => {
         if (!src) return undefined;
         if (/^https?:\/\//i.test(src)) return src;
@@ -110,20 +114,22 @@ export default function SEO({
         setMeta('og:image', absImage);
         setMeta('twitter:image', absImage);
       }
-    } catch (_) {
-      // noop
+    } catch (err) {
+      void err; // noop to satisfy no-empty
     }
 
     // JSON-LD structured data: remove previous ones we injected, then add new
     document.querySelectorAll('script[data-seo-ld]')?.forEach((n) => n.parentElement?.removeChild(n));
-    const addLd = (obj: Record<string, any>) => {
+    const addLd = (obj: JSONObject) => {
       try {
         const script = document.createElement('script');
         script.type = 'application/ld+json';
         script.setAttribute('data-seo-ld', 'true');
         script.text = JSON.stringify(obj);
         document.head.appendChild(script);
-      } catch {}
+      } catch (e) {
+        void e;
+      }
     };
     if (structuredData) {
       const list = Array.isArray(structuredData) ? structuredData : [structuredData];
