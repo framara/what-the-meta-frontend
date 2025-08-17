@@ -62,7 +62,12 @@ function App() {
   const params: TopKeyParams = { season_id: seasonId };
     if (filter.period_id) params.period_id = filter.period_id;
     if (filter.dungeon_id) params.dungeon_id = filter.dungeon_id;
-    if (filter.limit) params.limit = filter.limit;
+    // Cap list size on mobile to reduce JS/render cost
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+    const maxMobile = 250;
+    const defaultLimit = filter.limit ?? 1000;
+    const effectiveLimit = isMobile ? Math.min(defaultLimit, maxMobile) : defaultLimit;
+    params.limit = effectiveLimit;
     fetchTopKeys(params)
       .then(async (data) => {
         // If no data and this is the latest season, fallback to previous season once
@@ -119,7 +124,11 @@ function App() {
             const params: TopKeyParams = { season_id: Number(filter.season_id) };
             if (filter.period_id) params.period_id = filter.period_id;
             if (filter.dungeon_id) params.dungeon_id = filter.dungeon_id;
-            if (filter.limit) params.limit = filter.limit;
+            const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+            const maxMobile = 250;
+            const defaultLimit = filter.limit ?? 1000;
+            const effectiveLimit = isMobile ? Math.min(defaultLimit, maxMobile) : defaultLimit;
+            params.limit = effectiveLimit;
             fetchTopKeys(params)
               .then(data => setApiData((data || []) as Run[]))
               .catch(err => setApiError(err.message || 'API error'))
@@ -162,8 +171,12 @@ function App() {
                   Looking for the latest meta? Check out
                   {' '}<Link to="/wow-meta-season-3" className="text-blue-400 hover:underline">WoW Meta — TWW Season 3</Link>.
                 </div>
-                <SummaryStats runs={apiData || []} dungeons={dungeons} />
-                <LeaderboardTable runs={apiData || []} dungeons={dungeons} loading={loading} />
+                <div className="cv-auto">
+                  <SummaryStats runs={apiData || []} dungeons={dungeons} />
+                </div>
+                <div className="cv-auto-table">
+                  <LeaderboardTable runs={apiData || []} dungeons={dungeons} loading={loading} />
+                </div>
                 {!loading && (!apiData || apiData.length === 0) && (
                   <div className="flex flex-col items-center justify-center py-16 text-center">
                     <div className="text-6xl mb-4">📊</div>

@@ -198,6 +198,25 @@
 
 /* App.css - Enhanced modern styling */
 
+/* Defer rendering of heavy sections below the fold */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 500px;
+}
+.cv-auto-table {
+  content-visibility: auto;
+  contain-intrinsic-size: 800px 1200px;
+}
+
+/* Lighter visuals on small screens to reduce paint cost */
+@media (max-width: 768px) {
+  .stats-card,
+  .spec-role-section,
+  .group-composition-section {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18) !important;
+    backdrop-filter: none !important;
+  }
+}
 /* Global styles */
 * {
   box-sizing: border-box;
