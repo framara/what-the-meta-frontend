@@ -19,6 +19,10 @@ dist
 dist-ssr
 *.local
 
+# Ignore backup artifacts from image optimizer
+public/*.bak-*
+*.bak-*
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
