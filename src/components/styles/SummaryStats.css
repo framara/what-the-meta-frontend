@@ -6,6 +6,8 @@
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
+  align-items: stretch;
+  justify-items: center;
 }
 
 /* Individual stats card */
@@ -19,6 +21,11 @@
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  /* Center content within each stats card */
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
 }
 
 .stats-card::before {
