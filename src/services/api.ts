@@ -2,6 +2,44 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
+// Lightweight in-memory cache for cross-page reuse (browser memory; resets on reload)
+// TTL configurable via VITE_API_CACHE_TTL_MS (defaults to 5 minutes)
+const API_CACHE_TTL_MS: number = (() => {
+  const v = Number(import.meta.env?.VITE_API_CACHE_TTL_MS);
+  return Number.isFinite(v) && v > 0 ? v : 5 * 60 * 1000; // 5 minutes
+})();
+
+type SeasonInfo = {
+  periods: Array<{ period_id: number; period_name: string }>;
+  dungeons: Array<{ dungeon_id: number; dungeon_name: string }>;
+};
+
+type CacheEntry<T> = { data: T; ts: number };
+
+const seasonsCache: { entry: CacheEntry<any> | null; inflight: Promise<any> | null } = {
+  entry: null,
+  inflight: null,
+};
+
+const seasonInfoCache = new Map<number, CacheEntry<SeasonInfo>>();
+const seasonInfoInflight = new Map<number, Promise<SeasonInfo>>();
+
+function isFresh(ts: number): boolean {
+  return Date.now() - ts < API_CACHE_TTL_MS;
+}
+
+export function invalidateSeasonsCache() {
+  seasonsCache.entry = null;
+}
+
+export function invalidateSeasonInfoCache(seasonId?: number) {
+  if (typeof seasonId === 'number') {
+    seasonInfoCache.delete(seasonId);
+  } else {
+    seasonInfoCache.clear();
+  }
+}
+
 export interface TopKeyParams {
   season_id: number;
   period_id?: number;
@@ -109,21 +147,35 @@ export async function fetchCompositionData(seasonId: number) {
 
 // New: Fetch all seasons
 export async function fetchSeasons() {
-  console.log('API: fetchSeasons called');
   const url = `${API_BASE_URL}/wow/advanced/seasons`;
-  console.log('API: fetchSeasons URL:', url);
-  try {
-    const response = await axios.get(url);
-    console.log('API: fetchSeasons response received:', {
-      status: response.status,
-      dataLength: response.data?.length || 0,
-      firstSeason: response.data?.[0]
-    });
-    return response.data;
-  } catch (error) {
-    console.error('API: fetchSeasons error:', error);
-    throw error;
+  // Cache hit
+  if (seasonsCache.entry && isFresh(seasonsCache.entry.ts)) {
+    console.log('API: fetchSeasons cache hit');
+    return seasonsCache.entry.data;
   }
+  // Deduplicate in-flight requests
+  if (seasonsCache.inflight) {
+    console.log('API: fetchSeasons awaiting inflight');
+    return seasonsCache.inflight;
+  }
+  console.log('API: fetchSeasons fetch', { url });
+  const req = axios.get(url)
+    .then((response) => {
+      seasonsCache.entry = { data: response.data, ts: Date.now() };
+      seasonsCache.inflight = null;
+      console.log('API: fetchSeasons response received:', {
+        status: response.status,
+        dataLength: response.data?.length || 0,
+      });
+      return response.data;
+    })
+    .catch((error) => {
+      seasonsCache.inflight = null;
+      console.error('API: fetchSeasons error:', error);
+      throw error;
+    });
+  seasonsCache.inflight = req;
+  return req;
 }
 
 // Helper: Get latest season id (API provides DB-first data)
@@ -147,12 +199,34 @@ export async function getLatestSeasonId(): Promise<number | null> {
 
 // New: Fetch season info (periods and dungeons) for a given seasonId
 export async function fetchSeasonInfo(seasonId: number) {
+  // Cache hit
+  const cached = seasonInfoCache.get(seasonId);
+  if (cached && isFresh(cached.ts)) {
+    console.log('API: fetchSeasonInfo cache hit for', seasonId);
+    return cached.data;
+  }
+  // Deduplicate in-flight requests per season
+  const inflight = seasonInfoInflight.get(seasonId);
+  if (inflight) {
+    console.log('API: fetchSeasonInfo awaiting inflight for', seasonId);
+    return inflight;
+  }
   const url = `${API_BASE_URL}/wow/advanced/season-info/${seasonId}`;
-  const response = await axios.get(url);
-  return response.data as {
-    periods: Array<{ period_id: number; period_name: string }>;
-    dungeons: Array<{ dungeon_id: number; dungeon_name: string }>;
-  };
+  console.log('API: fetchSeasonInfo fetch', { seasonId, url });
+  const req = axios.get(url)
+    .then((response) => {
+      const data = response.data as SeasonInfo;
+      seasonInfoInflight.delete(seasonId);
+      seasonInfoCache.set(seasonId, { data, ts: Date.now() });
+      return data;
+    })
+    .catch((error) => {
+      seasonInfoInflight.delete(seasonId);
+      console.error('API: fetchSeasonInfo error:', error);
+      throw error;
+    });
+  seasonInfoInflight.set(seasonId, req);
+  return req;
 }
 
 // Cutoff snapshots
