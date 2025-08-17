@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import LoadingScreen from './components/LoadingScreen';
 import './App.css';
 import { fetchTopKeys, fetchSeasonInfo, fetchSeasons } from './services/api';
@@ -8,20 +8,22 @@ import { useFilterDispatch, useFilterState } from './components/FilterContext';
 import { FilterBar } from './components/FilterBar';
 import { LeaderboardTable } from './components/LeaderboardTable';
 import { SummaryStats } from './components/SummaryStats';
-import { MetaEvolutionPage } from './components/MetaEvolutionPage/index';
-import { RaceBarsPage } from './components/RaceBarsPage';
-import { GroupCompositionPage } from './components/GroupCompositionPage/index';
-import { CompAllSeasonsPage } from './components/CompAllSeasonsPage/index';
-import { AIPredictionsPage } from './components/AIPredictionsPage';
-import { MetaHealthPage } from './components/MetaHealthPage';
-import AboutPage from './components/AboutPage';
-import PrivacyPage from './components/PrivacyPage';
-import TermsPage from './components/TermsPage';
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
 import toast from 'react-hot-toast';
-import CutoffPage from './components/CutoffPage';
-import Season3LandingPage from './components/Season3LandingPage';
+
+// Route-level code splitting for heavy pages
+const MetaEvolutionPage = React.lazy(() => import('./components/MetaEvolutionPage/index').then(m => ({ default: m.MetaEvolutionPage })));
+const RaceBarsPage = React.lazy(() => import('./components/RaceBarsPage').then(m => ({ default: m.RaceBarsPage })));
+const GroupCompositionPage = React.lazy(() => import('./components/GroupCompositionPage/index').then(m => ({ default: m.GroupCompositionPage })));
+const CompAllSeasonsPage = React.lazy(() => import('./components/CompAllSeasonsPage/index').then(m => ({ default: m.CompAllSeasonsPage })));
+const AIPredictionsPage = React.lazy(() => import('./components/AIPredictionsPage').then(m => ({ default: m.AIPredictionsPage })));
+const MetaHealthPage = React.lazy(() => import('./components/MetaHealthPage').then(m => ({ default: m.MetaHealthPage })));
+const AboutPage = React.lazy(() => import('./components/AboutPage'));
+const PrivacyPage = React.lazy(() => import('./components/PrivacyPage'));
+const TermsPage = React.lazy(() => import('./components/TermsPage'));
+const CutoffPage = React.lazy(() => import('./components/CutoffPage'));
+const Season3LandingPage = React.lazy(() => import('./components/Season3LandingPage'));
 
 function App() {
   // Types aligned with LeaderboardTable's expectations
@@ -145,6 +147,7 @@ function App() {
           </div>
         </header>
         <main className="flex-1">
+          <Suspense fallback={<LoadingScreen />}>
           <Routes>
             <Route path="/" element={
               <div className="max-w-7xl mx-auto px-4">
@@ -218,6 +221,7 @@ function App() {
               </div>
             } />
           </Routes>
+          </Suspense>
         </main>
         <Footer />
       </div>
