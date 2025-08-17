@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import LoadingScreen from './components/LoadingScreen';
 import './App.css';
 import { fetchTopKeys, fetchSeasonInfo, fetchSeasons } from './services/api';
+import type { TopKeyParams } from './services/api';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { useFilterDispatch, useFilterState } from './components/FilterContext';
 import { FilterBar } from './components/FilterBar';
@@ -20,11 +21,26 @@ import Navigation from './components/Navigation';
 import Footer from './components/Footer';
 import toast from 'react-hot-toast';
 import CutoffPage from './components/CutoffPage';
+import Season3LandingPage from './components/Season3LandingPage';
 
 function App() {
-  const [apiData, setApiData] = useState<any>(null);
+  // Types aligned with LeaderboardTable's expectations
+  type GroupMember = { character_name: string; class_id: number; spec_id: number; role: string };
+  type Run = {
+    id: number;
+    rank: number;
+    keystone_level: number;
+    score: number;
+    dungeon_id: number;
+    duration_ms: number;
+    completed_at: string;
+    members: GroupMember[];
+  };
+  type Dungeon = { dungeon_id: number; dungeon_name: string };
+
+  const [apiData, setApiData] = useState<Run[] | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
-  const [dungeons, setDungeons] = useState<any[]>([]);
+  const [dungeons, setDungeons] = useState<Dungeon[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasBooted, setHasBooted] = useState(false);
   const filter = useFilterState();
@@ -40,7 +56,8 @@ function App() {
     // Only clear data when changing filters; keeps skeleton inline
     setApiError(null);
     setLoading(true);
-    const params: any = { season_id: filter.season_id };
+  const seasonId = Number(filter.season_id);
+  const params: TopKeyParams = { season_id: seasonId };
     if (filter.period_id) params.period_id = filter.period_id;
     if (filter.dungeon_id) params.dungeon_id = filter.dungeon_id;
     if (filter.limit) params.limit = filter.limit;
@@ -49,8 +66,9 @@ function App() {
         // If no data and this is the latest season, fallback to previous season once
         if ((Array.isArray(data) && data.length === 0) && fallbackTriedRef.current !== filter.season_id) {
           try {
-            const seasons = await fetchSeasons();
-            const sorted = [...seasons].sort((a: any, b: any) => b.season_id - a.season_id);
+            type Season = { season_id: number; season_name?: string };
+            const seasons = await fetchSeasons() as Season[];
+            const sorted = [...seasons].sort((a: Season, b: Season) => b.season_id - a.season_id);
             const latestId = sorted[0]?.season_id;
             if (latestId && filter.season_id === latestId) {
               const prev = sorted[1];
@@ -64,21 +82,22 @@ function App() {
               }
             }
           } catch (e) {
+            void e;
             // If fallback fails, just proceed to set empty data
           }
         }
-        setApiData(data);
+        setApiData((data || []) as Run[]);
       })
       .catch(err => setApiError(err.message || 'API error'))
       .finally(() => {
         setLoading(false);
         if (!hasBooted) setHasBooted(true);
       });
-  }, [filter.season_id, filter.period_id, filter.dungeon_id, filter.limit]);
+  }, [filter.season_id, filter.period_id, filter.dungeon_id, filter.limit, dispatch, hasBooted]);
 
   useEffect(() => {
     if (!filter.season_id) return;
-    fetchSeasonInfo(filter.season_id).then(info => setDungeons(info.dungeons));
+    fetchSeasonInfo(filter.season_id).then(info => setDungeons(info.dungeons as Dungeon[]));
   }, [filter.season_id]);
 
   if (!hasBooted && loading) {
@@ -95,12 +114,12 @@ function App() {
           onClick={() => {
             setApiError(null);
             setLoading(true);
-            const params: any = { season_id: filter.season_id };
+            const params: TopKeyParams = { season_id: Number(filter.season_id) };
             if (filter.period_id) params.period_id = filter.period_id;
             if (filter.dungeon_id) params.dungeon_id = filter.dungeon_id;
             if (filter.limit) params.limit = filter.limit;
             fetchTopKeys(params)
-              .then(data => setApiData(data))
+              .then(data => setApiData((data || []) as Run[]))
               .catch(err => setApiError(err.message || 'API error'))
               .finally(() => setLoading(false));
           }}
@@ -136,6 +155,10 @@ function App() {
                   showLimit={true}
                 />
                 {/* Inline loading: show skeleton table while fetching */}
+                <div className="mb-4 text-sm text-gray-300">
+                  Looking for the latest meta? Check out
+                  {' '}<Link to="/wow-meta-season-3" className="text-blue-400 hover:underline">WoW Meta — TWW Season 3</Link>.
+                </div>
                 <SummaryStats runs={apiData || []} dungeons={dungeons} />
                 <LeaderboardTable runs={apiData || []} dungeons={dungeons} loading={loading} />
                 {!loading && (!apiData || apiData.length === 0) && (
@@ -150,6 +173,10 @@ function App() {
                 )}
               </div>
             } />
+            {/* SEO: season landing routes */}
+            <Route path="/wow-meta-season-3" element={<Season3LandingPage />} />
+            <Route path="/wow-meta-tww-s3" element={<Season3LandingPage />} />
+            <Route path="/tww-s3-meta" element={<Season3LandingPage />} />
             <Route path="/meta-evolution" element={<MetaEvolutionPage />} />
             <Route path="/race-bars" element={<RaceBarsPage />} />
             <Route path="/group-composition" element={<GroupCompositionPage />} />

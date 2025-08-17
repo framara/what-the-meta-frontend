@@ -9,6 +9,8 @@
       "destination": "https://whatthemeta.io/:path*",
       "permanent": true
     },
+  { "source": "/wow-meta-tww-s3", "destination": "/wow-meta-season-3", "permanent": true },
+  { "source": "/tww-s3-meta", "destination": "/wow-meta-season-3", "permanent": true },
     
     { "source": "/meta-evolution/", "destination": "/meta-evolution", "permanent": true },
     { "source": "/race-bars/", "destination": "/race-bars", "permanent": true },
@@ -23,6 +25,9 @@
   ],
   "rewrites": [
     { "source": "/", "destination": "/index.html" },
+  { "source": "/wow-meta-season-3", "destination": "/index.html" },
+  { "source": "/wow-meta-tww-s3", "destination": "/index.html" },
+  { "source": "/tww-s3-meta", "destination": "/index.html" },
     { "source": "/meta-evolution", "destination": "/index.html" },
     { "source": "/race-bars", "destination": "/index.html" },
     { "source": "/group-composition", "destination": "/index.html" },

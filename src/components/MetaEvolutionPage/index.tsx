@@ -46,6 +46,8 @@ export const MetaEvolutionPage: React.FC = () => {
   const isLoading = loading;
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://whatthemeta.io';
   const { seasonLabel } = useSeasonLabel(filter.season_id);
+  const periodsCount = (currentChart?.data?.length ?? 0);
+  const insufficientOverTime = !isLoading && periodsCount <= 1;
 
   return (
     <div className="meta-evolution-page">
@@ -104,6 +106,21 @@ export const MetaEvolutionPage: React.FC = () => {
           <ChartTypeSelector activeChart={activeChart} setActiveChart={setActiveChart} loading={loading} />
         </div>
       </div>
+
+      {/* Insufficient data alert for over-time charts */}
+      {insufficientOverTime && (
+        <div role="alert" className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-200 px-4 py-3 flex items-start gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 mt-0.5">
+            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          <div>
+            <div className="font-semibold">Limited time data</div>
+            <div className="text-amber-200/90 text-sm">Only one period is available for this selection. Over-time charts may not display meaningful trends yet.</div>
+          </div>
+        </div>
+      )}
 
       <div className="chart-container-wrapper" style={{ position: 'relative' }}>
         {/* Skeleton loading overlay - non-blocking, dark themed */}

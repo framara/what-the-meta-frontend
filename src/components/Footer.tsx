@@ -24,8 +24,17 @@ const Footer: React.FC = () => {
 
                     {/* Middle - Legal/Info Links */}
                     <div className="flex flex-col items-center">
-                        <h4 className="text-blue-400 font-semibold mb-3">Legal</h4>
+                        <h4 className="text-blue-400 font-semibold mb-3">Explore</h4>
                         <div className="flex flex-col gap-2 text-sm">
+                            <Link
+                                to="/wow-meta-season-3"
+                                className="text-gray-300 hover:text-blue-400 transition-colors duration-200 flex items-center gap-2"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7H7v10h10V7h-4z" />
+                                </svg>
+                                WoW Meta TWW S3
+                            </Link>
                             <Link
                                 to="/about"
                                 className="text-gray-300 hover:text-blue-400 transition-colors duration-200 flex items-center gap-2"
