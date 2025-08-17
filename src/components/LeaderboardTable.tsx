@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_CLASS_NAMES, WOW_SPEC_TO_CLASS, WOW_DUNGEON_TIMERS } from '../constants/wow-constants';
 import { SpecIconImage } from '../utils/specIconImages';
 import './styles/LeaderboardTable.css';
@@ -211,7 +212,7 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
                           className="saas-group-square"
                           style={{ border: `0.15rem solid ${classColor}` }}
                           onMouseEnter={e => {
-                            const position = calculateTooltipPosition(e.target as HTMLElement, tooltipContent);
+                            const position = calculateTooltipPosition(e.currentTarget as HTMLElement, tooltipContent);
                             setTooltip({
                               x: position.x,
                               y: position.y,
@@ -276,7 +277,7 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
       </div>
 
       {/* Enhanced Tooltip - Moved outside table container */}
-      {tooltip && (
+      {tooltip && createPortal(
         <div
           className="leaderboard-tooltip"
           style={{
@@ -287,7 +288,8 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
             color: getTextColor(tooltip.color),
           }}
           dangerouslySetInnerHTML={{ __html: tooltip.content }}
-        />
+        />,
+        document.body
       )}
     </>
   );

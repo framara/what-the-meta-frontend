@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_SPEC_ROLES } from '../constants/wow-constants';
+import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_SPEC_ROLES, WOW_DUNGEON_TIMERS } from '../constants/wow-constants';
 import { SpecIconImage } from '../utils/specIconImages';
 import './styles/SummaryStats.css';
 import { useFilterState } from './FilterContext';
-import { fetchCutoffLatest } from '../services/api';
+import { fetchCutoffLatest, fetchSeasonInfo } from '../services/api';
 import { getRaiderIoSeasonSlug } from '../constants/wow-constants';
 
 interface GroupMember {
@@ -37,6 +38,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
   const navigate = useNavigate();
   const [cutoffScores, setCutoffScores] = useState<{ us: number | null; eu: number | null }>({ us: null, eu: null });
   const [cutoffLoading, setCutoffLoading] = useState<boolean>(false);
+  const [periodLabel, setPeriodLabel] = useState<string | null>(null);
 
   // Load latest cutoff snapshot for current season (default region: US)
   useEffect(() => {
@@ -63,11 +65,53 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
       .finally(() => setCutoffLoading(false));
   }, [filter?.season_id]);
 
+  // Resolve scope label for period (week) when selected
+  useEffect(() => {
+    let cancelled = false;
+    async function run() {
+      if (!filter?.season_id || !filter?.period_id) {
+        setPeriodLabel(null);
+        return;
+      }
+      try {
+        const info = await fetchSeasonInfo(Number(filter.season_id));
+        const p = info?.periods?.find(p => Number(p.period_id) === Number(filter.period_id));
+        if (!cancelled) setPeriodLabel(p?.period_name || `Week ${filter.period_id}`);
+      } catch {
+        if (!cancelled) setPeriodLabel(`Week ${filter.period_id}`);
+      }
+    }
+    run();
+    return () => { cancelled = true; };
+  }, [filter?.season_id, filter?.period_id]);
+
   // Top runs
   const totalRuns = runs.length;
+  const totalRunsFormatted = totalRuns.toLocaleString('de-DE');
+  const scopeText = filter?.period_id ? (periodLabel || 'selected week') : 'entire season';
 
-  // Highest keystone
-  const highestKeystone = runs.length ? Math.max(...runs.map(r => r.keystone_level)) : '-';
+  // Highest keystone and representative dungeon name (excluding depleted runs)
+  let highestKeystoneLabel: string = '-';
+  if (runs.length) {
+    const nonDepleted = runs.filter(r => {
+      const timer = WOW_DUNGEON_TIMERS[r.dungeon_id as number];
+      return !timer || r.duration_ms <= timer; // keep only in-time or unknown-timer
+    });
+    if (nonDepleted.length) {
+      const maxLevel = nonDepleted.reduce((m, r) => (r.keystone_level > m ? r.keystone_level : m), nonDepleted[0].keystone_level);
+      const topLevelRuns = nonDepleted.filter(r => r.keystone_level === maxLevel);
+      const fastestAtMax = topLevelRuns.reduce<Run | null>((best, r) => {
+        if (!best) return r;
+        return r.duration_ms < best.duration_ms ? r : best;
+      }, null);
+      const topDungeonName = fastestAtMax
+        ? dungeons.find(d => d.dungeon_id === fastestAtMax.dungeon_id)?.dungeon_name
+        : undefined;
+      highestKeystoneLabel = `${maxLevel}${topDungeonName ? ` — ${topDungeonName}` : ''}`;
+    } else {
+      highestKeystoneLabel = '-';
+    }
+  }
 
   // Most popular dungeon
   const dungeonCounts: Record<number, number> = {};
@@ -202,12 +246,12 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
       {/* Summary Stats Grid */}
       <div className="stats-grid">
         <div className="stats-card">
-          <div className="label">Top Runs</div>
-          <div className="value">{totalRuns}</div>
+          <div className="label">Sample size</div>
+          <div className="value">Best {totalRunsFormatted} runs of {scopeText}</div>
         </div>
         <div className="stats-card">
           <div className="label">Highest Keystone</div>
-          <div className="value">{highestKeystone}</div>
+          <div className="value">{highestKeystoneLabel}</div>
         </div>
         <div className="stats-card">
           <div className="label">Most Popular Dungeon</div>
@@ -245,7 +289,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
                 border: `3px solid ${WOW_CLASS_COLORS[tankClassId] || '#fff'}`,
               }}
               onMouseEnter={(e: React.MouseEvent) => {
-                const rect = (e.target as HTMLElement).getBoundingClientRect();
+                const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
                 setSpecTooltip({
                   x: rect.left + rect.width / 2,
                   y: rect.top,
@@ -273,7 +317,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
                 border: `3px solid ${WOW_CLASS_COLORS[healerClassId] || '#fff'}`,
               }}
               onMouseEnter={(e: React.MouseEvent) => {
-                const rect = (e.target as HTMLElement).getBoundingClientRect();
+                const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
                 setSpecTooltip({
                   x: rect.left + rect.width / 2,
                   y: rect.top,
@@ -307,7 +351,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
                     border: `3px solid ${WOW_CLASS_COLORS[dpsClassId] || '#fff'}`,
                   }}
                   onMouseEnter={(e: React.MouseEvent) => {
-                    const rect = (e.target as HTMLElement).getBoundingClientRect();
+                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
                     setSpecTooltip({
                       x: rect.left + rect.width / 2,
                       y: rect.top,
@@ -362,7 +406,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
                     border: `3px solid ${WOW_CLASS_COLORS[Number(classId)] || '#fff'}`,
                   }}
                   onMouseEnter={(e: React.MouseEvent) => {
-                    const rect = (e.target as HTMLElement).getBoundingClientRect();
+                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
                     setSpecTooltip({
                       x: rect.left + rect.width / 2,
                       y: rect.top,
@@ -402,7 +446,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
       </div>
 
       {/* Enhanced Tooltip */}
-      {specTooltip && (
+      {specTooltip && createPortal(
         <div
           className="spec-tooltip"
           style={{
@@ -414,7 +458,8 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
           }}
         >
           {specTooltip.content}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
