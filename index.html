@@ -175,20 +175,28 @@
       // Initialize Google Analytics
       const gaId = import.meta.env.VITE_GA_MEASUREMENT_ID;
       if (gaId && gaId !== 'G-XXXXXXXXXX') {
-        // Load Google Analytics script
-        const script = document.createElement('script');
-        script.async = true;
-        script.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
-        document.head.appendChild(script);
-        
-        // Initialize gtag
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', gaId);
-        
-        // Make gtag available globally
-        window.gtag = gtag;
+        const loadGA = () => {
+          const script = document.createElement('script');
+          script.async = true;
+          script.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
+          document.head.appendChild(script);
+          
+          // Initialize gtag
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);} 
+          gtag('js', new Date());
+          gtag('config', gaId);
+          
+          // Make gtag available globally
+          window.gtag = gtag;
+        };
+
+        if ('requestIdleCallback' in window) {
+          // @ts-ignore
+          requestIdleCallback(loadGA, { timeout: 2000 });
+        } else {
+          setTimeout(loadGA, 1200);
+        }
       }
     </script>
   </body>
