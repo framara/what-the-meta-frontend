@@ -85,9 +85,9 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
     return () => { cancelled = true; };
   }, [filter?.season_id, filter?.period_id]);
 
-  // Top runs
-  const totalRuns = runs.length;
-  const totalRunsFormatted = totalRuns.toLocaleString('de-DE');
+  // Top runs (reflect the filter's selected Top N, not the returned rows count)
+  const selectedLimit = Number(filter?.limit ?? runs.length);
+  const totalRunsFormatted = selectedLimit.toLocaleString('de-DE');
   const scopeText = filter?.period_id ? (periodLabel || 'selected week') : 'entire season';
 
   // Highest keystone and representative dungeon name (excluding depleted runs)
