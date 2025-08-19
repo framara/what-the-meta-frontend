@@ -212,9 +212,9 @@ export const MetaHealthPage: React.FC = () => {
         }}
       />
       <div className="mh-meta-health-header">
-        <h1>Meta Analysis</h1>
+        <h1>Meta Health - AI Analysis</h1>
         <p className="mh-subtitle">
-          Simple insights about the current meta state
+          AI-generated analysis using OpenAI models
         </p>
       </div>
 

@@ -298,7 +298,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
           <div className="value">{highestKeystoneLabel}</div>
         </div>
         <div className="stats-card">
-          <div className="label">Meta Health</div>
+          <div className="label">Meta Health <span className="ai-badge" title="AI generated">AI</span></div>
           <div className={`value ${metaHealthState.className}`}>{metaHealthState.label}</div>
           <div className="stats-card-cta">
             <button
