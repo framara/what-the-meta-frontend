@@ -107,31 +107,12 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ aiAnal
     <div className="prediction-dashboard dashboard-refactored">
       <div className="dashboard-header">
         <h1 className="dashboard-title">
-          <span className="ai-icon" role="img" aria-label="AI" style={{ color: 'inherit', fontSize: '2rem', filter: 'none', textShadow: '0 1px 2px #fff' }}>🤖</span>
-          AI-Powered Predictions
-          <Tooltip content={`This section uses OpenAI ${aiAnalysis?.model || 'model'} to analyze all dungeon runs for the season and predict which specializations are rising, declining, or stable in the meta. The AI considers trends, success rates, consistency, and cross-validation accuracy to forecast future performance.`}>
-            <svg className="ai-tooltip-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-label="Info" role="img" style={{marginLeft: '0.5rem', verticalAlign: 'middle'}}>
-              <circle cx="10" cy="10" r="10" fill="#3b82f6" />
-              <text x="10" y="15" textAnchor="middle" fontSize="13" fill="#fff" fontWeight="bold">i</text>
-            </svg>
-          </Tooltip>
+          Spec Predictions – AI Analysis
         </h1>
-        <p className="dashboard-subtitle">
-          AI-powered meta trend forecasting using OpenAI {aiAnalysis?.model || 'model'} analysis
-        </p>
+        <p className="dashboard-subtitle">AI-generated predictions using OpenAI models.</p>
         <p className="dashboard-data-info">
-          {getSeasonName(seasonId)} • {totalPeriods} weeks • {totalKeys.toLocaleString()} keys analyzed
+          {getSeasonName(seasonId)} • {totalPeriods} week(s)
         </p>
-        {usingCache && (
-          <div className="cache-indicator">
-            💾 Using cached analysis • Last updated: {cacheMetadata ? new Date(cacheMetadata.created_at).toLocaleString() : 'Unknown'}
-          </div>
-        )}
-        {forceRefresh && (
-          <div className="force-refresh-indicator">
-            🔄 Force refresh enabled - Bypassing cache
-          </div>
-        )}
       </div>
 
       <div className="predictions-columns">

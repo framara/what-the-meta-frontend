@@ -463,7 +463,7 @@ const Navigation = () => {
                 role="menuitem"
                 onClick={() => setAiDropdownOpen(false)}
               >
-                Meta Health
+                AI Meta Health
               </NavLink>
             </div>
           )}
@@ -515,7 +515,7 @@ const Navigation = () => {
                   setNavOpen(false);
                 }}
               >
-                Meta Health
+                AI Meta Health
               </NavLink>
             </div>
           )}
