@@ -20,6 +20,38 @@
   margin-bottom: 2rem;
 }
 
+.mh-cache-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0.35rem 0.6rem;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #34d399;
+  font-size: 0.8rem;
+  border-radius: 9999px;
+}
+
+.mh-cache-indicator .mh-cache-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: #10b981;
+  animation: mhCacheBlink 1.6s ease-in-out infinite;
+}
+
+.mh-cache-indicator.mh-force {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.25);
+  color: #f59e0b;
+}
+
+@keyframes mhCacheBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
 .mh-meta-health-header h1 {
   display: flex;
   align-items: center;

@@ -73,6 +73,8 @@ export const MetaHealthPage: React.FC = () => {
   const completedSeasonRef = useRef<number | null>(null);
   const pendingRequestRef = useRef<Promise<any> | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [cacheInfo, setCacheInfo] = useState<{ created_at: string; age_hours: number; max_age_hours: number } | null>(null);
+  const [forceRefresh, setForceRefresh] = useState(false);
 
   // Load data when season changes
   useEffect(() => {
@@ -122,6 +124,12 @@ export const MetaHealthPage: React.FC = () => {
   const startMetaHealthAnalysis = async (seasonId: number) => {
     const currentSeasonId = filter.season_id;
     setAiLoading(true);
+    // Check URL param for force refresh on first run
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const shouldForce = params.get('force_refresh') === 'true';
+      if (shouldForce !== forceRefresh) setForceRefresh(shouldForce);
+    }
     
     if (pendingRequestRef.current) {
       try {
@@ -134,7 +142,8 @@ export const MetaHealthPage: React.FC = () => {
 
     try {
       const requestPromise = getMetaHealthAnalysis({
-        seasonId: currentSeasonId!
+        seasonId: currentSeasonId!,
+        forceRefresh
       });
       pendingRequestRef.current = requestPromise;
       
@@ -145,6 +154,10 @@ export const MetaHealthPage: React.FC = () => {
       }
 
       setMetaHealthData(analysis);
+      try {
+        const ci = (analysis as any)?._cache;
+        setCacheInfo(ci && typeof ci === 'object' ? ci : null);
+      } catch { setCacheInfo(null); }
       pendingRequestRef.current = null;
       completedSeasonRef.current = currentSeasonId || null;
     } catch (err) {
@@ -155,6 +168,19 @@ export const MetaHealthPage: React.FC = () => {
     finally {
       setAiLoading(false);
     }
+  };
+
+  const formatAge = (hours: number) => {
+    if (!Number.isFinite(hours) || hours < 0) return '';
+    if (hours < 1) {
+      const mins = Math.max(1, Math.round(hours * 60));
+      return `${mins}m`;
+    }
+    if (hours < 24) {
+      return `${hours.toFixed(hours < 10 ? 1 : 0)}h`;
+    }
+    const days = hours / 24;
+    return `${days.toFixed(days < 10 ? 1 : 0)}d`;
   };
 
   const handleRefresh = () => {
@@ -216,6 +242,18 @@ export const MetaHealthPage: React.FC = () => {
         <p className="mh-subtitle">
           AI-generated analysis using OpenAI models
         </p>
+        {cacheInfo && (
+          <div className="mh-cache-indicator" title={`Generated ${formatAge(cacheInfo.age_hours)} ago • Max age ${cacheInfo.max_age_hours}h`}>
+            <span className="mh-cache-dot" />
+            Cached • {formatAge(cacheInfo.age_hours)} ago
+          </div>
+        )}
+        {forceRefresh && (
+          <div className="mh-cache-indicator mh-force" title="Force refresh enabled for this session">
+            <span className="mh-cache-dot" />
+            Force refresh active
+          </div>
+        )}
       </div>
 
       <FilterBar 

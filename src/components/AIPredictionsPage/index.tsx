@@ -17,7 +17,6 @@ export const AIPredictionsPage: React.FC = () => {
   const [aiLoading, setAiLoading] = useState(false);
   const [usingCache, setUsingCache] = useState(false);
   const [cacheMetadata, setCacheMetadata] = useState<{ created_at: string; age_hours: number; max_age_hours: number } | null>(null);
-  const [forceRefresh, setForceRefresh] = useState(false);
   const [currentSeasonId, setCurrentSeasonId] = useState<number | null>(null);
   const fallbackTriedRef = useRef<number | null>(null);
   const { seasonLabel } = useSeasonLabel(currentSeasonId);
@@ -33,42 +32,32 @@ export const AIPredictionsPage: React.FC = () => {
     try {
       let aiResponse: AIAnalysisResponse;
       
-      // Skip cache if force refresh is enabled
-      if (forceRefresh) {
-        console.log(`🔄 [Frontend] Force refresh enabled, skipping cache`);
-        aiResponse = await getAIPredictions({
-          seasonId: seasonId
-        });
-        setUsingCache(false);
-        setCacheMetadata(null);
-      } else {
-        // First, try to get cached analysis
-        console.log(`📋 [Frontend] Checking cache for season ${seasonId}`);
-        try {
-          aiResponse = await getAIAnalysis(seasonId);
-          console.log(`✅ [Frontend] Cache hit for season ${seasonId}`);
-          setUsingCache(true);
-          // Extract cache metadata if available
-          if (aiResponse._cache) {
-            setCacheMetadata(aiResponse._cache);
-          }
-        } catch (cacheError: any) {
-          console.log(`❌ [Frontend] Cache miss for season ${seasonId}:`, cacheError.message);
-          // Check if it's a cache miss vs actual error
-          if (cacheError.message === 'CACHE_MISS') {
-            // Cache miss - this is expected, generate new analysis
-            console.log(`🔄 [Frontend] Generating new analysis for season ${seasonId}`);
-            aiResponse = await getAIPredictions({
-              seasonId: seasonId
-            });
-            setUsingCache(false);
-            setCacheMetadata(null);
-            console.log(`✅ [Frontend] New analysis generated for season ${seasonId}`);
-          } else {
-            // Actual error - rethrow
-            console.error(`❌ [Frontend] Actual error during cache check:`, cacheError);
-            throw cacheError;
-          }
+      // First, try to get cached analysis
+      console.log(`📋 [Frontend] Checking cache for season ${seasonId}`);
+      try {
+        aiResponse = await getAIAnalysis(seasonId);
+        console.log(`✅ [Frontend] Cache hit for season ${seasonId}`);
+        setUsingCache(true);
+        // Extract cache metadata if available
+        if (aiResponse._cache) {
+          setCacheMetadata(aiResponse._cache);
+        }
+      } catch (cacheError: any) {
+        console.log(`❌ [Frontend] Cache miss for season ${seasonId}:`, cacheError.message);
+        // Check if it's a cache miss vs actual error
+        if (cacheError.message === 'CACHE_MISS') {
+          // Cache miss - this is expected, generate new analysis
+          console.log(`🔄 [Frontend] Generating new analysis for season ${seasonId}`);
+          aiResponse = await getAIPredictions({
+            seasonId: seasonId
+          });
+          setUsingCache(false);
+          setCacheMetadata(null);
+          console.log(`✅ [Frontend] New analysis generated for season ${seasonId}`);
+        } else {
+          // Actual error - rethrow
+          console.error(`❌ [Frontend] Actual error during cache check:`, cacheError);
+          throw cacheError;
         }
       }
       console.log(`✅ [Frontend] AI analysis completed for season ${seasonId}`);
@@ -101,7 +90,7 @@ export const AIPredictionsPage: React.FC = () => {
     } finally {
       setAiLoading(false);
     }
-  }, [forceRefresh]);
+  }, []);
 
   // Load initial data
   const loadData = useCallback(async () => {
@@ -147,11 +136,6 @@ export const AIPredictionsPage: React.FC = () => {
   }, [currentSeasonId, startAIAnalysis]);
 
   useEffect(() => {
-    // Check for force refresh parameter in URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const shouldForceRefresh = urlParams.get('force_refresh') === 'true';
-    setForceRefresh(shouldForceRefresh);
-
     const initializeData = async () => {
       try {
         // First, get the highest season_id (current season)
@@ -215,41 +199,7 @@ export const AIPredictionsPage: React.FC = () => {
           ]
         }}
       />
-      {/* Force Refresh Controls */}
-      {currentSeasonId && isTestingEnabled && (
-        <div className="force-refresh-controls">
-          <div className="force-refresh-info">
-            <span className="force-refresh-label">🔄 Force AI Refresh:</span>
-            <span className="force-refresh-description">
-              Bypass cache and generate fresh AI analysis (useful for testing)
-            </span>
-          </div>
-          <div className="force-refresh-buttons">
-            <button
-              className={`force-refresh-btn ${forceRefresh ? 'active' : ''}`}
-              onClick={() => {
-                const url = new URL(window.location.href);
-                if (forceRefresh) {
-                  url.searchParams.delete('force_refresh');
-                } else {
-                  url.searchParams.set('force_refresh', 'true');
-                }
-                window.location.href = url.toString();
-              }}
-            >
-              {forceRefresh ? '🔄 Disable Force Refresh' : '🔄 Enable Force Refresh'}
-            </button>
-            {forceRefresh && (
-              <button
-                className="refresh-now-btn"
-                onClick={() => window.location.reload()}
-              >
-                🔄 Refresh Now
-              </button>
-            )}
-          </div>
-        </div>
-      )}
+  {/* Force Refresh Controls removed by request; refresh handled by scheduled jobs */}
 
       {/* Main Content */}
       {!currentSeasonId ? (
@@ -299,7 +249,6 @@ export const AIPredictionsPage: React.FC = () => {
                   aiAnalysis={aiAnalysis}
                   usingCache={usingCache}
                   cacheMetadata={cacheMetadata}
-                  forceRefresh={forceRefresh}
                   seasonId={currentSeasonId}
                 />
                 <AffixInsightsPanel seasonId={currentSeasonId} />

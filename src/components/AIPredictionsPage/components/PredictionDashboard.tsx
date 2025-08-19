@@ -10,7 +10,6 @@ interface PredictionDashboardProps {
   aiAnalysis: any;
   usingCache?: boolean;
   cacheMetadata?: { created_at: string; age_hours: number; max_age_hours: number } | null;
-  forceRefresh?: boolean;
   seasonId?: number; // Add seasonId prop
 }
 
@@ -35,9 +34,10 @@ interface Prediction {
   };
 }
 
-export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ aiAnalysis, usingCache, cacheMetadata, forceRefresh, seasonId: propSeasonId }) => {
+export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ aiAnalysis, usingCache, cacheMetadata, seasonId: propSeasonId }) => {
   const [seasonInfo, setSeasonInfo] = useState<any>(null);
   const [loadingSeasonInfo, setLoadingSeasonInfo] = useState(false);
+  const [cacheInfo, setCacheInfo] = useState<{ created_at: string; age_hours: number; max_age_hours: number } | null>(null);
 
   // Function to convert season ID to user-friendly name
   const getSeasonName = (seasonId: number): string => {
@@ -63,6 +63,13 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ aiAnal
         });
     }
   }, [seasonId]);
+
+  // Derive cache info from prop or analysis payload
+  useEffect(() => {
+    if (cacheMetadata) setCacheInfo(cacheMetadata);
+    else if ((aiAnalysis as any)?._cache) setCacheInfo((aiAnalysis as any)._cache);
+    else setCacheInfo(null);
+  }, [cacheMetadata, aiAnalysis]);
 
   const predictions = useMemo(() => {
     // Only use AI analysis data
@@ -113,6 +120,12 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ aiAnal
         <p className="dashboard-data-info">
           {getSeasonName(seasonId)} • {totalPeriods} week(s)
         </p>
+        {cacheInfo && (
+          <div className="prediction-cache-indicator" title={`Generated ${formatAge(cacheInfo.age_hours)} ago • Max age ${cacheInfo.max_age_hours}h`}>
+            <span className="prediction-cache-dot" />
+            Cached • {formatAge(cacheInfo.age_hours)} ago
+          </div>
+        )}
       </div>
 
       <div className="predictions-columns">
@@ -165,3 +178,15 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ aiAnal
     </div>
   );
 };
+
+function formatAge(hours: number | undefined): string {
+  if (!Number.isFinite(hours as number) || (hours as number) < 0) return '';
+  const h = hours as number;
+  if (h < 1) {
+    const mins = Math.max(1, Math.round(h * 60));
+    return `${mins}m`;
+  }
+  if (h < 24) return `${h.toFixed(h < 10 ? 1 : 0)}h`;
+  const d = h / 24;
+  return `${d.toFixed(d < 10 ? 1 : 0)}d`;
+}
