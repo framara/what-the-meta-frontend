@@ -27,6 +27,9 @@
   margin-left: auto;
   margin-right: auto;
   width: 100%;
+  /* Layout for pushing CTA to bottom */
+  display: flex;
+  flex-direction: column;
 }
 
 .stats-card::before {
@@ -68,6 +71,47 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* State color overrides for Meta Health card */
+.stats-card .value.state-healthy {
+  background: linear-gradient(135deg, #34d399, #059669); /* emerald */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.stats-card .value.state-concerning {
+  background: linear-gradient(135deg, #fbbf24, #d97706); /* amber */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.stats-card .value.state-unhealthy {
+  background: linear-gradient(135deg, #f87171, #b91c1c); /* red */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.stats-card .value.state-unknown {
+  background: linear-gradient(135deg, #cbd5e1, #64748b); /* slate */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Meta health subtitle (cached summary) */
+.meta-health-subtitle {
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  line-height: 1.2;
+  color: #cbd5e1;
+  opacity: 0.9;
+  max-height: 2.4em; /* ~2 lines */
+  overflow: hidden;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 /* Smaller numbers only for the cutoff summary card */
@@ -171,6 +215,14 @@
   margin-top: 1.5rem;
   padding-top: 1rem;
   border-top: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+/* CTA inside a stats card sits at the bottom and centered */
+.stats-card-cta {
+  margin-top: auto; /* push to bottom */
+  display: flex;
+  justify-content: center; /* center horizontally */
+  padding-top: 0.75rem;
 }
 
 /* Spec cards container */

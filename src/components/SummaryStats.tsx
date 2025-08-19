@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_SPEC_TO_CLASS, WOW_SPEC_ROLES, WOW_DUNGEON_TIMERS } from '../constants/wow-constants';
@@ -39,6 +40,11 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
   const [cutoffScores, setCutoffScores] = useState<{ us: number | null; eu: number | null }>({ us: null, eu: null });
   const [cutoffLoading, setCutoffLoading] = useState<boolean>(false);
   const [periodLabel, setPeriodLabel] = useState<string | null>(null);
+  const [metaHealthOverall, setMetaHealthOverall] = useState<string | null>(null);
+  const [metaHealthLoading, setMetaHealthLoading] = useState<boolean>(false);
+
+  // API base URL (duplicate of services value to avoid generating analysis here)
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
   // Load latest cutoff snapshot for current season (default region: US)
   useEffect(() => {
@@ -65,6 +71,22 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
       .finally(() => setCutoffLoading(false));
   }, [filter?.season_id]);
 
+  // Derive display label and class for Meta Health card
+  const metaHealthState = (() => {
+    if (metaHealthLoading) return { label: '…', className: '' };
+    const norm = (metaHealthOverall || '').toLowerCase();
+    if (norm === 'healthy') return { label: 'Healthy', className: 'state-healthy' };
+    if (norm === 'concerning') return { label: 'Concerning', className: 'state-concerning' };
+    if (norm === 'unhealthy') return { label: 'Unhealthy', className: 'state-unhealthy' };
+    return { label: 'Needs analysis', className: 'state-unknown' };
+  })();
+
+  const metaHealthSubtitle: string = (() => {
+  if (metaHealthLoading) return '';
+  if (!metaHealthOverall) return '';
+  return '';
+  })();
+
   // Resolve scope label for period (week) when selected
   useEffect(() => {
     let cancelled = false;
@@ -85,9 +107,31 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
     return () => { cancelled = true; };
   }, [filter?.season_id, filter?.period_id]);
 
-  // Top runs
-  const totalRuns = runs.length;
-  const totalRunsFormatted = totalRuns.toLocaleString('de-DE');
+  // Load cached Meta Health analysis (do not trigger generation). If missing, keep null.
+  useEffect(() => {
+    const seasonId = Number(filter?.season_id);
+    if (!seasonId) {
+      setMetaHealthOverall(null);
+      return;
+    }
+    let cancelled = false;
+    setMetaHealthLoading(true);
+    axios
+      .get(`${API_BASE_URL}/ai/analysis/${seasonId}?type=meta_health`)
+      .then((res) => {
+        const overall = res?.data?.metaSummary?.overallState;
+        if (!cancelled) {
+          setMetaHealthOverall(typeof overall === 'string' ? overall : null);
+        }
+      })
+      .catch(() => { if (!cancelled) { setMetaHealthOverall(null); } })
+      .finally(() => { if (!cancelled) setMetaHealthLoading(false); });
+    return () => { cancelled = true; };
+  }, [filter?.season_id]);
+
+  // Top runs (reflect the filter's selected Top N, not the returned rows count)
+  const selectedLimit = Number(filter?.limit ?? runs.length);
+  const totalRunsFormatted = selectedLimit.toLocaleString('de-DE');
   const scopeText = filter?.period_id ? (periodLabel || 'selected week') : 'entire season';
 
   // Highest keystone and representative dungeon name (excluding depleted runs)
@@ -254,8 +298,17 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
           <div className="value">{highestKeystoneLabel}</div>
         </div>
         <div className="stats-card">
-          <div className="label">Most Popular Dungeon</div>
-          <div className="value">{mostPopularDungeon}</div>
+          <div className="label">Meta Health</div>
+          <div className={`value ${metaHealthState.className}`}>{metaHealthState.label}</div>
+          <div className="stats-card-cta">
+            <button
+              className="meta-evolution-link"
+              onClick={() => { navigate('/meta-health'); }}
+              title="View AI Meta Health summary"
+            >
+              View Meta Health
+            </button>
+          </div>
         </div>
         <div className="stats-card cutoff-card">
           <div className="label">Current 0.1% Cutoff</div>
@@ -265,7 +318,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
           <div className="value" style={{ marginTop: '0.25rem' }}>
             {cutoffLoading ? '' : `EU: ${cutoffScores.eu != null ? Math.round(cutoffScores.eu) : '-'}`}
           </div>
-          <div style={{ marginTop: '0.75rem' }}>
+          <div className="stats-card-cta">
             <button 
               className="meta-evolution-link"
               onClick={() => { navigate('/cutoff'); }}
