@@ -405,7 +405,7 @@ const Navigation = () => {
         
         {/* AI Analysis dropdown - desktop */}
         <div 
-          className="hidden md:block relative"
+          className="hidden md:block relative ai-analysis-section"
           onMouseEnter={() => {
             clearDropdownTimeout(aiTimeoutRef);
             setAiDropdownOpen(true);
@@ -426,6 +426,7 @@ const Navigation = () => {
             aria-controls="ai-menu-desktop"
             onClick={() => setAiDropdownOpen(!aiDropdownOpen)}
           >
+            <span className="text-sm mr-1">🤖</span>
             AI Analysis
             <svg 
               className={`w-4 h-4 transition-transform ${aiDropdownOpen ? 'rotate-180' : ''}`} 
@@ -456,7 +457,10 @@ const Navigation = () => {
                 role="menuitem"
                 onClick={() => setAiDropdownOpen(false)}
               >
-                AI Meta Health
+                <div className="flex items-center justify-between">
+                  <span>AI Meta Health</span>
+                  <span className="nav-ai-badge">AI</span>
+                </div>
               </NavLink>
               <NavLink 
                 to="/ai-predictions" 
@@ -464,7 +468,10 @@ const Navigation = () => {
                 role="menuitem"
                 onClick={() => setAiDropdownOpen(false)}
               >
-                AI Predictions
+                <div className="flex items-center justify-between">
+                  <span>AI Predictions</span>
+                  <span className="nav-ai-badge">AI</span>
+                </div>
               </NavLink>
               <NavLink 
                 to="/ai-tier-list" 
@@ -472,14 +479,17 @@ const Navigation = () => {
                 role="menuitem"
                 onClick={() => setAiDropdownOpen(false)}
               >
-                AI Tier List
+                <div className="flex items-center justify-between">
+                  <span>AI Tier List</span>
+                  <span className="nav-ai-badge">AI</span>
+                </div>
               </NavLink>
             </div>
           )}
         </div>
         
         {/* AI Analysis dropdown - mobile */}
-        <div className="md:hidden">
+        <div className="md:hidden ai-analysis-section">
           <button
             className={`font-bold text-lg transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap flex items-center justify-between w-full ${
               isActive('/ai-predictions') || isActive('/meta-health') || isActive('/ai-analysis') || isActive('/ai-insights') || isActive('/ai-tier-list')
@@ -492,7 +502,10 @@ const Navigation = () => {
             aria-controls="ai-menu-mobile"
             onClick={() => setAiDropdownOpen(!aiDropdownOpen)}
           >
-            <span>AI Analysis</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm">🤖</span>
+              <span>AI Analysis</span>
+            </div>
             <svg 
               className={`w-4 h-4 transition-transform ${aiDropdownOpen ? 'rotate-180' : ''}`} 
               fill="none" 
@@ -513,7 +526,10 @@ const Navigation = () => {
                   setNavOpen(false);
                 }}
               >
-                AI Meta Health
+                <div className="flex items-center justify-between">
+                  <span>AI Meta Health</span>
+                  <span className="nav-ai-badge">AI</span>
+                </div>
               </NavLink>
               <NavLink 
                 to="/ai-predictions" 
@@ -524,7 +540,10 @@ const Navigation = () => {
                   setNavOpen(false);
                 }}
               >
-                AI Predictions
+                <div className="flex items-center justify-between">
+                  <span>AI Predictions</span>
+                  <span className="nav-ai-badge">AI</span>
+                </div>
               </NavLink>
               <NavLink 
                 to="/ai-tier-list" 
@@ -535,7 +554,10 @@ const Navigation = () => {
                   setNavOpen(false);
                 }}
               >
-                AI Tier List
+                <div className="flex items-center justify-between">
+                  <span>AI Tier List</span>
+                  <span className="nav-ai-badge">AI</span>
+                </div>
               </NavLink>
             </div>
           )}
