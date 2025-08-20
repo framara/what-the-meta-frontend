@@ -160,6 +160,7 @@ const Navigation = () => {
           0.1% Cutoff
         </NavLink>
         
+        
         {/* Spec Evolution dropdown - desktop */}
         <div 
           className="hidden md:block relative"
@@ -415,7 +416,7 @@ const Navigation = () => {
         >
           <button
             className={`font-bold text-lg transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap flex items-center gap-1 ${
-              isActive('/ai-predictions') || isActive('/ai-analysis') || isActive('/ai-insights') || isActive('/meta-health')
+              isActive('/ai-predictions') || isActive('/ai-analysis') || isActive('/ai-insights') || isActive('/meta-health') || isActive('/ai-tier-list')
                 ? 'text-blue-400 border-b-2 border-blue-400 md:border-b-2'
                 : 'hover:text-blue-400'
             }`}
@@ -450,20 +451,28 @@ const Navigation = () => {
               }}
             >
               <NavLink 
-                to="/ai-predictions" 
+                to="/meta-health" 
                 className={({ isActive }: { isActive: boolean }) => `block px-4 py-2 transition-colors rounded-t-lg ${isActive ? 'text-blue-400 bg-gray-700' : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'}`}
+                role="menuitem"
+                onClick={() => setAiDropdownOpen(false)}
+              >
+                AI Meta Health
+              </NavLink>
+              <NavLink 
+                to="/ai-predictions" 
+                className={({ isActive }: { isActive: boolean }) => `block px-4 py-2 transition-colors ${isActive ? 'text-blue-400 bg-gray-700' : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'}`}
                 role="menuitem"
                 onClick={() => setAiDropdownOpen(false)}
               >
                 AI Predictions
               </NavLink>
               <NavLink 
-                to="/meta-health" 
+                to="/ai-tier-list" 
                 className={({ isActive }: { isActive: boolean }) => `block px-4 py-2 transition-colors rounded-b-lg ${isActive ? 'text-blue-400 bg-gray-700' : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'}`}
                 role="menuitem"
                 onClick={() => setAiDropdownOpen(false)}
               >
-                AI Meta Health
+                AI Tier List
               </NavLink>
             </div>
           )}
@@ -473,7 +482,7 @@ const Navigation = () => {
         <div className="md:hidden">
           <button
             className={`font-bold text-lg transition px-6 py-3 md:px-0 md:py-0 whitespace-nowrap flex items-center justify-between w-full ${
-              isActive('/ai-predictions') || isActive('/meta-health') || isActive('/ai-analysis') || isActive('/ai-insights')
+              isActive('/ai-predictions') || isActive('/meta-health') || isActive('/ai-analysis') || isActive('/ai-insights') || isActive('/ai-tier-list')
                 ? 'text-blue-400 border-b-2 border-blue-400'
                 : 'hover:text-blue-400'
             }`}
@@ -496,6 +505,17 @@ const Navigation = () => {
           {aiDropdownOpen && (
             <div id="ai-menu-mobile" role="menu" aria-labelledby="ai-menu-button-mobile" className="pl-6 bg-gray-800 border-l-2 border-blue-500">
               <NavLink 
+                to="/meta-health" 
+                className={({ isActive }: { isActive: boolean }) => `block px-4 py-2 transition-colors ${isActive ? 'text-blue-400 bg-gray-700' : 'text-gray-300 hover:text-blue-400'}`}
+                role="menuitem"
+                onClick={() => {
+                  setAiDropdownOpen(false);
+                  setNavOpen(false);
+                }}
+              >
+                AI Meta Health
+              </NavLink>
+              <NavLink 
                 to="/ai-predictions" 
                 className={({ isActive }: { isActive: boolean }) => `block px-4 py-2 transition-colors ${isActive ? 'text-blue-400 bg-gray-700' : 'text-gray-300 hover:text-blue-400'}`}
                 role="menuitem"
@@ -507,7 +527,7 @@ const Navigation = () => {
                 AI Predictions
               </NavLink>
               <NavLink 
-                to="/meta-health" 
+                to="/ai-tier-list" 
                 className={({ isActive }: { isActive: boolean }) => `block px-4 py-2 transition-colors ${isActive ? 'text-blue-400 bg-gray-700' : 'text-gray-300 hover:text-blue-400'}`}
                 role="menuitem"
                 onClick={() => {
@@ -515,7 +535,7 @@ const Navigation = () => {
                   setNavOpen(false);
                 }}
               >
-                AI Meta Health
+                AI Tier List
               </NavLink>
             </div>
           )}

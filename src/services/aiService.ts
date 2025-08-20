@@ -90,6 +90,7 @@ export interface MetaHealthResponse {
     description: string;
     severity: string; // low, medium, high
   }>;
+  _cache?: { created_at: string; age_hours: number; max_age_hours: number };
 }
 
 export interface AffixInsightsRequest {
@@ -119,6 +120,21 @@ export interface RoleAnalysis {
   underusedSpecs: Array<{ specId: number; usage: number; name: string }>;
   healthStatus: string; // Good, Concerning, Poor
   totalRuns: number; // Total number of runs for this role
+}
+
+// Tier List types
+export type TierKey = 'S' | 'A' | 'B' | 'C' | 'D';
+export interface TierListEntry {
+  specId: number;
+  specName: string;
+  className: string;
+  role: string;
+  usage: number;
+}
+export interface TierListResponse {
+  tiers: Record<TierKey, TierListEntry[]>;
+  // tiers-only schema
+  _cache?: { created_at: string; age_hours: number; max_age_hours: number };
 }
 
 export async function getAIPredictions(request: AIPredictionRequest): Promise<AIAnalysisResponse> {
@@ -151,6 +167,35 @@ export async function getAIPredictions(request: AIPredictionRequest): Promise<AI
     const wrapped: any = new Error('Failed to get AI predictions');
     if (error?.message) wrapped.cause = error;
     throw wrapped;
+  }
+}
+
+// Cache-first: GET cached Tier List, else POST to generate
+export async function getTierListCached(seasonId: number): Promise<TierListResponse> {
+  try {
+    const resp = await axios.get(`${API_BASE_URL}/ai/analysis/${seasonId}?type=tier_list`);
+    return resp.data as TierListResponse;
+  } catch (err: any) {
+    if (err.response?.status === 404) throw new Error('CACHE_MISS');
+    throw new Error('Failed to get cached tier list');
+  }
+}
+
+export async function generateTierList(seasonId: number, forceRefresh?: boolean): Promise<TierListResponse> {
+  const resp = await axios.post(`${API_BASE_URL}/ai/tier-list`, { seasonId, forceRefresh: !!forceRefresh }, {
+    headers: { 'Content-Type': 'application/json' },
+  });
+  return resp.data as TierListResponse;
+}
+
+export async function getTierList(seasonId: number): Promise<TierListResponse> {
+  try {
+    return await getTierListCached(seasonId);
+  } catch (e: any) {
+    if (e.message === 'CACHE_MISS') {
+      return await generateTierList(seasonId);
+    }
+    throw e;
   }
 }
 
@@ -190,16 +235,28 @@ export async function getMetaHealthAnalysis(request: MetaHealthRequest): Promise
   });
   
   try {
-    // First, try to get cached analysis
+    // If force refresh is requested, bypass cache and generate fresh analysis
+    if (request.forceRefresh) {
+      console.log(`🔄 [AI Service] Force refresh enabled for season ${request.seasonId} - generating new analysis`);
+      const response = await axios.post(`${API_BASE_URL}/ai/meta-health`, request, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      console.log('✅ [AI Service] Meta health analysis (forced) completed:', {
+        status: response.status,
+        hasData: !!response.data,
+        dataKeys: Object.keys(response.data || {})
+      });
+      return response.data;
+    }
+
+    // Otherwise, first try to get cached analysis
     console.log(`📋 [AI Service] Checking cache for season ${request.seasonId}`);
     const cachedResponse = await axios.get(`${API_BASE_URL}/ai/analysis/${request.seasonId}?type=meta_health`);
-    
     console.log('✅ [AI Service] Cached meta health analysis found:', {
       status: cachedResponse.status,
       hasData: !!cachedResponse.data,
       dataKeys: Object.keys(cachedResponse.data || {})
     });
-    
     return cachedResponse.data;
   } catch (error: any) {
     console.log(`📋 [AI Service] Cache miss for season ${request.seasonId} - generating new analysis`);

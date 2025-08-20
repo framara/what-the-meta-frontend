@@ -72,7 +72,15 @@
   <!-- AI Predictions Page -->
   <url>
     <loc>https://whatthemeta.io/ai-predictions</loc>
-    <lastmod>2025-08-05</lastmod>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- AI Tier List Page -->
+  <url>
+    <loc>https://whatthemeta.io/ai-tier-list</loc>
+    <lastmod>2025-08-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
@@ -80,7 +88,7 @@
   <!-- Meta Health Page -->
   <url>
     <loc>https://whatthemeta.io/meta-health</loc>
-    <lastmod>2025-08-05</lastmod>
+    <lastmod>2025-08-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>

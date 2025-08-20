@@ -42,6 +42,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
   const [periodLabel, setPeriodLabel] = useState<string | null>(null);
   const [metaHealthOverall, setMetaHealthOverall] = useState<string | null>(null);
   const [metaHealthLoading, setMetaHealthLoading] = useState<boolean>(false);
+  const [metaHealthCacheInfo, setMetaHealthCacheInfo] = useState<{ created_at: string; age_hours: number; max_age_hours: number } | null>(null);
 
   // API base URL (duplicate of services value to avoid generating analysis here)
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
@@ -112,6 +113,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
     const seasonId = Number(filter?.season_id);
     if (!seasonId) {
       setMetaHealthOverall(null);
+      setMetaHealthCacheInfo(null);
       return;
     }
     let cancelled = false;
@@ -120,11 +122,13 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
       .get(`${API_BASE_URL}/ai/analysis/${seasonId}?type=meta_health`)
       .then((res) => {
         const overall = res?.data?.metaSummary?.overallState;
+        const ci = res?.data?._cache;
         if (!cancelled) {
           setMetaHealthOverall(typeof overall === 'string' ? overall : null);
+          setMetaHealthCacheInfo(ci && typeof ci === 'object' ? ci : null);
         }
       })
-      .catch(() => { if (!cancelled) { setMetaHealthOverall(null); } })
+      .catch(() => { if (!cancelled) { setMetaHealthOverall(null); setMetaHealthCacheInfo(null); } })
       .finally(() => { if (!cancelled) setMetaHealthLoading(false); });
     return () => { cancelled = true; };
   }, [filter?.season_id]);
@@ -285,6 +289,18 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
     return luminance > 0.5 ? '#23263a' : '#fff';
   }
 
+  function formatAge(hours: number | undefined): string {
+    if (!Number.isFinite(hours as number) || (hours as number) < 0) return '';
+    const h = hours as number;
+    if (h < 1) {
+      const mins = Math.max(1, Math.round(h * 60));
+      return `${mins}m`;
+    }
+    if (h < 24) return `${h.toFixed(h < 10 ? 1 : 0)}h`;
+    const d = h / 24;
+    return `${d.toFixed(d < 10 ? 1 : 0)}d`;
+  }
+
   return (
     <div className="mb-8">
       {/* Summary Stats Grid */}
@@ -298,7 +314,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
           <div className="value">{highestKeystoneLabel}</div>
         </div>
         <div className="stats-card">
-          <div className="label">Meta Health <span className="ai-badge" title="AI generated">AI</span></div>
+          <div className="label">Meta Health <span className="ai-badge" title={metaHealthCacheInfo ? `AI generated • Cached ${formatAge(metaHealthCacheInfo.age_hours)} ago` : 'AI generated'}>AI</span></div>
           <div className={`value ${metaHealthState.className}`}>{metaHealthState.label}</div>
           <div className="stats-card-cta">
             <button
