@@ -269,7 +269,7 @@ nav a:hover::after {
 
 @media (min-width: 900px) {
   nav {
-    padding-right: 14rem;
+    padding-right: 17.5rem;
   }
 }
 
@@ -519,4 +519,155 @@ select:focus, input:focus {
 .chart-container:hover {
   border-color: rgba(59, 130, 246, 0.25);
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+}
+
+/* Navigation AI Badge Styles */
+.nav-ai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 0.5rem;
+  padding: 0.15rem 0.4rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #a78bfa; /* violet-400 */
+  background: rgba(139, 92, 246, 0.1); /* violet */
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 0.3rem;
+  vertical-align: middle;
+  line-height: 1;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+}
+
+.nav-ai-badge:hover {
+  background: rgba(139, 92, 246, 0.16);
+  border-color: rgba(139, 92, 246, 0.35);
+  box-shadow: 0 1px 6px rgba(139, 92, 246, 0.25);
+  transform: translateY(-0.5px);
+}
+
+/* AI Analysis Section Highlighting */
+.ai-analysis-section {
+  position: relative;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(168, 85, 247, 0.12) 100%);
+  border-radius: 8px;
+  padding: 0.25rem 0.5rem;
+  margin: -0.25rem -0.5rem; /* Negative margin to maintain alignment */
+  transition: all 0.3s ease;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  display: flex;
+  align-items: center; /* Ensure vertical alignment */
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.1);
+}
+
+.ai-analysis-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%);
+  border-radius: 8px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.ai-analysis-section:hover::before {
+  opacity: 1;
+}
+
+.ai-analysis-section:hover {
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.25);
+  transform: translateY(-1px);
+  border-color: rgba(139, 92, 246, 0.4);
+}
+
+/* Enhanced AI button with subtle glow */
+.ai-analysis-section button {
+  position: relative;
+  margin: 0; /* Reset any margin */
+  padding: 0; /* Let parent handle padding */
+}
+
+.ai-analysis-section button::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.4) 0%, rgba(168, 85, 247, 0.4) 100%);
+  border-radius: 12px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+  filter: blur(10px);
+}
+
+.ai-analysis-section:hover button::after {
+  opacity: 1;
+}
+
+/* Pulse animation for AI badge */
+@keyframes ai-pulse {
+  0%, 100% { 
+    opacity: 1; 
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.7; 
+    transform: scale(1.05);
+  }
+}
+
+@keyframes ai-glow-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 5px rgba(139, 92, 246, 0.3);
+  }
+  50% { 
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.6);
+  }
+}
+
+.nav-ai-badge {
+  animation: ai-pulse 3s infinite ease-in-out;
+}
+
+.nav-ai-badge:hover {
+  animation: ai-glow-pulse 1s infinite ease-in-out;
+}
+
+/* Mobile navigation AI section styling */
+@media (max-width: 768px) {
+  .nav-ai-badge {
+    margin-left: 0.3rem;
+    padding: 0.1rem 0.3rem;
+    font-size: 0.6rem;
+  }
+  
+  .ai-analysis-section {
+    margin: -0.2rem -0.5rem; /* Adjusted for mobile */
+    padding: 0.5rem;
+  }
+}
+
+/* Dropdown menu AI badges - smaller for space efficiency */
+[role="menu"] .nav-ai-badge {
+  margin-left: 0.25rem;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.6rem;
+  border-radius: 0.25rem;
+}
+
+/* Reduce animation intensity in dropdown menus */
+[role="menu"] .nav-ai-badge {
+  animation: none;
+}
+
+[role="menu"] .nav-ai-badge:hover {
+  animation: ai-glow-pulse 1s infinite ease-in-out;
 }
