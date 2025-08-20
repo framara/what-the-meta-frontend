@@ -4,6 +4,7 @@ import './App.css';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { useFilterState } from './components/FilterContext';
 import Navigation from './components/Navigation';
+import ScrollUpNavigation from './components/ScrollUpNavigation';
 import Footer from './components/Footer';
 import HomePage from './components/HomePage';
 
@@ -27,6 +28,9 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen flex flex-col">
+        {/* Fixed scroll-up navigation */}
+        <ScrollUpNavigation />
+        
         <header className="w-full flex flex-row items-center justify-between py-4 bg-gradient-to-b from-gray-950 to-gray-900 shadow-lg mb-6 relative z-40">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-8 flex flex-row items-center justify-between">
                   <div className="flex flex-col justify-center">

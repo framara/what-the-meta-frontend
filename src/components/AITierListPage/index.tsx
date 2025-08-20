@@ -9,6 +9,17 @@ import { SpecIconImage } from '../../utils/specIconImages';
 import { Tooltip } from '../AIPredictionsPage/components/Tooltip';
 import './styles/AITierListPage.css';
 
+const formatLocalTimestamp = (iso?: string) => {
+  if (!iso) return '';
+  try {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleString();
+  } catch {
+    return '';
+  }
+};
+
 export const AITierListPage: React.FC = () => {
   const [seasonId, setSeasonId] = useState<number | null>(null);
   const [tierList, setTierList] = useState<TierListResponse | null>(null);
@@ -234,8 +245,15 @@ export const AITierListPage: React.FC = () => {
             )}
 
             {tierList ? (
-              <div className="tiers-table">
-                {lanes.map(renderRow)}
+              <div className="tier-list-wrapper">
+                <div className="tiers-table">
+                  {lanes.map(renderRow)}
+                  {tierList._cache?.created_at && (
+                    <div className="ai-tier-timestamp">
+                      <span className="label">Generated:</span> {formatLocalTimestamp(tierList._cache.created_at)}
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
               !loading && !aiLoading && (
