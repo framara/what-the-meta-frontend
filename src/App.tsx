@@ -14,6 +14,7 @@ const GroupCompositionPage = React.lazy(() => import('./components/GroupComposit
 const CompAllSeasonsPage = React.lazy(() => import('./components/CompAllSeasonsPage/index').then(m => ({ default: m.CompAllSeasonsPage })));
 const AIPredictionsPage = React.lazy(() => import('./components/AIPredictionsPage').then(m => ({ default: m.AIPredictionsPage })));
 const MetaHealthPage = React.lazy(() => import('./components/MetaHealthPage').then(m => ({ default: m.MetaHealthPage })));
+const AITierListPage = React.lazy(() => import('./components/AITierListPage').then(m => ({ default: m.AITierListPage })));
 const AboutPage = React.lazy(() => import('./components/AboutPage'));
 const PrivacyPage = React.lazy(() => import('./components/PrivacyPage'));
 const TermsPage = React.lazy(() => import('./components/TermsPage'));
@@ -51,6 +52,7 @@ function App() {
             <Route path="/historical-composition" element={<CompAllSeasonsPage />} />
             <Route path="/ai-predictions" element={<AIPredictionsPage />} />
             <Route path="/meta-health" element={<MetaHealthPage />} />
+            <Route path="/ai-tier-list" element={<AITierListPage />} />
             <Route path="/cutoff" element={<CutoffPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />

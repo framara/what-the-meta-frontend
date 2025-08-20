@@ -122,6 +122,21 @@ export interface RoleAnalysis {
   totalRuns: number; // Total number of runs for this role
 }
 
+// Tier List types
+export type TierKey = 'S' | 'A' | 'B' | 'C' | 'D';
+export interface TierListEntry {
+  specId: number;
+  specName: string;
+  className: string;
+  role: string;
+  usage: number;
+}
+export interface TierListResponse {
+  tiers: Record<TierKey, TierListEntry[]>;
+  // tiers-only schema
+  _cache?: { created_at: string; age_hours: number; max_age_hours: number };
+}
+
 export async function getAIPredictions(request: AIPredictionRequest): Promise<AIAnalysisResponse> {
   try {
     console.log('🤖 [AI Service] Making predictions request:', {
@@ -152,6 +167,35 @@ export async function getAIPredictions(request: AIPredictionRequest): Promise<AI
     const wrapped: any = new Error('Failed to get AI predictions');
     if (error?.message) wrapped.cause = error;
     throw wrapped;
+  }
+}
+
+// Cache-first: GET cached Tier List, else POST to generate
+export async function getTierListCached(seasonId: number): Promise<TierListResponse> {
+  try {
+    const resp = await axios.get(`${API_BASE_URL}/ai/analysis/${seasonId}?type=tier_list`);
+    return resp.data as TierListResponse;
+  } catch (err: any) {
+    if (err.response?.status === 404) throw new Error('CACHE_MISS');
+    throw new Error('Failed to get cached tier list');
+  }
+}
+
+export async function generateTierList(seasonId: number, forceRefresh?: boolean): Promise<TierListResponse> {
+  const resp = await axios.post(`${API_BASE_URL}/ai/tier-list`, { seasonId, forceRefresh: !!forceRefresh }, {
+    headers: { 'Content-Type': 'application/json' },
+  });
+  return resp.data as TierListResponse;
+}
+
+export async function getTierList(seasonId: number): Promise<TierListResponse> {
+  try {
+    return await getTierListCached(seasonId);
+  } catch (e: any) {
+    if (e.message === 'CACHE_MISS') {
+      return await generateTierList(seasonId);
+    }
+    throw e;
   }
 }
 

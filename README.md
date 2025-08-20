@@ -11,6 +11,7 @@ A comprehensive World of Warcraft Mythic+ leaderboard and meta analysis tool tha
 - **Group Composition Analysis**: Analyze successful team compositions and class combinations
 - **Meta Evolution Tracking**: Watch how the meta changes over time with detailed charts
 - **AI Predictions**: Get AI-powered insights about upcoming meta shifts
+- **AI Tier List**: S–D tier ranking of specializations based on usage and performance trends
 - **Race Bars**: Visual representation of spec popularity and performance trends
 - **Meta Health**: Comprehensive analysis of current meta balance
 

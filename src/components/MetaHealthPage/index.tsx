@@ -242,18 +242,6 @@ export const MetaHealthPage: React.FC = () => {
         <p className="mh-subtitle">
           AI-generated analysis using OpenAI models
         </p>
-        {cacheInfo && (
-          <div className="mh-cache-indicator" title={`Generated ${formatAge(cacheInfo.age_hours)} ago • Max age ${cacheInfo.max_age_hours}h`}>
-            <span className="mh-cache-dot" />
-            Cached • {formatAge(cacheInfo.age_hours)} ago
-          </div>
-        )}
-        {forceRefresh && (
-          <div className="mh-cache-indicator mh-force" title="Force refresh enabled for this session">
-            <span className="mh-cache-dot" />
-            Force refresh active
-          </div>
-        )}
       </div>
 
       <FilterBar 

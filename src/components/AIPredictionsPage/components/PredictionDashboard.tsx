@@ -114,18 +114,9 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({ aiAnal
     <div className="prediction-dashboard dashboard-refactored">
       <div className="dashboard-header">
         <h1 className="dashboard-title">
-          Spec Predictions – AI Analysis
+           Spec Predictions for {getSeasonName(seasonId)} - AI Analysis
         </h1>
         <p className="dashboard-subtitle">AI-generated predictions using OpenAI models.</p>
-        <p className="dashboard-data-info">
-          {getSeasonName(seasonId)} • {totalPeriods} week(s)
-        </p>
-        {cacheInfo && (
-          <div className="prediction-cache-indicator" title={`Generated ${formatAge(cacheInfo.age_hours)} ago • Max age ${cacheInfo.max_age_hours}h`}>
-            <span className="prediction-cache-dot" />
-            Cached • {formatAge(cacheInfo.age_hours)} ago
-          </div>
-        )}
       </div>
 
       <div className="predictions-columns">
