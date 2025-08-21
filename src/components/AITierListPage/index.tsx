@@ -224,7 +224,7 @@ export const AITierListPage: React.FC = () => {
             <div className="dashboard-header">
               <h1 className="dashboard-title">
                 Tier List for {getSeasonName(seasonId)} - AI Analysis
-                <Tooltip content="Our AI analyzes thousands of Mythic+ runs to rank specializations from S (dominant) to D (underperforming). The algorithm considers: current usage rates, success rates across different key levels, recent performance trends, and class balance changes. S-tier specs dominate the meta, while D-tier specs may need buffs or have niche applications.">
+                <Tooltip content="How it works: the AI blends three signals — (1) how often each spec shows up for its role (we account for 1 tank, 1 healer, and 3 DPS per group), (2) performance at higher key levels using level ranges that automatically adapt as the season progresses (higher ranges count more), and (3) recent week‑to‑week trends.">
                   <svg className="ai-tooltip-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-label="Info" role="img" style={{marginLeft: '0.5rem', verticalAlign: 'middle'}}>
                     <circle cx="10" cy="10" r="10" fill="#3b82f6" />
                     <text x="10" y="15" textAnchor="middle" fontSize="13" fill="#fff" fontWeight="bold">?</text>
