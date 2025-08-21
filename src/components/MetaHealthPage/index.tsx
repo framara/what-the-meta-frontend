@@ -202,6 +202,35 @@ export const MetaHealthPage: React.FC = () => {
     }
   };
 
+  // Class mapping for role health badge (green/amber/red)
+  const getHealthClass = (state: string) => {
+    switch (state?.toLowerCase()) {
+      case 'healthy':
+      case 'good':
+        return 'mh-health-green';
+      case 'concerning':
+        return 'mh-health-amber';
+      case 'unhealthy':
+        return 'mh-health-red';
+      default:
+        return 'mh-health-gray';
+    }
+  };
+
+  // Class mapping for severity badge (green/amber/red)
+  const getSeverityClass = (severity: string) => {
+    switch (severity?.toLowerCase()) {
+      case 'low':
+        return 'mh-severity-green';
+      case 'medium':
+        return 'mh-severity-amber';
+      case 'high':
+        return 'mh-severity-red';
+      default:
+        return 'mh-severity-gray';
+    }
+  };
+
   const getSeverityColor = (severity: string) => {
     switch (severity.toLowerCase()) {
       case 'low':
@@ -339,8 +368,7 @@ export const MetaHealthPage: React.FC = () => {
                                          <div className="mh-role-header">
                        <h3 className="mh-role-title">{role === 'dps' ? 'DPS' : role.charAt(0).toUpperCase() + role.slice(1)}</h3>
                       <div 
-                        className="mh-health-badge"
-                        style={{ backgroundColor: getStateColor(data.healthStatus) }}
+                        className={`mh-health-badge ${getHealthClass(data.healthStatus)}`}
                       >
                         {data.healthStatus}
                       </div>
@@ -384,102 +412,119 @@ export const MetaHealthPage: React.FC = () => {
           {/* Composition Analysis */}
           {metaHealthData.compositionAnalysis && (
             <div className="mh-composition-section">
-              <h2>Composition Analysis</h2>
-              <div className="mh-composition-content">
-                <div className="mh-composition-overview">
-                  <div className="mh-diversity-badge">
-                    <span className="mh-diversity-label">Diversity:</span>
-                    <span className={`mh-diversity-value mh-diversity-${metaHealthData.compositionAnalysis.compositionDiversity.toLowerCase()}`}>
-                      {metaHealthData.compositionAnalysis.compositionDiversity}
-                    </span>
-                  </div>
-                  
-                  {metaHealthData.compositionAnalysis.dominantPatterns.length > 0 && (
-                    <div className="mh-patterns-section">
-                      <h3>Dominant Patterns</h3>
-                      <ul className="mh-patterns-list">
-                        {metaHealthData.compositionAnalysis.dominantPatterns.map((pattern, index) => (
-                          <li key={index} className="mh-pattern-item">
-                            {pattern}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+              <div className="mh-composition-header">
+                <h2>🔄 Composition Analysis</h2>
+                <div className="mh-diversity-badge">
+                  <span className="mh-diversity-label">Meta Diversity</span>
+                  <span className={`mh-diversity-value mh-diversity-${metaHealthData.compositionAnalysis.compositionDiversity.toLowerCase()}`}>
+                    {metaHealthData.compositionAnalysis.compositionDiversity}
+                  </span>
                 </div>
+              </div>
 
+              <div className="mh-composition-grid">
                 {/* Most Popular Group */}
                 {metaHealthData.compositionAnalysis.mostPopularGroup && (
-                  <div className="mh-most-popular-group">
+                  <div className="mh-composition-card mh-popular-card">
+                    <div className="mh-card-icon">👑</div>
                     <h3>Most Popular Group</h3>
-                    <div className="mh-composition-card mh-popular-group-card">
-                      <div className="mh-composition-header">
-                        <span className="mh-composition-usage">{metaHealthData.compositionAnalysis.mostPopularGroup.usage.toFixed(1)}%</span>
-                        <span className="mh-composition-count">({metaHealthData.compositionAnalysis.mostPopularGroup.count} runs)</span>
+                    <div className="mh-card-stats">
+                      <div className="mh-stat">
+                        <span className="mh-stat-value">{metaHealthData.compositionAnalysis.mostPopularGroup.usage.toFixed(1)}%</span>
+                        <span className="mh-stat-label">Usage Rate</span>
                       </div>
-                      <div className="mh-composition-specs">
-                        {metaHealthData.compositionAnalysis.mostPopularGroup.specNames.map((specName, specIndex) => (
-                          <span key={specIndex} className="mh-composition-spec">
-                            {specName}
-                          </span>
-                        ))}
+                      <div className="mh-stat">
+                        <span className="mh-stat-value">{metaHealthData.compositionAnalysis.mostPopularGroup.avgLevel}</span>
+                        <span className="mh-stat-label">Avg Level</span>
                       </div>
-                      <div className="mh-composition-level">
-                        Avg Level: {metaHealthData.compositionAnalysis.mostPopularGroup.avgLevel}
-                      </div>
+                    </div>
+                    <div className="mh-composition-specs">
+                      {metaHealthData.compositionAnalysis.mostPopularGroup.specNames.map((specName, specIndex) => (
+                        <span key={specIndex} className="mh-composition-spec">
+                          {specName}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="mh-card-footer">
+                      {metaHealthData.compositionAnalysis.mostPopularGroup.count.toLocaleString()} runs analyzed
                     </div>
                   </div>
                 )}
 
-                {/* Spec Replacements */}
-                {metaHealthData.compositionAnalysis.specReplacements && (
-                  <div className="mh-spec-replacements">
-                    <h3>Spec Replacements</h3>
-                    <div className="mh-replacements-grid">
-                      {Object.entries(metaHealthData.compositionAnalysis.specReplacements).map(([specId, specData]) => (
-                        <div key={specId} className="mh-replacement-card">
-                          <div className="mh-replacement-header">
-                            <h4 className="mh-replacement-spec">{specData.specName}</h4>
-                            <span className="mh-replacement-role">{specData.role}</span>
-                          </div>
-                          
-                          {specData.replacements.length > 0 ? (
-                            <div className="mh-replacements-list">
-                              <h5>Most Common Replacements:</h5>
-                              {specData.replacements.map((replacement, index) => (
-                                <div key={index} className="mh-replacement-item">
-                                  <span className="mh-replacement-name">{replacement.specName}</span>
-                                  <span className="mh-replacement-usage">{replacement.usage.toFixed(1)}%</span>
-                                  <span className="mh-replacement-count">({replacement.count} runs)</span>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="mh-no-replacements">
-                              <p>No common replacements found</p>
-                            </div>
-                          )}
+                {/* Patterns Card */}
+                {metaHealthData.compositionAnalysis.dominantPatterns.length > 0 && (
+                  <div className="mh-composition-card mh-patterns-card">
+                    <div className="mh-card-icon">📊</div>
+                    <h3>Meta Patterns</h3>
+                    <div className="mh-patterns-list">
+                      {metaHealthData.compositionAnalysis.dominantPatterns.map((pattern, index) => (
+                        <div key={index} className="mh-pattern-item">
+                          <span className="mh-pattern-bullet">•</span>
+                          <span className="mh-pattern-text">{pattern}</span>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
               </div>
+
+              {/* Spec Replacements */}
+              {metaHealthData.compositionAnalysis.specReplacements && Object.keys(metaHealthData.compositionAnalysis.specReplacements).length > 0 && (
+                <div className="mh-replacements-section">
+                  <h3>🔄 Spec Flexibility</h3>
+                  <div className="mh-replacements-grid">
+                    {Object.entries(metaHealthData.compositionAnalysis.specReplacements).map(([specId, specData]) => (
+                      <div key={specId} className="mh-replacement-card">
+                        <div className="mh-replacement-header">
+                          <h4 className="mh-replacement-spec">{specData.specName}</h4>
+                          <span className={`mh-replacement-role mh-role-${specData.role}`}>{specData.role}</span>
+                        </div>
+                        
+                        {specData.replacements.length > 0 ? (
+                          <div className="mh-replacements-list">
+                            <div className="mh-replacements-title">Common Alternatives:</div>
+                            {specData.replacements.slice(0, 3).map((replacement, index) => (
+                              <div key={index} className="mh-replacement-item">
+                                <span className="mh-replacement-name">{replacement.specName}</span>
+                                <div className="mh-replacement-stats">
+                                  <span className="mh-replacement-usage">{replacement.usage.toFixed(1)}%</span>
+                                  <span className="mh-replacement-count">({replacement.count})</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="mh-no-replacements">
+                            <span className="mh-no-replacements-icon">🔒</span>
+                            <span>Highly specialized role</span>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
           {/* Balance Issues */}
           {metaHealthData.balanceIssues.length > 0 && (
             <div className="mh-issues-section">
-              <h2>Balance Issues</h2>
-              <div className="mh-issues-list">
+              <div className="mh-issues-header">
+                <h2>⚠️ Balance Issues</h2>
+              </div>
+              <div className="mh-issues-grid">
                 {metaHealthData.balanceIssues.map((issue, index) => (
-                  <div key={index} className="mh-issue-card">
+                  <div key={index} className={`mh-issue-card mh-issue-${issue.severity.toLowerCase()}`}>
                     <div className="mh-issue-header">
-                      <span className="mh-issue-type">{issue.type}</span>
+                      <div className="mh-issue-type-container">
+                        <span className="mh-issue-icon">
+                          {issue.severity === 'high' ? '🔴' : issue.severity === 'medium' ? '🟡' : '🟢'}
+                        </span>
+                        <span className="mh-issue-type">{issue.type.replace(/_/g, ' ')}</span>
+                      </div>
                       <div 
-                        className="mh-severity-badge"
-                        style={{ backgroundColor: getSeverityColor(issue.severity) }}
+                        className={`mh-severity-badge ${getSeverityClass(issue.severity)}`}
                       >
                         {issue.severity}
                       </div>
