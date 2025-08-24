@@ -44,20 +44,26 @@ export const HomePage: React.FC = () => {
     setApiError(null);
     setLoading(true);
 
-    const seasonId = Number(filter.season_id);
-    const params: TopKeyParams = { season_id: seasonId };
-    if (filter.period_id) params.period_id = filter.period_id;
-    if (filter.dungeon_id) params.dungeon_id = filter.dungeon_id;
-    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
-    const maxMobile = 250;
-    const defaultLimit = filter.limit ?? 1000;
-    const effectiveLimit = isMobile ? Math.min(defaultLimit, maxMobile) : defaultLimit;
-    params.limit = effectiveLimit;
+    let cancelled = false;
 
-    fetchTopKeys(params)
-      .then(async (data) => {
+    const seasonId = Number(filter.season_id);
+    const baseParams: TopKeyParams = { season_id: seasonId };
+    if (filter.period_id) baseParams.period_id = filter.period_id;
+    if (filter.dungeon_id) baseParams.dungeon_id = filter.dungeon_id;
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+    const maxMobileInitial = 250; // fast first paint on mobile
+    const targetLimit = filter.limit ?? 1000;
+    const initialLimit = isMobile ? Math.min(targetLimit, maxMobileInitial) : targetLimit;
+
+    (async () => {
+      try {
+        // First batch
+        const firstBatch = await fetchTopKeys({ ...baseParams, limit: initialLimit });
+
+        if (cancelled) return;
+
         // If no data and this is the latest season, fallback to previous season once
-        if ((Array.isArray(data) && data.length === 0) && fallbackTriedRef.current !== filter.season_id) {
+        if ((Array.isArray(firstBatch) && firstBatch.length === 0) && fallbackTriedRef.current !== filter.season_id) {
           try {
             type Season = { season_id: number; season_name?: string };
             const seasons = await fetchSeasons() as Season[];
@@ -78,13 +84,38 @@ export const HomePage: React.FC = () => {
             // If fallback fails, just proceed to set empty data
           }
         }
-        setApiData((data || []) as Run[]);
-      })
-      .catch(err => setApiError(err.message || 'API error'))
-      .finally(() => {
+
+        setApiData((firstBatch || []) as Run[]);
+        if (!hasBooted) setHasBooted(true);
+        setLoading(false); // render immediately with the first batch
+
+        // If we still need more (mobile requested Top 1000), fetch the rest in the background
+        if (initialLimit < targetLimit) {
+          const remaining = targetLimit - initialLimit;
+          try {
+            const rest = await fetchTopKeys({ ...baseParams, limit: remaining, offset: initialLimit });
+            if (cancelled) return;
+            const combined = [
+              ...((firstBatch || []) as Run[]),
+              ...((rest || []) as Run[]),
+            ];
+            setApiData(combined);
+          } catch (e) {
+            // Ignore background fetch errors; user still sees initial data
+            console.error('Background fetch (remaining runs) failed:', e);
+          }
+        }
+      } catch (err: any) {
+        if (cancelled) return;
+        setApiError(err?.message || 'API error');
         setLoading(false);
         if (!hasBooted) setHasBooted(true);
-      });
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [filter.season_id, filter.period_id, filter.dungeon_id, filter.limit, dispatch, hasBooted]);
 
   // Fetch season info (dungeons) for the home page only
@@ -104,21 +135,32 @@ export const HomePage: React.FC = () => {
         <p className="mb-2">We are under maintenance, please try again in a few minutes.</p>
         <button
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          onClick={() => {
+          onClick={async () => {
             setApiError(null);
             setLoading(true);
-            const params: TopKeyParams = { season_id: Number(filter.season_id) };
-            if (filter.period_id) params.period_id = filter.period_id;
-            if (filter.dungeon_id) params.dungeon_id = filter.dungeon_id;
+            const baseParams: TopKeyParams = { season_id: Number(filter.season_id) };
+            if (filter.period_id) baseParams.period_id = filter.period_id;
+            if (filter.dungeon_id) baseParams.dungeon_id = filter.dungeon_id;
             const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
-            const maxMobile = 250;
-            const defaultLimit = filter.limit ?? 1000;
-            const effectiveLimit = isMobile ? Math.min(defaultLimit, maxMobile) : defaultLimit;
-            params.limit = effectiveLimit;
-            fetchTopKeys(params)
-              .then(data => setApiData((data || []) as Run[]))
-              .catch(err => setApiError(err.message || 'API error'))
-              .finally(() => setLoading(false));
+            const maxMobileInitial = 250;
+            const targetLimit = filter.limit ?? 1000;
+            const initialLimit = isMobile ? Math.min(targetLimit, maxMobileInitial) : targetLimit;
+            try {
+              const first = await fetchTopKeys({ ...baseParams, limit: initialLimit });
+              setApiData((first || []) as Run[]);
+              setLoading(false);
+              if (initialLimit < targetLimit) {
+                try {
+                  const rest = await fetchTopKeys({ ...baseParams, limit: targetLimit - initialLimit, offset: initialLimit });
+                  setApiData([...(first || []), ...(rest || [])] as Run[]);
+                } catch (e) {
+                  console.error('Background fetch (remaining runs) failed:', e);
+                }
+              }
+            } catch (err: any) {
+              setApiError(err?.message || 'API error');
+              setLoading(false);
+            }
           }}
         >
           Try again
