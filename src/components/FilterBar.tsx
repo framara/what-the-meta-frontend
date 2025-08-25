@@ -3,7 +3,7 @@ import { useFilterState, useFilterDispatch } from './FilterContext';
 import { fetchSeasons, fetchSeasonInfo } from '../services/api';
 import { WOW_EXPANSIONS } from '../constants/wow-constants';
 import './styles/FilterBar.css';
-import toast from 'react-hot-toast';
+// defer toast loading until actually used
 
 interface FilterBarProps {
   showExpansion?: boolean;
@@ -191,8 +191,11 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           const prev = sortedByValue[1];
           if (prev) {
             const latestLabel = seasonOptions.find(s => s.value === latestSeasonId)?.label || `Season ${latestSeasonId}`;
-            toast.dismiss('season-fallback');
-            toast.success(`${latestLabel} has not started yet. Showing previous season instead.`, { id: 'season-fallback' });
+            import('react-hot-toast').then(m => {
+              const t: any = (m as any).default || (m as any).toast || m;
+              t.dismiss?.('season-fallback');
+              t.success?.(`${latestLabel} has not started yet. Showing previous season instead.`, { id: 'season-fallback' });
+            }).catch(() => {});
             dispatch({ type: 'SET_SEASON', season_id: prev.value });
             return; // bail out; effect will rerun
           }

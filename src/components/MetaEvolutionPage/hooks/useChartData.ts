@@ -3,7 +3,7 @@ import { fetchSeasons, fetchSpecEvolution } from '../../../services/api';
 import { processSpecEvolutionData } from '../utils/dataProcessing';
 import type { ChartDataState, SpecEvolutionData } from '../types';
 import { useFilterState, useFilterDispatch } from '../../FilterContext';
-import toast from 'react-hot-toast';
+// lazy toast usage
 
 // Cache for processed chart data
 const chartDataCache = new Map<number, ChartDataState>();
@@ -58,8 +58,11 @@ export const useChartData = () => {
           if (prev?.season_id) {
             const latest = sorted[0];
             const latestLabel = latest?.season_name || `Season ${seasonId}`;
-            toast.dismiss('season-fallback');
-            toast.success(`${latestLabel} has not started yet. Showing previous season instead.`, { id: 'season-fallback' });
+            import('react-hot-toast').then(m => {
+              const t: any = (m as any).default || (m as any).toast || m;
+              t.dismiss?.('season-fallback');
+              t.success?.(`${latestLabel} has not started yet. Showing previous season instead.`, { id: 'season-fallback' });
+            }).catch(() => {});
             fallbackTriedRef.current = seasonId;
             dispatch({ type: 'SET_SEASON', season_id: prev.season_id });
           }

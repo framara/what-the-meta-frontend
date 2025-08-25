@@ -5,7 +5,7 @@ import type { AIAnalysisResponse } from '../../services/aiService';
 import { PredictionDashboard } from './components/PredictionDashboard';
 import { AIAnalysisInsights } from './components/AIAnalysisInsights';
 import './styles/AIPredictionsPage.css';
-import toast from 'react-hot-toast';
+// lazy toast
 import SEO from '../SEO';
 import { useSeasonLabel } from '../../hooks/useSeasonLabel';
 import { AffixInsightsPanel } from './components/AffixInsightsPanel';
@@ -74,8 +74,11 @@ export const AIPredictionsPage: React.FC = () => {
             const latestLabel = sorted[0]?.season_name || `Season ${sorted[0].season_id}`;
             const prev = sorted[1];
             if (prev?.season_id) {
-              toast.dismiss('season-fallback');
-              toast.success(`${latestLabel} has not started yet. Showing previous season instead.`, { id: 'season-fallback' });
+              import('react-hot-toast').then(m => {
+                const t: any = (m as any).default || (m as any).toast || m;
+                t.dismiss?.('season-fallback');
+                t.success?.(`${latestLabel} has not started yet. Showing previous season instead.`, { id: 'season-fallback' });
+              }).catch(() => {});
               fallbackTriedRef.current = seasonId;
               setCurrentSeasonId(prev.season_id);
               return; // Trigger reload for previous season
@@ -111,8 +114,11 @@ export const AIPredictionsPage: React.FC = () => {
             const latestLabel = sorted[0]?.season_name || `Season ${sorted[0].season_id}`;
             const prev = sorted[1];
             if (prev?.season_id) {
-              toast.dismiss('season-fallback');
-              toast.success(`${latestLabel} has not started yet. Showing previous season instead.`, { id: 'season-fallback' });
+              import('react-hot-toast').then(m => {
+                const t: any = (m as any).default || (m as any).toast || m;
+                t.dismiss?.('season-fallback');
+                t.success?.(`${latestLabel} has not started yet. Showing previous season instead.`, { id: 'season-fallback' });
+              }).catch(() => {});
               fallbackTriedRef.current = currentSeasonId;
               setCurrentSeasonId(prev.season_id);
               setLoading(false);

@@ -5,7 +5,7 @@ import { LeaderboardTable } from './LeaderboardTable';
 import { SummaryStats } from './SummaryStats';
 import LoadingScreen from '../components/LoadingScreen';
 import { Link } from 'react-router-dom';
-import toast from 'react-hot-toast';
+// no eager toast import; we'll load it on demand when needed
 import { fetchTopKeys, fetchSeasonInfo, fetchSeasons } from '../services/api';
 import type { TopKeyParams } from '../services/api';
 
@@ -73,8 +73,11 @@ export const HomePage: React.FC = () => {
               const prev = sorted[1];
               if (prev?.season_id) {
                 const latestLabel = sorted[0]?.season_name || `Season ${latestId}`;
-                toast.dismiss('season-fallback');
-                toast.success(`${latestLabel} has not started yet. Showing previous season instead.`, { id: 'season-fallback' });
+                import('react-hot-toast').then(m => {
+                  const t: any = (m as any).default || (m as any).toast || m;
+                  t.dismiss?.('season-fallback');
+                  t.success?.(`${latestLabel} has not started yet. Showing previous season instead.`, { id: 'season-fallback' });
+                }).catch(() => {/* ignore */});
                 fallbackTriedRef.current = filter.season_id ?? null;
                 dispatch({ type: 'SET_SEASON', season_id: prev.season_id });
                 return; // effect will re-run with the new season
@@ -171,7 +174,7 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4">
-      <FilterBar 
+      <FilterBar
         showExpansion={false}
         showPeriod={true}
         showDungeon={true}
@@ -182,10 +185,10 @@ export const HomePage: React.FC = () => {
         Looking for the latest meta? Check out{' '}
         <Link to="/wow-meta-season-3" className="text-blue-400 hover:underline">WoW Meta — TWW Season 3</Link>.
       </div>
-      <div className="cv-auto">
+      <div>
         <SummaryStats runs={apiData || []} dungeons={dungeons} />
       </div>
-      <div className="cv-auto-table">
+      <div>
         <LeaderboardTable runs={apiData || []} dungeons={dungeons} loading={loading} />
       </div>
       {!loading && (!apiData || apiData.length === 0) && (
