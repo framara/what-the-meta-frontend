@@ -1,50 +1,54 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/wtm.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <!-- Primary Meta Tags -->
-    <title>What the Meta? - WoW Mythic+ Leaderboard & Meta Analysis Tool</title>
-    <meta name="description" content="Track World of Warcraft Mythic+ leaderboards, analyze group compositions, spec popularity, and meta evolution. Real-time data for WoW M+ runs, class rankings, and dungeon statistics." />
-    <meta name="keywords" content="World of Warcraft, WoW, Mythic+, M+, leaderboard, meta analysis, group composition, spec popularity, dungeon runs, class rankings, WoW M+ tool" />
-    <meta name="author" content="What the Meta?" />
-    <meta name="robots" content="index, follow" />
-    <meta name="language" content="English" />
-    
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/wtm.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Primary Meta Tags -->
+  <title>What the Meta? - WoW Mythic+ Leaderboard & Meta Analysis Tool</title>
+  <meta name="description"
+    content="Track World of Warcraft Mythic+ leaderboards, analyze group compositions, spec popularity, and meta evolution. Real-time data for WoW M+ runs, class rankings, and dungeon statistics." />
+  <meta name="keywords"
+    content="World of Warcraft, WoW, Mythic+, M+, leaderboard, meta analysis, group composition, spec popularity, dungeon runs, class rankings, WoW M+ tool" />
+  <meta name="author" content="What the Meta?" />
+  <meta name="robots" content="index, follow" />
+  <meta name="language" content="English" />
+
   <!-- Canonical URL is injected at runtime per-route.
        We intentionally do NOT ship a default canonical here to avoid
        mis-canonicalizing all SPA routes to the homepage in raw HTML. -->
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://whatthemeta.io" />
-    <meta property="og:title" content="What the Meta? - WoW Mythic+ Leaderboard & Meta Analysis" />
-    <meta property="og:description" content="Track World of Warcraft Mythic+ leaderboards, analyze group compositions, spec popularity, and meta evolution. Real-time data for WoW M+ runs." />
-    <meta property="og:image" content="https://whatthemeta.io/og-image.jpg" />
-    <meta property="og:site_name" content="What the Meta?" />
-    <meta property="og:locale" content="en_US" />
-    
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://whatthemeta.io" />
-    <meta property="twitter:title" content="What the Meta? - WoW Mythic+ Leaderboard & Meta Analysis" />
-    <meta property="twitter:description" content="Track World of Warcraft Mythic+ leaderboards, analyze group compositions, spec popularity, and meta evolution." />
-    <meta property="twitter:image" content="https://whatthemeta.io/twitter-image.jpg" />
-    
-    <!-- Additional SEO Meta Tags -->
-    <meta name="theme-color" content="#1a1a1a" />
-    <meta name="msapplication-TileColor" content="#1a1a1a" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="What the Meta?" />
-    
-  <!-- Preconnect to external domains for performance -->
-  <link rel="preconnect" href="https://www.googletagmanager.com" />
-    
-    <!-- Structured Data for Rich Snippets -->
-    <script type="application/ld+json">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://whatthemeta.io" />
+  <meta property="og:title" content="What the Meta? - WoW Mythic+ Leaderboard & Meta Analysis" />
+  <meta property="og:description"
+    content="Track World of Warcraft Mythic+ leaderboards, analyze group compositions, spec popularity, and meta evolution. Real-time data for WoW M+ runs." />
+  <meta property="og:image" content="https://whatthemeta.io/og-image.jpg" />
+  <meta property="og:site_name" content="What the Meta?" />
+  <meta property="og:locale" content="en_US" />
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://whatthemeta.io" />
+  <meta property="twitter:title" content="What the Meta? - WoW Mythic+ Leaderboard & Meta Analysis" />
+  <meta property="twitter:description"
+    content="Track World of Warcraft Mythic+ leaderboards, analyze group compositions, spec popularity, and meta evolution." />
+  <meta property="twitter:image" content="https://whatthemeta.io/twitter-image.jpg" />
+
+  <!-- Additional SEO Meta Tags -->
+  <meta name="theme-color" content="#1a1a1a" />
+  <meta name="msapplication-TileColor" content="#1a1a1a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="What the Meta?" />
+
+  <!-- Keep head lean: GA is loaded idle via script, no preconnect needed to avoid early network contention. -->
+
+  <!-- Structured Data for Rich Snippets -->
+  <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
@@ -75,9 +79,9 @@
       }
     }
     </script>
-    
-    <!-- Additional Structured Data for Gaming Website -->
-    <script type="application/ld+json">
+
+  <!-- Additional Structured Data for Gaming Website -->
+  <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
@@ -94,9 +98,9 @@
       ]
     }
     </script>
-    
-    <!-- FAQ Schema for Better SEO -->
-    <script type="application/ld+json">
+
+  <!-- FAQ Schema for Better SEO -->
+  <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "FAQPage",
@@ -128,9 +132,9 @@
       ]
     }
     </script>
-    
-    <!-- Breadcrumb Schema (site-level, only include valid live URLs) -->
-    <script type="application/ld+json">
+
+  <!-- Breadcrumb Schema (site-level, only include valid live URLs) -->
+  <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
@@ -141,63 +145,68 @@
     }
     </script>
 
-    <!-- Normalize canonical and social URL tags for SPA routes -->
-    <script>
-      (function () {
-        try {
-          var href = window.location.origin + window.location.pathname; // exclude query to avoid duplicate canonicals
-          // Canonical
-          var canonical = document.querySelector('link[rel="canonical"]');
-          if (!canonical) {
-            canonical = document.createElement('link');
-            canonical.setAttribute('rel', 'canonical');
-            document.head.appendChild(canonical);
-          }
-          canonical.setAttribute('href', href);
-
-          // OpenGraph/Twitter URL
-          var og = document.querySelector('meta[property="og:url"]');
-          if (og) og.setAttribute('content', href);
-          var tw = document.querySelector('meta[property="twitter:url"]');
-          if (tw) tw.setAttribute('content', href);
-        } catch (e) {
-          /* no-op */
+  <!-- Normalize canonical and social URL tags for SPA routes -->
+  <script>
+    (function () {
+      try {
+        var href = window.location.origin + window.location.pathname; // exclude query to avoid duplicate canonicals
+        // Canonical
+        var canonical = document.querySelector('link[rel="canonical"]');
+        if (!canonical) {
+          canonical = document.createElement('link');
+          canonical.setAttribute('rel', 'canonical');
+          document.head.appendChild(canonical);
         }
-      })();
-    </script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-    
-    <!-- Google Analytics -->
+        canonical.setAttribute('href', href);
+
+        // OpenGraph/Twitter URL
+        var og = document.querySelector('meta[property="og:url"]');
+        if (og) og.setAttribute('content', href);
+        var tw = document.querySelector('meta[property="twitter:url"]');
+        if (tw) tw.setAttribute('content', href);
+      } catch (e) {
+        /* no-op */
+      }
+    })();
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Google Analytics: defer until user interaction or idle to avoid unused JS on initial paint -->
     <script type="module">
-      // Initialize Google Analytics
       const gaId = import.meta.env.VITE_GA_MEASUREMENT_ID;
-      if (gaId && gaId !== 'G-XXXXXXXXXX') {
+      const DNT = navigator.doNotTrack === '1' || window.doNotTrack === '1' || navigator.msDoNotTrack === '1';
+      if (gaId && gaId !== 'G-XXXXXXXXXX' && !DNT) {
+        let loaded = false;
         const loadGA = () => {
-          const script = document.createElement('script');
-          script.async = true;
-          script.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
-          document.head.appendChild(script);
-          
-          // Initialize gtag
+          if (loaded) return; loaded = true;
+          const s = document.createElement('script');
+          s.async = true;
+          s.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
+          document.head.appendChild(s);
+
           window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);} 
+          function gtag(){window.dataLayer.push(arguments);} 
           gtag('js', new Date());
           gtag('config', gaId);
-          
-          // Make gtag available globally
           window.gtag = gtag;
+
+          window.removeEventListener('pointerdown', loadGA);
+          window.removeEventListener('keydown', loadGA);
+          window.removeEventListener('scroll', loadGA);
         };
 
-        if ('requestIdleCallback' in window) {
-          // @ts-ignore
-          requestIdleCallback(loadGA, { timeout: 2000 });
-        } else {
-          setTimeout(loadGA, 1200);
-        }
+        // Prefer true user intent; fallback to idle; final fallback after 8s
+        window.addEventListener('pointerdown', loadGA, { once: true });
+        window.addEventListener('keydown', loadGA, { once: true });
+        window.addEventListener('scroll', loadGA, { once: true, passive: true });
+        // @ts-ignore
+        const ric = window.requestIdleCallback ? window.requestIdleCallback(loadGA, { timeout: 4000 }) : setTimeout(loadGA, 8000);
       }
     </script>
-  </body>
+</body>
+
 </html>

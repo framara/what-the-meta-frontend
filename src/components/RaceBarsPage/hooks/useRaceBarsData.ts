@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { fetchSeasons, fetchSpecEvolution } from '../../../services/api';
 import { useFilterDispatch } from '../../FilterContext';
-import toast from 'react-hot-toast';
+// lazy toast import when needed
 import { 
   WOW_SPECIALIZATIONS, 
   WOW_SPEC_TO_CLASS, 
@@ -236,8 +236,11 @@ export const useRaceBarsData = (
           if (prev?.season_id) {
             const latest = sorted[0];
             const latestLabel = latest?.season_name || `Season ${season_id}`;
-            toast.dismiss('season-fallback');
-            toast.success(`${latestLabel} has not started yet. Showing previous season instead.`, { id: 'season-fallback' });
+            import('react-hot-toast').then(m => {
+              const t: any = (m as any).default || (m as any).toast || m;
+              t.dismiss?.('season-fallback');
+              t.success?.(`${latestLabel} has not started yet. Showing previous season instead.`, { id: 'season-fallback' });
+            }).catch(() => {});
             fallbackTriedRef.current = season_id;
             dispatch({ type: 'SET_SEASON', season_id: prev.season_id });
             return;
