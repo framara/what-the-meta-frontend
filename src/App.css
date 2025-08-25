@@ -258,12 +258,17 @@ body {
   font-family: 'Inter Variable', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
+  /* Stabilize fallback text size until Inter loads to reduce CLS */
+  font-size-adjust: 0.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
   min-height: 100vh;
   color: #f8fafc;
 }
+
+/* Always reserve vertical scrollbar space to avoid horizontal reflow on first layout */
+html { overflow-y: scroll; }
 
 /* Enhanced header styling */
 header {

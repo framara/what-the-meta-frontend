@@ -47,29 +47,44 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
   // API base URL (duplicate of services value to avoid generating analysis here)
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
-  // Load latest cutoff snapshot for current season (default region: US)
+  // Load latest cutoff snapshot for current season (default region: US) — defer until idle
   useEffect(() => {
     const seasonSlug = getRaiderIoSeasonSlug(filter?.season_id);
     if (!seasonSlug) {
       setCutoffScores({ us: null, eu: null });
       return;
     }
-    setCutoffLoading(true);
-    Promise.allSettled([
-      fetchCutoffLatest(seasonSlug, 'us'),
-      fetchCutoffLatest(seasonSlug, 'eu')
-    ])
-      .then(results => {
-        const parse = (v: any): number | null => {
-          const num = v?.cutoff_score == null ? null : Number(v.cutoff_score);
-          return typeof num === 'number' && Number.isFinite(num) ? num : null;
-        };
-        const us = results[0].status === 'fulfilled' ? parse(results[0].value) : null;
-        const eu = results[1].status === 'fulfilled' ? parse(results[1].value) : null;
-        setCutoffScores({ us, eu });
-      })
-      .catch(() => setCutoffScores({ us: null, eu: null }))
-      .finally(() => setCutoffLoading(false));
+    let cancelled = false;
+    let timeoutId: number | undefined;
+    // @ts-ignore
+    const ric = (window as any).requestIdleCallback as undefined | ((cb: () => void, opts?: any) => number);
+    const run = () => {
+      if (cancelled) return;
+      setCutoffLoading(true);
+      Promise.allSettled([
+        fetchCutoffLatest(seasonSlug, 'us'),
+        fetchCutoffLatest(seasonSlug, 'eu')
+      ])
+        .then(results => {
+          const parse = (v: any): number | null => {
+            const num = v?.cutoff_score == null ? null : Number(v.cutoff_score);
+            return typeof num === 'number' && Number.isFinite(num) ? num : null;
+          };
+          const us = results[0].status === 'fulfilled' ? parse(results[0].value) : null;
+          const eu = results[1].status === 'fulfilled' ? parse(results[1].value) : null;
+          if (!cancelled) setCutoffScores({ us, eu });
+        })
+        .catch(() => { if (!cancelled) setCutoffScores({ us: null, eu: null }); })
+        .finally(() => { if (!cancelled) setCutoffLoading(false); });
+    };
+    if (typeof ric === 'function') {
+      // @ts-ignore
+      const id = ric(run, { timeout: 2000 });
+      timeoutId = id as unknown as number;
+    } else {
+      timeoutId = window.setTimeout(run, 1500);
+    }
+    return () => { cancelled = true; if (timeoutId) clearTimeout(timeoutId); };
   }, [filter?.season_id]);
 
   // Derive display label and class for Meta Health card
@@ -108,7 +123,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
     return () => { cancelled = true; };
   }, [filter?.season_id, filter?.period_id]);
 
-  // Load cached Meta Health analysis (do not trigger generation). If missing, keep null.
+  // Load cached Meta Health analysis (do not trigger generation). Defer until idle to keep first paint lean.
   useEffect(() => {
     const seasonId = Number(filter?.season_id);
     if (!seasonId) {
@@ -117,20 +132,33 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
       return;
     }
     let cancelled = false;
-    setMetaHealthLoading(true);
-    axios
-      .get(`${API_BASE_URL}/ai/analysis/${seasonId}?type=meta_health`)
-      .then((res) => {
-        const overall = res?.data?.metaSummary?.overallState;
-        const ci = res?.data?._cache;
-        if (!cancelled) {
-          setMetaHealthOverall(typeof overall === 'string' ? overall : null);
-          setMetaHealthCacheInfo(ci && typeof ci === 'object' ? ci : null);
-        }
-      })
-      .catch(() => { if (!cancelled) { setMetaHealthOverall(null); setMetaHealthCacheInfo(null); } })
-      .finally(() => { if (!cancelled) setMetaHealthLoading(false); });
-    return () => { cancelled = true; };
+    let timeoutId: number | undefined;
+    const run = () => {
+      if (cancelled) return;
+      setMetaHealthLoading(true);
+      axios
+        .get(`${API_BASE_URL}/ai/analysis/${seasonId}?type=meta_health`)
+        .then((res) => {
+          const overall = res?.data?.metaSummary?.overallState;
+          const ci = res?.data?._cache;
+          if (!cancelled) {
+            setMetaHealthOverall(typeof overall === 'string' ? overall : null);
+            setMetaHealthCacheInfo(ci && typeof ci === 'object' ? ci : null);
+          }
+        })
+        .catch(() => { if (!cancelled) { setMetaHealthOverall(null); setMetaHealthCacheInfo(null); } })
+        .finally(() => { if (!cancelled) setMetaHealthLoading(false); });
+    };
+    // @ts-ignore
+    const ric = (window as any).requestIdleCallback as undefined | ((cb: () => void, opts?: any) => number);
+    if (typeof ric === 'function') {
+      // @ts-ignore
+      const id = ric(run, { timeout: 2500 });
+      timeoutId = id as unknown as number;
+    } else {
+      timeoutId = window.setTimeout(run, 1800);
+    }
+    return () => { cancelled = true; if (timeoutId) clearTimeout(timeoutId); };
   }, [filter?.season_id]);
 
   // Top runs (reflect the filter's selected Top N, not the returned rows count)

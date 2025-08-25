@@ -100,6 +100,9 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  line-height: 1.2;
+  /* Reserve space to avoid layout shift when the word width changes (e.g., Concerning vs Healthy) */
+  min-height: 2.2rem;
 }
 
 /* State color overrides for Meta Health card */
