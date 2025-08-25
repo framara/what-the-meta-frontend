@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { useFilterDispatch, useFilterState } from './FilterContext';
 import { FilterBar } from './FilterBar';
-import { LeaderboardTable } from './LeaderboardTable';
-import { SummaryStats } from './SummaryStats';
+// Lazy-load heavy components to trim initial JS, especially for mobile
+const SummaryStats = React.lazy(() => import('./SummaryStats').then(m => ({ default: m.SummaryStats })));
+const LeaderboardTable = React.lazy(() => import('./LeaderboardTable').then(m => ({ default: m.LeaderboardTable })));
 import LoadingScreen from '../components/LoadingScreen';
 import { Link } from 'react-router-dom';
 // no eager toast import; we'll load it on demand when needed
@@ -186,10 +187,62 @@ export const HomePage: React.FC = () => {
         <Link to="/wow-meta-season-3" className="text-blue-400 hover:underline">WoW Meta — TWW Season 3</Link>.
       </div>
       <div>
-        <SummaryStats runs={apiData || []} dungeons={dungeons} />
+        <Suspense
+          fallback={
+            <div className="w-full" style={{ minHeight: 220 }}>
+              {/* lightweight placeholder to reserve space and avoid CLS */}
+              <div className="skeleton skeleton-bar mb-2" style={{ width: '40%' }} />
+              <div className="skeleton skeleton-bar mb-2" style={{ width: '60%' }} />
+              <div className="skeleton skeleton-bar" style={{ width: '50%' }} />
+            </div>
+          }
+        >
+          <SummaryStats runs={apiData || []} dungeons={dungeons} />
+        </Suspense>
       </div>
       <div>
-        <LeaderboardTable runs={apiData || []} dungeons={dungeons} loading={loading} />
+        <Suspense
+          fallback={
+            <div className="leaderboard-table-container" aria-busy="true">
+              <table className="leaderboard-table">
+                <thead>
+                  <tr>
+                    <th className="table-cell rank-cell">Rank</th>
+                    <th className="md:hidden">Key</th>
+                    <th className="hidden md:table-cell">Key</th>
+                    <th className="hidden md:table-cell">Dungeon</th>
+                    <th className="hidden md:table-cell">Score</th>
+                    <th className="hidden md:table-cell">Time</th>
+                    <th className="hidden md:table-cell">Date</th>
+                    <th className="table-cell">Group</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.from({ length: 12 }).map((_, i) => (
+                    <tr key={`lazy-skeleton-${i}`}>
+                      <td className="table-cell rank-cell"><div className="skeleton skeleton-bar tiny" /></td>
+                      <td className="md:hidden"><div className="skeleton skeleton-bar" /></td>
+                      <td className="hidden md:table-cell"><div className="skeleton skeleton-bar short" /></td>
+                      <td className="hidden md:table-cell"><div className="skeleton skeleton-bar" /></td>
+                      <td className="hidden md:table-cell"><div className="skeleton skeleton-bar short" /></td>
+                      <td className="hidden md:table-cell"><div className="skeleton skeleton-bar tiny" /></td>
+                      <td className="hidden md:table-cell"><div className="skeleton skeleton-bar tiny" /></td>
+                      <td className="table-cell">
+                        <div className="saas-group-squares">
+                          {Array.from({ length: 5 }).map((__, j) => (
+                            <div key={j} className="skeleton skeleton-square" />
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          }
+        >
+          <LeaderboardTable runs={apiData || []} dungeons={dungeons} loading={loading} />
+        </Suspense>
       </div>
       {!loading && (!apiData || apiData.length === 0) && (
         <div className="flex flex-col items-center justify-center py-16 text-center">

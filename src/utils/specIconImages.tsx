@@ -95,6 +95,10 @@ export const SpecIconImage: React.FC<{
       alt={specName}
       width={80}
       height={80}
+  loading="lazy"
+  decoding="async"
+  // these icons are not LCP; lower priority helps slow networks
+  fetchPriority="low"
       className={className}
       style={{
         width: '100%',
