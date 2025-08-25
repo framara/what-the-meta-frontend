@@ -261,8 +261,31 @@
     overflow: hidden
 }
 
-.tier-row:last-child {
-    border-bottom: none
+.tier-row:first-child {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.tier-row:first-child .tier-label {
+    border-top-left-radius: 8px;
+}
+
+.tier-row:first-child .tier-icons {
+    border-top-right-radius: 8px;
+}
+
+.tier-row:last-of-type {
+    border-bottom: none;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.tier-row:last-of-type .tier-label {
+    border-bottom-left-radius: 8px;
+}
+
+.tier-row:last-of-type .tier-icons {
+    border-bottom-right-radius: 8px;
 }
 
 .tier-row::before,
@@ -520,7 +543,74 @@
 }
 
 /* Mobile responsive styles */
-@media (max-width: 480px) {
+@media (max-width: 768px) {
+    .ai-tier-page {
+        padding: 0.75rem;
+        border-radius: 12px;
+        margin: 0.5rem;
+    }
+
+    .dashboard-title {
+        font-size: 1.75rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .dashboard-subtitle {
+        font-size: 1rem;
+        padding: 0 0.5rem;
+    }
+
+    .tiers-table {
+        margin: 2rem 0.5rem 1rem;
+    }
+
+    .tier-row {
+        grid-template-columns: 70px 1fr;
+    }
+
+    .tier-row:first-child {
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+
+    .tier-row:first-child .tier-label {
+        border-top-left-radius: 8px;
+    }
+
+    .tier-row:first-child .tier-icons {
+        border-top-right-radius: 8px;
+    }
+
+    .tier-row:last-of-type {
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+    }
+
+    .tier-row:last-of-type .tier-label {
+        border-bottom-left-radius: 8px;
+    }
+
+    .tier-row:last-of-type .tier-icons {
+        border-bottom-right-radius: 8px;
+    }
+
+    .tier-label {
+        font-size: 2.2rem;
+        min-height: 70px;
+    }
+
+    .tier-icons {
+        padding: 0.75rem;
+        gap: 0.4rem;
+    }
+
+    .spec-chip {
+        width: 56px;
+        height: 56px;
+        border-radius: 8px;
+    }
+
     .ai-robot-buddy {
         top: auto;
         bottom: 12px;
@@ -529,34 +619,24 @@
         flex-direction: row;
     }
 
-    .ai-tier-page {
-        padding: 1rem;
-        border-radius: 12px;
+    .ai-robot-emoji {
+        font-size: 1.5rem;
     }
 
-    .tier-row {
-        grid-template-columns: 60px 1fr;
+    .ai-robot-bubble {
+        padding: 4px 8px;
     }
 
-    .tier-label {
-        font-size: 2rem;
-        min-height: 60px;
-    }
-
-    .tier-icons {
-        padding: 0.75rem;
-    }
-
-    .spec-chip {
-        width: 48px;
-        height: 48px;
+    .ai-robot-msg {
+        font-size: 0.7rem;
     }
 
     .spec-tooltip {
         font-size: 0.8rem;
         padding: 0.5rem 0.75rem;
         white-space: normal;
-        max-width: 200px;
+        max-width: 220px;
+        text-align: center;
     }
 
     .ai-tier-timestamp {
@@ -565,5 +645,107 @@
         margin-top: 1rem;
         padding: 0.5rem;
         font-size: 11px;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .ai-tier-page {
+        padding: 0.5rem;
+        margin: 0.25rem;
+    }
+
+    .dashboard-title {
+        font-size: 1.5rem;
+    }
+
+    .dashboard-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .tiers-table {
+        margin: 1.5rem 0.5rem 1rem;
+    }
+
+    .tier-row {
+        grid-template-columns: 60px 1fr;
+    }
+
+    .tier-row:first-child {
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+
+    .tier-row:first-child .tier-label {
+        border-top-left-radius: 8px;
+    }
+
+    .tier-row:first-child .tier-icons {
+        border-top-right-radius: 8px;
+    }
+
+    .tier-row:last-of-type {
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+    }
+
+    .tier-row:last-of-type .tier-label {
+        border-bottom-left-radius: 8px;
+    }
+
+    .tier-row:last-of-type .tier-icons {
+        border-bottom-right-radius: 8px;
+    }
+
+    .tier-label {
+        font-size: 1.8rem;
+        min-height: 60px;
+    }
+
+    .tier-icons {
+        padding: 0.5rem;
+        gap: 0.3rem;
+    }
+
+    .spec-chip {
+        width: 48px;
+        height: 48px;
+        border-radius: 6px;
+        border-width: 2px;
+    }
+
+    .spec-chip:hover {
+        transform: scale(1.08);
+    }
+
+    .ai-robot-emoji {
+        font-size: 1.25rem;
+    }
+
+    .spec-tooltip {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.6rem;
+        max-width: 180px;
+    }
+
+    .ai-tier-timestamp {
+        font-size: 10px;
+        padding: 0.4rem;
+    }
+
+    /* Make touch targets larger for mobile */
+    .spec-chip {
+        position: relative;
+    }
+
+    .spec-chip::before {
+        content: '';
+        position: absolute;
+        top: -8px;
+        left: -8px;
+        right: -8px;
+        bottom: -8px;
+        z-index: 1;
     }
 }

@@ -144,6 +144,18 @@ export const AITierListPage: React.FC = () => {
           });
         }}
         onMouseLeave={() => setSpecTooltip(null)}
+        // Add touch support for mobile
+        onTouchStart={(event: React.TouchEvent) => {
+          const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+          setSpecTooltip({
+            x: rect.left + rect.width / 2,
+            y: rect.top,
+            content: tooltipContent,
+            color: classColor,
+          });
+          // Auto-hide tooltip after 2 seconds on mobile
+          setTimeout(() => setSpecTooltip(null), 2000);
+        }}
       >
         <div className="icon"><SpecIconImage specId={e.specId} /></div>
       </div>
