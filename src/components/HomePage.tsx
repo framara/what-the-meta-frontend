@@ -50,10 +50,10 @@ export const HomePage: React.FC = () => {
     const baseParams: TopKeyParams = { season_id: seasonId };
     if (filter.period_id) baseParams.period_id = filter.period_id;
     if (filter.dungeon_id) baseParams.dungeon_id = filter.dungeon_id;
-    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
-    const maxMobileInitial = 250; // fast first paint on mobile
-    const targetLimit = filter.limit ?? 1000;
-    const initialLimit = isMobile ? Math.min(targetLimit, maxMobileInitial) : targetLimit;
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+  const maxInitial = 250; // keep first payload small for faster paint on all devices
+  const targetLimit = filter.limit ?? 1000;
+  const initialLimit = Math.min(targetLimit, maxInitial);
 
     (async () => {
       try {
@@ -92,8 +92,8 @@ export const HomePage: React.FC = () => {
         if (!hasBooted) setHasBooted(true);
         setLoading(false); // render immediately with the first batch
 
-        // If we still need more (mobile requested Top 1000), fetch the rest in the background
-        if (initialLimit < targetLimit) {
+  // Fetch the remaining rows in the background for a smooth progressive experience
+  if (initialLimit < targetLimit) {
           const remaining = targetLimit - initialLimit;
           try {
             const rest = await fetchTopKeys({ ...baseParams, limit: remaining, offset: initialLimit });

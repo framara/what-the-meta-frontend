@@ -175,7 +175,7 @@
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
 
-    <!-- Google Analytics: defer until user interaction or idle to avoid unused JS on initial paint -->
+  <!-- Google Analytics: load only on explicit user interaction -->
     <script type="module">
       const gaId = import.meta.env.VITE_GA_MEASUREMENT_ID;
       const DNT = navigator.doNotTrack === '1' || window.doNotTrack === '1' || navigator.msDoNotTrack === '1';
@@ -196,15 +196,11 @@
 
           window.removeEventListener('pointerdown', loadGA);
           window.removeEventListener('keydown', loadGA);
-          window.removeEventListener('scroll', loadGA);
         };
 
-        // Prefer true user intent; fallback to idle; final fallback after 8s
+    // Load only after an explicit user action
         window.addEventListener('pointerdown', loadGA, { once: true });
         window.addEventListener('keydown', loadGA, { once: true });
-        window.addEventListener('scroll', loadGA, { once: true, passive: true });
-        // @ts-ignore
-        const ric = window.requestIdleCallback ? window.requestIdleCallback(loadGA, { timeout: 4000 }) : setTimeout(loadGA, 8000);
       }
     </script>
 </body>
