@@ -1,4 +1,14 @@
 import axios from 'axios';
+import type {
+  TopKeyParams,
+  TopKeysResponse,
+  AllSeasonsParams,
+  SeasonInfo,
+  MythicKeystoneRun,
+  CompositionData,
+  Season,
+  CutoffSnapshot
+} from '../types/api';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
@@ -9,14 +19,9 @@ const API_CACHE_TTL_MS: number = (() => {
   return Number.isFinite(v) && v > 0 ? v : 5 * 60 * 1000; // 5 minutes
 })();
 
-type SeasonInfo = {
-  periods: Array<{ period_id: number; period_name: string }>;
-  dungeons: Array<{ dungeon_id: number; dungeon_name: string }>;
-};
-
 type CacheEntry<T> = { data: T; ts: number };
 
-const seasonsCache: { entry: CacheEntry<any> | null; inflight: Promise<any> | null } = {
+const seasonsCache: { entry: CacheEntry<Season[]> | null; inflight: Promise<Season[]> | null } = {
   entry: null,
   inflight: null,
 };
@@ -24,8 +29,30 @@ const seasonsCache: { entry: CacheEntry<any> | null; inflight: Promise<any> | nu
 const seasonInfoCache = new Map<number, CacheEntry<SeasonInfo>>();
 const seasonInfoInflight = new Map<number, Promise<SeasonInfo>>();
 
+// Global request deduplication cache
+const inflightRequests = new Map<string, Promise<any>>();
+
 function isFresh(ts: number): boolean {
   return Date.now() - ts < API_CACHE_TTL_MS;
+}
+
+// Request deduplication helper
+function deduplicateRequest<T>(key: string, requestFn: () => Promise<T>): Promise<T> {
+  // Check if request is already in flight
+  if (inflightRequests.has(key)) {
+    console.log(`API: Deduplicating request for key: ${key}`);
+    return inflightRequests.get(key) as Promise<T>;
+  }
+
+  // Create new request and store it
+  const request = requestFn()
+    .finally(() => {
+      // Clean up after request completes
+      inflightRequests.delete(key);
+    });
+
+  inflightRequests.set(key, request);
+  return request;
 }
 
 export function invalidateSeasonsCache() {
@@ -40,33 +67,31 @@ export function invalidateSeasonInfoCache(seasonId?: number) {
   }
 }
 
-export interface TopKeyParams {
-  season_id: number;
-  period_id?: number;
-  dungeon_id?: number;
-  limit?: number;
-  offset?: number;
+
+
+export async function fetchTopKeys(params: TopKeyParams): Promise<TopKeysResponse> {
+  const requestKey = `top-keys-${JSON.stringify(params)}`;
+  
+  return deduplicateRequest(requestKey, async () => {
+    const searchParams = new URLSearchParams();
+    searchParams.append('season_id', params.season_id.toString());
+    if (params.period_id) searchParams.append('period_id', params.period_id.toString());
+    if (params.dungeon_id) searchParams.append('dungeon_id', params.dungeon_id.toString());
+    if (params.limit) searchParams.append('limit', params.limit.toString());
+    if (params.offset) searchParams.append('offset', params.offset.toString());
+
+    const url = `${API_BASE_URL}/meta/top-keys?${searchParams.toString()}`;
+    console.log('API: fetchTopKeys executing request:', url);
+    
+    const response = await axios.get<TopKeysResponse>(url, { 
+      timeout: 10000 // 10 second timeout
+    });
+    
+    return response.data;
+  });
 }
 
-export async function fetchTopKeys(params: TopKeyParams) {
-  const searchParams = new URLSearchParams();
-  searchParams.append('season_id', params.season_id.toString());
-  if (params.period_id) searchParams.append('period_id', params.period_id.toString());
-  if (params.dungeon_id) searchParams.append('dungeon_id', params.dungeon_id.toString());
-  if (params.limit) searchParams.append('limit', params.limit.toString());
-  if (params.offset) searchParams.append('offset', params.offset.toString());
 
-  const url = `${API_BASE_URL}/meta/top-keys?${searchParams.toString()}`;
-  const response = await axios.get(url, { timeout: 10000 }); // 10 second timeout
-  return response.data;
-}
-
-export interface AllSeasonsParams {
-  period_id?: number;
-  dungeon_id?: number;
-  limit?: number;
-  offset?: number;
-}
 
 export async function fetchTopKeysAllSeasons(params: AllSeasonsParams) {
   const searchParams = new URLSearchParams();
@@ -108,41 +133,45 @@ export async function fetchSeasonData(seasonId: number) {
 
 // New: Fetch composition data optimized for group composition analysis
 export async function fetchCompositionData(seasonId: number) {
-  console.log('API: fetchCompositionData called with seasonId:', seasonId);
-  const url = `${API_BASE_URL}/meta/composition-data/${seasonId}`;
-  console.log('API: fetchCompositionData URL:', url);
-  try {
-    const response = await axios.get(url);
-    console.log('API: fetchCompositionData response received:', {
-      status: response.status,
-      hasData: !!response.data,
-      dataKeys: Object.keys(response.data || {}),
-      periodsCount: response.data?.periods?.length || 0
-    });
-    return response.data as {
-      season_id: number;
-      total_periods: number;
-      total_keys: number;
-      periods: Array<{
-        period_id: number;
-        keys_count: number;
-        keys: Array<{
-          id: number;
-          keystone_level: number;
-          score: number;
-          members: Array<{
-            spec_id: string;
-            class_id: string;
-            role: string;
+  const requestKey = `composition-data-${seasonId}`;
+  
+  return deduplicateRequest(requestKey, async () => {
+    console.log('API: fetchCompositionData called with seasonId:', seasonId);
+    const url = `${API_BASE_URL}/meta/composition-data/${seasonId}`;
+    console.log('API: fetchCompositionData URL:', url);
+    try {
+      const response = await axios.get(url);
+      console.log('API: fetchCompositionData response received:', {
+        status: response.status,
+        hasData: !!response.data,
+        dataKeys: Object.keys(response.data || {}),
+        periodsCount: response.data?.periods?.length || 0
+      });
+      return response.data as {
+        season_id: number;
+        total_periods: number;
+        total_keys: number;
+        periods: Array<{
+          period_id: number;
+          keys_count: number;
+          keys: Array<{
+            id: number;
+            keystone_level: number;
+            score: number;
+            members: Array<{
+              spec_id: string;
+              class_id: string;
+              role: string;
+            }>;
+            [key: string]: any;
           }>;
-          [key: string]: any;
         }>;
-      }>;
-    };
-  } catch (error) {
-    console.error('API: fetchCompositionData error:', error);
-    throw error;
-  }
+      };
+    } catch (error) {
+      console.error('API: fetchCompositionData error:', error);
+      throw error;
+    }
+  });
 }
 
 // New: Fetch all seasons
@@ -230,19 +259,6 @@ export async function fetchSeasonInfo(seasonId: number) {
 }
 
 // Cutoff snapshots
-export type CutoffSnapshot = {
-  id: number;
-  created_at: string;
-  season_slug: string;
-  region: string;
-  cutoff_score: number;
-  target_count: number;
-  total_qualifying: number;
-  source_pages: number;
-  dungeon_count: number;
-  distribution: Record<string, { total: number; specs: Record<string, number> }>;
-  allColor?: string; // optional color hint for overall/cutoff visuals
-};
 
 export async function fetchCutoffLatest(season: string, region: string) {
   const url = `${API_BASE_URL}/raiderio/cutoff-snapshots/latest?season=${encodeURIComponent(season)}&region=${encodeURIComponent(region)}`;

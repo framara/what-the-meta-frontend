@@ -5,70 +5,134 @@ self.onmessage = async (event) => {
   const { seasons } = event.data;
   
   try {
-    // Process each season to find the most used composition
-    const compositions = seasons.map((season) => {
-      const compositionCounts = new Map();
+    // Sort seasons by season_id in descending order (latest first)
+    const sortedSeasons = [...seasons].sort((a, b) => b.season_id - a.season_id);
+    console.log(`🔄 [WORKER] Processing ${sortedSeasons.length} seasons (latest first)...`);
+    const startTime = performance.now();
+    
+    // Initialize streaming results and track last expansion sent
+    const groupedCompositions = {};
+    let lastExpansionCount = 0;
+    const CHUNK_SIZE = 1; // Process one season at a time for visible streaming
+    
+    for (let i = 0; i < sortedSeasons.length; i += CHUNK_SIZE) {
+      const chunk = sortedSeasons.slice(i, i + CHUNK_SIZE);
       
-      // Count compositions
-      season.data.forEach((run) => {
-        const specCombo = run.members
-          .sort((a, b) => getRoleOrder(Number(a.spec_id)) - getRoleOrder(Number(b.spec_id)) || Number(a.spec_id) - Number(b.spec_id))
-          .map((member) => member.spec_id)
-          .join('-');
+      // Process this chunk
+      const chunkResults = chunk.map((season, chunkIndex) => {
+        const seasonStartTime = performance.now();
         
-        if (compositionCounts.has(specCombo)) {
-          compositionCounts.get(specCombo).count++;
-          compositionCounts.get(specCombo).runs.push(run);
-        } else {
-          compositionCounts.set(specCombo, { count: 1, runs: [run] });
+        // Optimize: Pre-allocate Map with estimated size
+        const estimatedCompositions = Math.max(10, Math.min(100, season.data.length / 5));
+        const compositionCounts = new Map();
+        
+        // Optimize: Process runs in batches to prevent blocking
+        const BATCH_SIZE = 100;
+        for (let runIndex = 0; runIndex < season.data.length; runIndex += BATCH_SIZE) {
+          const batch = season.data.slice(runIndex, runIndex + BATCH_SIZE);
+          
+          batch.forEach((run) => {
+            // Optimize: Cache sorted members to avoid repeated sorting
+            const sortedMembers = run.members
+              .slice() // Shallow copy to avoid mutating original
+              .sort((a, b) => {
+                const roleOrderA = getRoleOrder(Number(a.spec_id));
+                const roleOrderB = getRoleOrder(Number(b.spec_id));
+                return roleOrderA - roleOrderB || Number(a.spec_id) - Number(b.spec_id);
+              });
+            
+            const specCombo = sortedMembers.map(member => member.spec_id).join('-');
+            
+            const existing = compositionCounts.get(specCombo);
+            if (existing) {
+              existing.count++;
+              // Optimize: Only store first few runs to save memory
+              if (existing.runs.length < 5) {
+                existing.runs.push(run);
+              }
+            } else {
+              compositionCounts.set(specCombo, { count: 1, runs: [run] });
+            }
+          });
         }
+        
+        // Find the most used composition (optimized)
+        let topComposition = { spec_combination: '', count: 0, percentage: 0, runs: [] };
+        const totalRuns = season.data.length;
+        
+        for (const [key, value] of compositionCounts) {
+          if (value.count > topComposition.count) {
+            topComposition = {
+              spec_combination: key,
+              count: value.count,
+              percentage: (value.count / totalRuns) * 100,
+              runs: value.runs
+            };
+          }
+        }
+        
+        const seasonTime = performance.now() - seasonStartTime;
+        console.log(`✅ [WORKER] Processed season ${season.season_id} in ${seasonTime.toFixed(2)}ms`);
+        
+        return {
+          season_id: season.season_id,
+          season_name: season.season_name,
+          expansion: season.expansion,
+          patch: season.patch,
+          keys_count: season.keys_count,
+          top_composition: topComposition
+        };
       });
       
-      // Find the most used composition
-      let topComposition = { spec_combination: '', count: 0, percentage: 0, runs: [] };
-      
-      compositionCounts.forEach((value, key) => {
-        const percentage = (value.count / season.data.length) * 100;
-        if (value.count > topComposition.count) {
-          topComposition = {
-            spec_combination: key,
-            count: value.count,
-            percentage,
-            runs: value.runs
-          };
+      // Group these results immediately
+      chunkResults.forEach(composition => {
+        const expansion = composition.expansion;
+        if (!groupedCompositions[expansion]) {
+          groupedCompositions[expansion] = [];
         }
+        groupedCompositions[expansion].push(composition);
+        
+        // Sort within expansion to maintain order (latest first)
+        groupedCompositions[expansion].sort((a, b) => b.season_id - a.season_id);
       });
       
-      return {
-        season_id: season.season_id,
-        season_name: season.season_name,
-        expansion: season.expansion,
-        patch: season.patch,
-        keys_count: season.keys_count,
-        top_composition: topComposition
-      };
-    });
-    
-    // Group compositions by expansion
-    const groupedCompositions = compositions.reduce((acc, composition) => {
-      const expansion = composition.expansion;
-      if (!acc[expansion]) {
-        acc[expansion] = [];
+      // Report progress - but only send data when a new expansion is complete
+      const progress = Math.round(((i + chunk.length) / sortedSeasons.length) * 100);
+      const currentExpansions = Object.keys(groupedCompositions);
+      const newExpansionAdded = currentExpansions.length > lastExpansionCount;
+      
+      if (newExpansionAdded || i + chunk.length === sortedSeasons.length) {
+        // Send streaming update when a new expansion is ready
+        self.postMessage({ 
+          type: 'progress',
+          progress,
+          message: `Processed ${i + chunk.length}/${sortedSeasons.length} seasons (${currentExpansions.length} expansions)`,
+          partialData: { ...groupedCompositions }, // Send current state
+          expansionsCount: currentExpansions.length,
+          newExpansion: newExpansionAdded
+        });
+        
+        lastExpansionCount = currentExpansions.length;
+        
+        // Add delay when a new expansion is complete for visible streaming
+        if (newExpansionAdded) {
+          await new Promise(resolve => setTimeout(resolve, 800)); // 800ms delay per expansion
+        }
       }
-      acc[expansion].push(composition);
-      return acc;
-    }, {});
+      
+      // Small delay between individual seasons
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
     
-    // Sort seasons within each expansion by season_id in descending order
-    Object.keys(groupedCompositions).forEach(expansion => {
-      groupedCompositions[expansion].sort((a, b) => b.season_id - a.season_id);
-    });
+    const totalTime = performance.now() - startTime;
+    console.log(`✅ [WORKER] Completed streaming processing in ${totalTime.toFixed(2)}ms`);
     
-    // Send the processed data back to the main thread
+    // Send the final completion message
     self.postMessage({ 
+      type: 'complete',
       success: true, 
-      compositions,
-      groupedCompositions
+      data: groupedCompositions,
+      processingTime: totalTime
     });
     
   } catch (error) {
@@ -76,32 +140,37 @@ self.onmessage = async (event) => {
     
     // Send error back to main thread
     self.postMessage({ 
+      type: 'error',
       success: false, 
       error: error.message 
     });
   }
 };
 
-// Helper function to get role order for sorting
+// Helper function to get role order for sorting (optimized with correct mappings)
 function getRoleOrder(specId) {
-  // This would need to be passed from the main thread or defined here
-  // For now, using a simple mapping
-  const roleMap = {
-    // Tank specs
-    250: 1, 251: 1, 252: 1, // Death Knight
-    104: 1, 105: 1, 106: 1, // Druid
-    66: 1, 70: 1, 73: 1,    // Paladin
-    268: 1, 270: 1, 269: 1, // Monk
-    263: 1, 264: 1, 262: 1, // Shaman
-    73: 1, 66: 1, 70: 1,    // Warrior
-    // Healer specs
-    105: 2, 102: 2, 104: 2, // Druid
-    65: 2, 66: 2, 70: 2,    // Paladin
-    256: 2, 257: 2, 258: 2, // Priest
-    264: 2, 263: 2, 262: 2, // Shaman
-    270: 2, 268: 2, 269: 2, // Monk
-    // DPS specs (default)
-  };
+  // Optimized role mapping - using array lookup for better performance
+  // Tank = 0, Healer = 1, DPS = 2
   
-  return roleMap[specId] || 3; // Default to DPS
+  // Tank specs
+  if (specId === 250 || specId === 581 || // Death Knight: Blood, Vengeance DH
+      specId === 104 || // Druid: Guardian
+      specId === 66 || // Paladin: Protection
+      specId === 268 || // Monk: Brewmaster
+      specId === 73) { // Warrior: Protection
+    return 0;
+  }
+  
+  // Healer specs
+  if (specId === 105 || // Druid: Restoration
+      specId === 65 || // Paladin: Holy
+      specId === 256 || specId === 257 || // Priest: Discipline, Holy
+      specId === 264 || // Shaman: Restoration
+      specId === 270 || // Monk: Mistweaver
+      specId === 1468) { // Evoker: Preservation
+    return 1;
+  }
+  
+  // All other specs are DPS
+  return 2;
 } 

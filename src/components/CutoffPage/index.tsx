@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import SEO from '../SEO';
 import { fetchCutoffLatest } from '../../services/api';
-import type { CutoffSnapshot } from '../../services/api';
+import type { CutoffSnapshot } from '../../types/api';
 import { FilterBar } from '../FilterBar';
 import { ChartViewSelector } from '../MetaEvolutionPage/components/ChartViewSelector';
 import { MobileAlert } from '../MetaEvolutionPage/components/MobileAlert';
@@ -75,10 +75,10 @@ export default function CutoffPage() {
     for (const [className, info] of Object.entries(snapshot.distribution)) {
       const filteredSpecs: Record<string, number> = {};
       let total = 0;
-      for (const [specName, count] of Object.entries(info.specs)) {
+      for (const [specName, count] of Object.entries(info.specs as Record<string, number>)) {
         if (specIncludedByView(specName)) {
-          filteredSpecs[specName] = count;
-          total += count;
+          filteredSpecs[specName] = (count as number);
+          total += (count as number);
         }
       }
       if (total > 0) rows.push({ name: className, total, specs: filteredSpecs, color: classColor(className) });
@@ -93,14 +93,14 @@ export default function CutoffPage() {
     if (!snapshot?.distribution) return [] as Array<{ name: string; total: number; color: string }>;
     for (const [className, info] of Object.entries(snapshot.distribution)) {
       const color = classColor(className);
-      for (const [specName, count] of Object.entries(info.specs)) {
+      for (const [specName, count] of Object.entries(info.specs as Record<string, number>)) {
         if (!specIncludedByView(specName)) continue;
         const label = `${specName} – ${className}`;
         const current = totals.get(label);
         if (current) {
-          current.total += count;
+          current.total += (count as number);
         } else {
-          totals.set(label, { name: label, total: count, color });
+          totals.set(label, { name: label, total: (count as number), color });
         }
       }
     }
@@ -115,9 +115,9 @@ export default function CutoffPage() {
     if (!snapshot?.distribution) return rows;
     for (const [className, info] of Object.entries(snapshot.distribution)) {
       const color = classColor(className);
-      for (const [specName, count] of Object.entries(info.specs)) {
+      for (const [specName, count] of Object.entries(info.specs as Record<string, number>)) {
         if (!specIncludedByView(specName)) continue;
-        rows.push({ name: specName, value: count, color, parent: className });
+        rows.push({ name: specName, value: (count as number), color, parent: className });
       }
     }
     return rows.sort((a, b) => b.value - a.value);

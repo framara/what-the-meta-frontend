@@ -5,27 +5,17 @@ import { FilterBar } from './FilterBar';
 const SummaryStats = React.lazy(() => import('./SummaryStats').then(m => ({ default: m.SummaryStats })));
 const LeaderboardTable = React.lazy(() => import('./LeaderboardTable').then(m => ({ default: m.LeaderboardTable })));
 import LoadingScreen from '../components/LoadingScreen';
+import ErrorBoundary, { TableErrorFallback } from './ErrorBoundary';
 import { Link } from 'react-router-dom';
 // no eager toast import; we'll load it on demand when needed
 import { fetchTopKeys, fetchSeasonInfo, fetchSeasons } from '../services/api';
-import type { TopKeyParams } from '../services/api';
+import type { TopKeyParams, MythicKeystoneRun, Dungeon, Season } from '../types/api';
 
 // Home page only: contains heavy data fetching for table and stats
 export const HomePage: React.FC = () => {
-  type GroupMember = { character_name: string; class_id: number; spec_id: number; role: string };
-  type Run = {
-    id: number;
-    rank: number;
-    keystone_level: number;
-    score: number;
-    dungeon_id: number;
-    duration_ms: number;
-    completed_at: string;
-    members: GroupMember[];
-  };
-  type Dungeon = { dungeon_id: number; dungeon_name: string };
 
-  const [apiData, setApiData] = useState<Run[] | null>(null);
+
+  const [apiData, setApiData] = useState<MythicKeystoneRun[] | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
   const [dungeons, setDungeons] = useState<Dungeon[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,14 +49,14 @@ export const HomePage: React.FC = () => {
     (async () => {
       try {
         // First batch
-        const firstBatch = await fetchTopKeys({ ...baseParams, limit: initialLimit });
+        const firstBatchResponse = await fetchTopKeys({ ...baseParams, limit: initialLimit });
+        const firstBatch = firstBatchResponse.data;
 
         if (cancelled) return;
 
         // If no data and this is the latest season, fallback to previous season once
         if ((Array.isArray(firstBatch) && firstBatch.length === 0) && fallbackTriedRef.current !== filter.season_id) {
           try {
-            type Season = { season_id: number; season_name?: string };
             const seasons = await fetchSeasons() as Season[];
             const sorted = [...seasons].sort((a: Season, b: Season) => b.season_id - a.season_id);
             const latestId = sorted[0]?.season_id;
@@ -89,7 +79,7 @@ export const HomePage: React.FC = () => {
           }
         }
 
-        setApiData((firstBatch || []) as Run[]);
+                    setApiData((firstBatch || []) as MythicKeystoneRun[]);
         if (!hasBooted) setHasBooted(true);
         setLoading(false); // render immediately with the first batch
 
@@ -97,11 +87,11 @@ export const HomePage: React.FC = () => {
   if (initialLimit < targetLimit) {
           const remaining = targetLimit - initialLimit;
           try {
-            const rest = await fetchTopKeys({ ...baseParams, limit: remaining, offset: initialLimit });
+            const restResponse = await fetchTopKeys({ ...baseParams, limit: remaining, offset: initialLimit });
             if (cancelled) return;
             const combined = [
-              ...((firstBatch || []) as Run[]),
-              ...((rest || []) as Run[]),
+              ...((firstBatch || []) as MythicKeystoneRun[]),
+              ...(restResponse.data as MythicKeystoneRun[]),
             ];
             setApiData(combined);
           } catch (e) {
@@ -150,13 +140,13 @@ export const HomePage: React.FC = () => {
             const targetLimit = filter.limit ?? 1000;
             const initialLimit = isMobile ? Math.min(targetLimit, maxMobileInitial) : targetLimit;
             try {
-              const first = await fetchTopKeys({ ...baseParams, limit: initialLimit });
-              setApiData((first || []) as Run[]);
+              const firstResponse = await fetchTopKeys({ ...baseParams, limit: initialLimit });
+              setApiData((firstResponse.data || []) as MythicKeystoneRun[]);
               setLoading(false);
               if (initialLimit < targetLimit) {
                 try {
-                  const rest = await fetchTopKeys({ ...baseParams, limit: targetLimit - initialLimit, offset: initialLimit });
-                  setApiData([...(first || []), ...(rest || [])] as Run[]);
+                  const restResponse = await fetchTopKeys({ ...baseParams, limit: targetLimit - initialLimit, offset: initialLimit });
+                  setApiData([...(firstResponse.data || []), ...(restResponse.data || [])] as MythicKeystoneRun[]);
                 } catch (e) {
                   console.error('Background fetch (remaining runs) failed:', e);
                 }
@@ -201,48 +191,50 @@ export const HomePage: React.FC = () => {
         </Suspense>
       </div>
       <div>
-        <Suspense
-          fallback={
-            <div className="leaderboard-table-container" aria-busy="true">
-              <table className="leaderboard-table">
-                <thead>
-                  <tr>
-                    <th className="table-cell rank-cell">Rank</th>
-                    <th className="md:hidden">Key</th>
-                    <th className="hidden md:table-cell">Key</th>
-                    <th className="hidden md:table-cell">Dungeon</th>
-                    <th className="hidden md:table-cell">Score</th>
-                    <th className="hidden md:table-cell">Time</th>
-                    <th className="hidden md:table-cell">Date</th>
-                    <th className="table-cell">Group</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Array.from({ length: 12 }).map((_, i) => (
-                    <tr key={`lazy-skeleton-${i}`}>
-                      <td className="table-cell rank-cell"><div className="skeleton skeleton-bar tiny" /></td>
-                      <td className="md:hidden"><div className="skeleton skeleton-bar" /></td>
-                      <td className="hidden md:table-cell"><div className="skeleton skeleton-bar short" /></td>
-                      <td className="hidden md:table-cell"><div className="skeleton skeleton-bar" /></td>
-                      <td className="hidden md:table-cell"><div className="skeleton skeleton-bar short" /></td>
-                      <td className="hidden md:table-cell"><div className="skeleton skeleton-bar tiny" /></td>
-                      <td className="hidden md:table-cell"><div className="skeleton skeleton-bar tiny" /></td>
-                      <td className="table-cell">
-                        <div className="saas-group-squares">
-                          {Array.from({ length: 5 }).map((__, j) => (
-                            <div key={j} className="skeleton skeleton-square" />
-                          ))}
-                        </div>
-                      </td>
+        <ErrorBoundary fallback={TableErrorFallback}>
+          <Suspense
+            fallback={
+              <div className="leaderboard-table-container" aria-busy="true">
+                <table className="leaderboard-table">
+                  <thead>
+                    <tr>
+                      <th className="table-cell rank-cell">Rank</th>
+                      <th className="md:hidden">Key</th>
+                      <th className="hidden md:table-cell">Key</th>
+                      <th className="hidden md:table-cell">Dungeon</th>
+                      <th className="hidden md:table-cell">Score</th>
+                      <th className="hidden md:table-cell">Time</th>
+                      <th className="hidden md:table-cell">Date</th>
+                      <th className="table-cell">Group</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          }
-        >
-          <LeaderboardTable runs={apiData || []} dungeons={dungeons} loading={loading} />
-        </Suspense>
+                  </thead>
+                  <tbody>
+                    {Array.from({ length: 12 }).map((_, i) => (
+                      <tr key={`lazy-skeleton-${i}`}>
+                        <td className="table-cell rank-cell"><div className="skeleton skeleton-bar tiny" /></td>
+                        <td className="md:hidden"><div className="skeleton skeleton-bar" /></td>
+                        <td className="hidden md:table-cell"><div className="skeleton skeleton-bar short" /></td>
+                        <td className="hidden md:table-cell"><div className="skeleton skeleton-bar" /></td>
+                        <td className="hidden md:table-cell"><div className="skeleton skeleton-bar short" /></td>
+                        <td className="hidden md:table-cell"><div className="skeleton skeleton-bar tiny" /></td>
+                        <td className="hidden md:table-cell"><div className="skeleton skeleton-bar tiny" /></td>
+                        <td className="table-cell">
+                          <div className="saas-group-squares">
+                            {Array.from({ length: 5 }).map((__, j) => (
+                              <div key={j} className="skeleton skeleton-square" />
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            }
+          >
+            <LeaderboardTable runs={apiData || []} dungeons={dungeons} loading={loading} />
+          </Suspense>
+        </ErrorBoundary>
       </div>
       {!loading && (!apiData || apiData.length === 0) && (
         <div className="flex flex-col items-center justify-center py-16 text-center">
