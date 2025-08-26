@@ -123,12 +123,13 @@ export const GroupCompositionPage: React.FC = () => {
       const topKeysStart = performance.now();
       
       // Fetch top keys first (this is the heaviest call)
-      const runsData = await fetchTopKeys({
+      const runsResponse = await fetchTopKeys({
         season_id: filter.season_id,
         period_id: filter.period_id,
         dungeon_id: filter.dungeon_id,
         limit: initialLimit
       });
+      const runsData = runsResponse.data;
       
       const topKeysTime = performance.now() - topKeysStart;
       
@@ -142,13 +143,14 @@ export const GroupCompositionPage: React.FC = () => {
         const remainingLimit = (filter.limit || 1000) - initialLimit;
         
         const additionalStart = performance.now();
-        const additionalRuns = await fetchTopKeys({
+        const additionalResponse = await fetchTopKeys({
           season_id: filter.season_id,
           period_id: filter.period_id,
           dungeon_id: filter.dungeon_id,
           limit: remainingLimit,
           offset: initialLimit
         });
+        const additionalRuns = additionalResponse.data;
         
         const additionalTime = performance.now() - additionalStart;
         

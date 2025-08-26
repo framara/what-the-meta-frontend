@@ -1,34 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { WOW_CLASS_COLORS, WOW_SPECIALIZATIONS, WOW_CLASS_NAMES, WOW_SPEC_TO_CLASS, WOW_DUNGEON_TIMERS } from '../constants/wow-constants';
 import { SpecIconImage } from '../utils/specIconImages';
+import type { GroupMember, MythicKeystoneRun, Dungeon } from '../types/api';
 import './styles/LeaderboardTable.css';
 
-interface GroupMember {
-  character_name: string;
-  class_id: number;
-  spec_id: number;
-  role: string;
-}
-
-interface Run {
-  id: number;
-  rank: number;
-  keystone_level: number;
-  score: number;
-  dungeon_id: number;
-  duration_ms: number;
-  completed_at: string;
-  members: GroupMember[];
-}
-
-interface Dungeon {
-  dungeon_id: number;
-  dungeon_name: string;
-}
-
 interface LeaderboardTableProps {
-  runs: Run[];
+  runs: MythicKeystoneRun[];
   dungeons: Dungeon[];
   loading?: boolean; // shows skeleton rows when true
 }
@@ -42,11 +20,11 @@ function msToTime(ms: number) {
 
 export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeons, loading = false }) => {
   const dungeonMap = React.useMemo(() => {
-    const map: Record<number, { name: string; shortname: string } > = {};
+    const map: Record<number, { name: string; shortname: string }> = {};
     dungeons.forEach(d => {
       map[d.dungeon_id] = {
-        name: (d as any).dungeon_name || (d as any).name || '',
-        shortname: (d as any).dungeon_shortname || (d as any).shortname || ''
+        name: d.dungeon_name || d.name || '',
+        shortname: d.dungeon_shortname || d.shortname || ''
       };
     });
     return map;
@@ -62,8 +40,8 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
   const skeletonRowCount = PAGE_SIZE;
 
   // Helper to sort members by role: tank, heal, dps, dps, dps
-  // Within same role, sort by spec_id
-  function sortMembers(members: GroupMember[]) {
+  // Within same role, sort by spec_id (memoized)
+  const sortMembers = useCallback((members: GroupMember[]) => {
     const roleOrder: Record<string, number> = { tank: 0, healer: 1, dps: 2 };
     return [...members].sort((a, b) => {
       const ra = roleOrder[a.role] ?? 99;
@@ -77,7 +55,7 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
       // Within same role, sort by spec_id
       return a.spec_id - b.spec_id;
     });
-  }
+  }, []);
 
   // Tooltip state for group squares
   const [tooltip, setTooltip] = useState<{
@@ -87,18 +65,18 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
     color: string;
   } | null>(null);
 
-  // Helper to determine text color for tooltip
-  function getTextColor(bgColor: string): string {
+  // Helper to determine text color for tooltip (memoized)
+  const getTextColor = useCallback((bgColor: string): string => {
     const hex = bgColor.replace('#', '');
     const r = parseInt(hex.substring(0, 2), 16);
     const g = parseInt(hex.substring(2, 4), 16);
     const b = parseInt(hex.substring(4, 6), 16);
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
     return luminance > 0.5 ? '#23263a' : '#fff';
-  }
+  }, []);
 
-  // Helper to calculate tooltip position within table bounds
-  function calculateTooltipPosition(element: HTMLElement, content: string): { x: number; y: number } {
+  // Helper to calculate tooltip position within table bounds (memoized)
+  const calculateTooltipPosition = useCallback((element: HTMLElement, content: string): { x: number; y: number } => {
     const rect = element.getBoundingClientRect();
     const tableContainer = element.closest('.leaderboard-table-container');
     const tableRect = tableContainer?.getBoundingClientRect();
@@ -140,7 +118,59 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
     }
 
     return { x, y };
-  }
+  }, []);
+
+  // Memoized GroupSquares component for better performance
+  const GroupSquares = React.memo<{
+    members: GroupMember[];
+    onTooltipShow: (e: React.MouseEvent<HTMLDivElement>, content: string, color: string) => void;
+    onTooltipHide: () => void;
+  }>(({ members, onTooltipShow, onTooltipHide }) => {
+    const sortedMembers = useMemo(() => sortMembers(members), [members]);
+    
+    return (
+      <div className="saas-group-squares">
+        {sortedMembers.map((m, idx) => {
+          const roleCap = m.role && typeof m.role === 'string'
+            ? m.role.charAt(0).toUpperCase() + m.role.slice(1)
+            : 'Unknown';
+          const tooltipContent = `Name: ${m.character_name}\nRole: ${roleCap}\nClass: ${WOW_CLASS_NAMES[m.class_id] || m.class_id}\nSpec: ${WOW_SPECIALIZATIONS[m.spec_id] || m.spec_id}`;
+          const classId = Number(WOW_SPEC_TO_CLASS[m.spec_id]) || 0;
+          const classColor = WOW_CLASS_COLORS[classId] || '#23263a';
+          
+          return (
+            <div
+              key={m.character_name + idx}
+              className="saas-group-square"
+              style={{ border: `0.15rem solid ${classColor}` }}
+              onMouseEnter={(e) => onTooltipShow(e, tooltipContent, classColor)}
+              onMouseLeave={onTooltipHide}
+            >
+              <SpecIconImage 
+                specId={m.spec_id} 
+                alt={WOW_SPECIALIZATIONS[m.spec_id] || 'Spec'}
+              />
+            </div>
+          );
+        })}
+      </div>
+    );
+  });
+
+  // Memoized tooltip handlers
+  const handleTooltipShow = useCallback((e: React.MouseEvent<HTMLDivElement>, content: string, color: string) => {
+    const position = calculateTooltipPosition(e.currentTarget as HTMLElement, content);
+    setTooltip({
+      x: position.x,
+      y: position.y,
+      content: content.replace(/\n/g, '<br/>'),
+      color: color,
+    });
+  }, [calculateTooltipPosition]);
+
+  const handleTooltipHide = useCallback(() => {
+    setTooltip(null);
+  }, []);
 
   return (
     <>
@@ -198,38 +228,11 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
                 <td className="hidden md:table-cell">{msToTime(run.duration_ms)}</td>
                 <td className="hidden md:table-cell">{new Date(run.completed_at).toLocaleDateString()}</td>
                 <td className="table-cell">
-                  <div className="saas-group-squares">
-                    {sortMembers(run.members).map((m, idx) => {
-                      const roleCap = m.role && typeof m.role === 'string'
-                        ? m.role.charAt(0).toUpperCase() + m.role.slice(1)
-                        : 'Unknown';
-                      const tooltipContent = `Name: ${m.character_name}\nRole: ${roleCap}\nClass: ${WOW_CLASS_NAMES[m.class_id] || m.class_id}\nSpec: ${WOW_SPECIALIZATIONS[m.spec_id] || m.spec_id}`;
-                      const classId = Number(WOW_SPEC_TO_CLASS[m.spec_id]) || 0;
-                      const classColor = WOW_CLASS_COLORS[classId] || '#23263a';
-                      return (
-                        <div
-                          key={m.character_name + idx}
-                          className="saas-group-square"
-                          style={{ border: `0.15rem solid ${classColor}` }}
-                          onMouseEnter={e => {
-                            const position = calculateTooltipPosition(e.currentTarget as HTMLElement, tooltipContent);
-                            setTooltip({
-                              x: position.x,
-                              y: position.y,
-                              content: tooltipContent.replace(/\n/g, '<br/>'),
-                              color: classColor,
-                            });
-                          }}
-                          onMouseLeave={() => setTooltip(null)}
-                        >
-                          <SpecIconImage 
-                            specId={m.spec_id} 
-                            alt={WOW_SPECIALIZATIONS[m.spec_id] || 'Spec'}
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <GroupSquares
+                    members={run.members}
+                    onTooltipShow={handleTooltipShow}
+                    onTooltipHide={handleTooltipHide}
+                  />
                 </td>
               </tr>
             );})}
