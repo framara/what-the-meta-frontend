@@ -510,7 +510,7 @@ export const CompAllSeasonsPage: React.FC = () => {
           </h1>
           <div className="description-container" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <p className="page-description">
-              Discover the most popular group compositions across {seasonsData?.total_seasons || 0} seasons of Mythic+ history.
+              Discover the most popular group compositions across all seasons of Mythic+ history.
             </p>
             <div className="chart-description-popover group relative">
               <button
@@ -565,8 +565,8 @@ export const CompAllSeasonsPage: React.FC = () => {
                         <div className="season-header-top">
                           <h3 className="season-name">{season.season_name}</h3>
                           <div className="season-info">
-                            <span className="patch">{season.patch}</span>
                             <span className="expansion-badge">{season.expansion}</span>
+                            <span className="patch">{season.patch}</span>
                           </div>
                         </div>
                         <div className="season-stats">
