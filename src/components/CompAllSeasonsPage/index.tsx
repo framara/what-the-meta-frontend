@@ -102,6 +102,9 @@ export const CompAllSeasonsPage: React.FC = () => {
         setSeasonsData(cached.seasonsData);
         setSeasonCompositions(cached.compositions);
         setGroupedCompositions(cached.groupedCompositions);
+        // CRITICAL FIX: Set loadedExpansions to show ALL cached expansions
+        setLoadedExpansions(groupedExpansions);
+        setIsInitialStreaming(false); // Mark as complete since we have all data
         return;
       } else {
         console.warn('⚠️ [CACHE] Invalid/incomplete cached data detected, clearing cache:', {
@@ -393,13 +396,13 @@ export const CompAllSeasonsPage: React.FC = () => {
     loadData();
   }, [loadData]);
 
-  // Initialize with first expansion when streaming starts
+  // Initialize with first expansion when streaming starts (but not when loading from cache)
   useEffect(() => {
     const availableExpansions = Object.keys(groupedCompositions).length;
-    if (availableExpansions > 0 && loadedExpansions === 0) {
+    if (availableExpansions > 0 && loadedExpansions === 0 && isInitialStreaming) {
       setLoadedExpansions(1); // Start with first (most recent) expansion
     }
-  }, [groupedCompositions, loadedExpansions]);
+  }, [groupedCompositions, loadedExpansions, isInitialStreaming]);
 
   // Load more expansions progressively
   const loadMoreExpansions = useCallback(() => {
