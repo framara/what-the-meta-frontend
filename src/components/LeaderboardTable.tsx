@@ -211,7 +211,24 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
             )}
             {!loading && pagedRuns.map((run, i) => {
               const timer = WOW_DUNGEON_TIMERS[run.dungeon_id as number];
-              const isDepleted = timer ? run.duration_ms > timer : false;
+              
+              // Determine if run is depleted using both timer and score checks
+              // This handles edge cases where Blizzard's server processing might cause slight discrepancies
+              let isDepleted = false;
+              if (timer) {
+                // Primary check: duration vs timer
+                const timerExceeded = run.duration_ms > timer;
+                
+                // Secondary check: score-based detection for edge cases
+                // Base score = 60 + (keystone_level * 7.5)
+                // Depleted runs have score < base due to scaling factor
+                const baseScore = 60 + (run.keystone_level * 7.5);
+                const scoreIndicatesDepleted = run.score < baseScore;
+                
+                // A run is depleted if BOTH timer is exceeded AND score indicates depletion
+                // This prevents false positives from server processing delays
+                isDepleted = timerExceeded && scoreIndicatesDepleted;
+              }
               return (
               <tr key={run.id} className={isDepleted ? 'depleted-row' : undefined}>
                 <td className="table-cell rank-cell">{page * PAGE_SIZE + i + 1}</td>
