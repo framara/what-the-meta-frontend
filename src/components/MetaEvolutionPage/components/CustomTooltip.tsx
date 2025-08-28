@@ -4,21 +4,29 @@ import { WOW_SPECIALIZATIONS, WOW_CLASS_COLORS, WOW_SPEC_TO_CLASS } from '../../
 
 interface CustomTooltipProps extends TooltipProps<number, string> {
   percent?: boolean;
+  hoveredSpecId?: number | null;
+  showOnlyHovered?: boolean;
 }
 
 export const CustomTooltip: React.FC<CustomTooltipProps> = (props) => {
-  const { active, payload, label, percent } = props as any;
+  const { active, payload, label, percent, hoveredSpecId, showOnlyHovered } = props as any;
   if (!active || !payload || payload.length === 0) return null;
 
   // Don't show tooltip on mobile
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
   if (isMobile) return null;
 
+  // Filter payload based on hover mode
+  let filteredPayload = [...payload].filter((entry: any) => entry.value !== 0);
+  
+  if (showOnlyHovered && hoveredSpecId !== null && hoveredSpecId !== undefined) {
+    // Show only the hovered spec
+    filteredPayload = filteredPayload.filter((entry: any) => Number(entry.dataKey) === hoveredSpecId);
+  }
+
   // Sort by value (descending), then by class, then spec name
   const classOrder = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
-  const sortedPayload = [...payload]
-    .filter((entry: any) => entry.value !== 0)
-    .sort((a: any, b: any) => {
+  const sortedPayload = filteredPayload.sort((a: any, b: any) => {
       // First sort by value (descending)
       if (b.value !== a.value) return b.value - a.value;
 
@@ -36,19 +44,30 @@ export const CustomTooltip: React.FC<CustomTooltipProps> = (props) => {
   // Calculate total for percentage display
   const total = sortedPayload.reduce((sum, entry) => sum + entry.value, 0);
 
-  // Split into three columns for better layout
-  const colSize = Math.ceil(sortedPayload.length / 3);
-  const col1 = sortedPayload.slice(0, colSize);
-  const col2 = sortedPayload.slice(colSize, colSize * 2);
-  const col3 = sortedPayload.slice(colSize * 2);
-  const columns = [col1, col2, col3];
+  // If showing only hovered spec, don't split into columns
+  let columns: any[][];
+  if (showOnlyHovered && sortedPayload.length === 1) {
+    columns = [sortedPayload];
+  } else {
+    // Split into three columns for better layout
+    const colSize = Math.ceil(sortedPayload.length / 3);
+    const col1 = sortedPayload.slice(0, colSize);
+    const col2 = sortedPayload.slice(colSize, colSize * 2);
+    const col3 = sortedPayload.slice(colSize * 2);
+    columns = [col1, col2, col3];
+  }
 
   return (
     <div className="meta-tooltip">
       <div className="meta-tooltip__header">
         <div className="meta-tooltip__title">Week {label}</div>
-        {percent && (
+        {percent && !showOnlyHovered && (
           <div className="meta-tooltip__total">Total: {total.toFixed(1)}%</div>
+        )}
+        {showOnlyHovered && hoveredSpecId && (
+          <div className="meta-tooltip__subtitle">
+            {WOW_SPECIALIZATIONS[hoveredSpecId] || `Spec ${hoveredSpecId}`}
+          </div>
         )}
       </div>
       <div className="meta-tooltip__columns">
