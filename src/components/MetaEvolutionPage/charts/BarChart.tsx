@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { BarChart as RechartsBarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { WOW_CLASS_COLORS, WOW_SPEC_TO_CLASS } from '../../../constants/wow-constants';
 import { CustomTooltip } from '../components/CustomTooltip';
+import { useSpecHover } from '../hooks/useSpecHover';
 
 interface BarChartProps {
   data: any[];
@@ -10,6 +11,8 @@ interface BarChartProps {
 }
 
 export const BarChart: React.FC<BarChartProps> = ({ data, topSpecs, isMobile }) => {
+  const { hoveredSpecId, handleSpecMouseEnter, handleSpecMouseLeave, hasHoveredSpec } = useSpecHover();
+
   const barChartMax = useMemo(() => {
     return Math.max(...data.map(row => 
       topSpecs.reduce((sum, specId) => sum + (row[specId] || 0), 0)
@@ -20,6 +23,11 @@ export const BarChart: React.FC<BarChartProps> = ({ data, topSpecs, isMobile }) 
     <div className="chart-container">
       <div className="chart-header">
         <h3 className="chart-title">Spec Distribution by Week</h3>
+        {!isMobile && (
+          <p className="chart-subtitle" style={{ color: '#a0a0a0', fontSize: '0.8rem', marginTop: '0.25rem' }}>
+            Hover over a bar segment to see specific spec details
+          </p>
+        )}
       </div>
       <div className="meta-chart-scroll">
         <ResponsiveContainer width="100%" height={600}>
@@ -30,13 +38,24 @@ export const BarChart: React.FC<BarChartProps> = ({ data, topSpecs, isMobile }) 
               domain={[0, barChartMax]} 
               ticks={[barChartMax/4, barChartMax/2, (barChartMax*3)/4, barChartMax]} 
             />
-            <Tooltip content={<CustomTooltip />} wrapperStyle={{ marginTop: '-40px' }} />
+            <Tooltip 
+              content={
+                <CustomTooltip 
+                  hoveredSpecId={hoveredSpecId} 
+                  showOnlyHovered={hasHoveredSpec}
+                />
+              } 
+              wrapperStyle={{ marginTop: '-40px' }} 
+            />
             {topSpecs.map(specId => (
               <Bar
                 key={specId}
                 dataKey={specId}
                 stackId="a"
                 fill={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
+                fillOpacity={hoveredSpecId === null ? 0.8 : hoveredSpecId === specId ? 1 : 0.3}
+                onMouseEnter={() => handleSpecMouseEnter(specId)}
+                onMouseLeave={handleSpecMouseLeave}
               />
             ))}
           </RechartsBarChart>

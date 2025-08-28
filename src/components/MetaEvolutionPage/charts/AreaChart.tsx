@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { AreaChart as RechartsAreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { WOW_CLASS_COLORS, WOW_SPEC_TO_CLASS } from '../../../constants/wow-constants';
 import { CustomTooltip } from '../components/CustomTooltip';
+import { useSpecHover } from '../hooks/useSpecHover';
 
 interface AreaChartProps {
   data: any[];
@@ -10,6 +11,8 @@ interface AreaChartProps {
 }
 
 export const AreaChart: React.FC<AreaChartProps> = ({ data, topSpecs, isMobile }) => {
+  const { hoveredSpecId, handleSpecMouseEnter, handleSpecMouseLeave, hasHoveredSpec } = useSpecHover();
+
   const percentData = useMemo(() => {
     return data.map(row => {
       const total = topSpecs.reduce((sum, specId) => sum + (row[specId] || 0), 0);
@@ -25,6 +28,11 @@ export const AreaChart: React.FC<AreaChartProps> = ({ data, topSpecs, isMobile }
     <div className="chart-container">
       <div className="chart-header">
         <h3 className="chart-title">Spec Popularity Percentage</h3>
+        {!isMobile && (
+          <p className="chart-subtitle" style={{ color: '#a0a0a0', fontSize: '0.8rem', marginTop: '0.25rem' }}>
+            Hover over an area to see specific spec details
+          </p>
+        )}
       </div>
       <div className="meta-chart-scroll">
         <ResponsiveContainer width="100%" height={600}>
@@ -36,7 +44,16 @@ export const AreaChart: React.FC<AreaChartProps> = ({ data, topSpecs, isMobile }
               tickFormatter={v => `${Math.round(v * 100) / 100}%`} 
               ticks={[25, 50, 75, 100]} 
             />
-            <Tooltip content={<CustomTooltip percent />} wrapperStyle={{ marginTop: '-40px' }} />
+            <Tooltip 
+              content={
+                <CustomTooltip 
+                  percent 
+                  hoveredSpecId={hoveredSpecId} 
+                  showOnlyHovered={hasHoveredSpec}
+                />
+              } 
+              wrapperStyle={{ marginTop: '-40px' }} 
+            />
             {topSpecs.map(specId => (
               <Area
                 key={specId}
@@ -44,7 +61,11 @@ export const AreaChart: React.FC<AreaChartProps> = ({ data, topSpecs, isMobile }
                 dataKey={specId}
                 stackId="1"
                 stroke={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
+                strokeWidth={hoveredSpecId === specId ? 3 : 1}
                 fill={WOW_CLASS_COLORS[WOW_SPEC_TO_CLASS[specId]] || '#888'}
+                fillOpacity={hoveredSpecId === null ? 0.8 : hoveredSpecId === specId ? 0.9 : 0.3}
+                onMouseEnter={() => handleSpecMouseEnter(specId)}
+                onMouseLeave={handleSpecMouseLeave}
               />
             ))}
           </RechartsAreaChart>
