@@ -6,7 +6,7 @@ import { useFilterState, useFilterDispatch } from '../../FilterContext';
 // lazy toast usage
 
 // Cache for processed chart data
-const chartDataCache = new Map<number, ChartDataState>();
+const chartDataCache = new Map<string, ChartDataState>();
 const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
 
 export const useChartData = () => {
@@ -24,10 +24,13 @@ export const useChartData = () => {
   const dispatch = useFilterDispatch();
   const fallbackTriedRef = useRef<number | null>(null);
 
-  // Memoized fetch function with caching
-  const fetchChartData = useCallback(async (seasonId: number) => {
+  // Memoized fetch function with caching - now includes filter parameters
+  const fetchChartData = useCallback(async (seasonId: number, periodId?: number, dungeonId?: number) => {
+    // Create cache key that includes all filter parameters
+    const cacheKey = `${seasonId}-${periodId || 'all'}-${dungeonId || 'all'}`;
+    
     // Check cache first
-    const cached = chartDataCache.get(seasonId);
+    const cached = chartDataCache.get(cacheKey);
     if (cached) {
       setCharts(cached);
       return;
@@ -36,11 +39,16 @@ export const useChartData = () => {
     setLoading(true);
     
     try {
-      const data: SpecEvolutionData = await fetchSpecEvolution(seasonId);
+      const params = {
+        ...(periodId && { period_id: periodId }),
+        ...(dungeonId && { dungeon_id: dungeonId })
+      };
+      
+      const data: SpecEvolutionData = await fetchSpecEvolution(seasonId, Object.keys(params).length > 0 ? params : undefined);
       const processedData = processSpecEvolutionData(data);
       
-      // Cache the processed data
-      chartDataCache.set(seasonId, processedData);
+      // Cache the processed data with the new cache key
+      chartDataCache.set(cacheKey, processedData);
       
       setCharts(processedData);
     } catch (err: unknown) {
@@ -73,14 +81,14 @@ export const useChartData = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [dispatch]);
 
-  // Fetch spec evolution when season changes
+  // Fetch spec evolution when season or filters change
   useEffect(() => {
     if (!filter.season_id) return;
     
-    fetchChartData(filter.season_id);
-  }, [filter.season_id, fetchChartData]);
+    fetchChartData(filter.season_id, filter.period_id, filter.dungeon_id);
+  }, [filter.season_id, filter.period_id, filter.dungeon_id, fetchChartData]);
 
   // Reset fallback guard when the selected season changes explicitly
   useEffect(() => {
