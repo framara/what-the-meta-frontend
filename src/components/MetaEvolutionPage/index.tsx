@@ -86,7 +86,7 @@ export const MetaEvolutionPage: React.FC = () => {
       <FilterBar 
         showExpansion={false}
         showPeriod={false}
-        showDungeon={false}
+        showDungeon={true}
         showLimit={false}
         className="meta-evolution-filter"
       />

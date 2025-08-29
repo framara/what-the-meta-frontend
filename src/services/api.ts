@@ -278,11 +278,18 @@ export async function fetchCutoffBySeason(season: string) {
   return resp.data as CutoffSnapshot[];
 }
 
-export async function fetchSpecEvolution(seasonId?: number) {
-  console.log('API: fetchSpecEvolution called with seasonId:', seasonId);
+export async function fetchSpecEvolution(seasonId?: number, params?: { period_id?: number; dungeon_id?: number }) {
+  console.log('API: fetchSpecEvolution called with seasonId:', seasonId, 'params:', params);
+  
+  const searchParams = new URLSearchParams();
+  if (params?.period_id) searchParams.append('period_id', params.period_id.toString());
+  if (params?.dungeon_id) searchParams.append('dungeon_id', params.dungeon_id.toString());
+  
+  const queryString = searchParams.toString();
   const url = seasonId 
-    ? `${API_BASE_URL}/meta/spec-evolution/${seasonId}`
-    : `${API_BASE_URL}/meta/spec-evolution`;
+    ? `${API_BASE_URL}/meta/spec-evolution/${seasonId}${queryString ? `?${queryString}` : ''}`
+    : `${API_BASE_URL}/meta/spec-evolution${queryString ? `?${queryString}` : ''}`;
+  
   console.log('API: fetchSpecEvolution URL:', url);
   try {
     const response = await axios.get(url);
