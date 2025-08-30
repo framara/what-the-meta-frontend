@@ -343,7 +343,10 @@ export const MetaHealthPage: React.FC = () => {
             <div className="mh-insights-section">
               <h3>Key Insights</h3>
               <ul className="mh-insights-list">
-                {metaHealthData.metaSummary.keyInsights.map((insight, index) => (
+                {(Array.isArray(metaHealthData.metaSummary.keyInsights) 
+                  ? metaHealthData.metaSummary.keyInsights 
+                  : []
+                ).map((insight, index) => (
                   <li key={index} className="mh-insight-item">
                     {insight}
                   </li>
@@ -359,9 +362,9 @@ export const MetaHealthPage: React.FC = () => {
               {['tank', 'healer', 'dps'].map((role) => {
                 const data = metaHealthData.roleAnalysis[role as keyof typeof metaHealthData.roleAnalysis];
                 
-                // Sort specs by usage descending
-                const sortedDominantSpecs = [...data.dominantSpecs].sort((a, b) => b.usage - a.usage);
-                const sortedUnderusedSpecs = [...data.underusedSpecs].sort((a, b) => b.usage - a.usage);
+                // Sort specs by usage descending with defensive checks
+                const sortedDominantSpecs = [...(Array.isArray(data.dominantSpecs) ? data.dominantSpecs : [])].sort((a, b) => b.usage - a.usage);
+                const sortedUnderusedSpecs = [...(Array.isArray(data.underusedSpecs) ? data.underusedSpecs : [])].sort((a, b) => b.usage - a.usage);
                 
                 return (
                   <div key={role} className="mh-role-card">
@@ -439,7 +442,10 @@ export const MetaHealthPage: React.FC = () => {
                       </div>
                     </div>
                     <div className="mh-composition-specs">
-                      {metaHealthData.compositionAnalysis.mostPopularGroup.specNames.map((specName, specIndex) => (
+                      {(Array.isArray(metaHealthData.compositionAnalysis.mostPopularGroup.specNames) 
+                        ? metaHealthData.compositionAnalysis.mostPopularGroup.specNames 
+                        : []
+                      ).map((specName, specIndex) => (
                         <span key={specIndex} className="mh-composition-spec">
                           {specName}
                         </span>
@@ -452,20 +458,29 @@ export const MetaHealthPage: React.FC = () => {
                 )}
 
                 {/* Patterns Card */}
-                {metaHealthData.compositionAnalysis.dominantPatterns.length > 0 && (
-                  <div className="mh-composition-card mh-patterns-card">
-                    <div className="mh-card-icon">📊</div>
-                    <h3>Meta Patterns</h3>
-                    <div className="mh-patterns-list">
-                      {metaHealthData.compositionAnalysis.dominantPatterns.map((pattern, index) => (
-                        <div key={index} className="mh-pattern-item">
-                          <span className="mh-pattern-bullet">•</span>
-                          <span className="mh-pattern-text">{pattern}</span>
-                        </div>
-                      ))}
+                {(() => {
+                  // Ensure dominantPatterns is always an array
+                  const patterns = Array.isArray(metaHealthData.compositionAnalysis.dominantPatterns) 
+                    ? metaHealthData.compositionAnalysis.dominantPatterns 
+                    : typeof metaHealthData.compositionAnalysis.dominantPatterns === 'string'
+                    ? [metaHealthData.compositionAnalysis.dominantPatterns]
+                    : [];
+                  
+                  return patterns.length > 0 && (
+                    <div className="mh-composition-card mh-patterns-card">
+                      <div className="mh-card-icon">📊</div>
+                      <h3>Meta Patterns</h3>
+                      <div className="mh-patterns-list">
+                        {patterns.map((pattern, index) => (
+                          <div key={index} className="mh-pattern-item">
+                            <span className="mh-pattern-bullet">•</span>
+                            <span className="mh-pattern-text">{pattern}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
               </div>
 
               {/* Spec Replacements */}
@@ -508,7 +523,7 @@ export const MetaHealthPage: React.FC = () => {
           )}
 
           {/* Balance Issues */}
-          {metaHealthData.balanceIssues.length > 0 && (
+          {Array.isArray(metaHealthData.balanceIssues) && metaHealthData.balanceIssues.length > 0 && (
             <div className="mh-issues-section">
               <div className="mh-issues-header">
                 <h2>⚠️ Balance Issues</h2>
