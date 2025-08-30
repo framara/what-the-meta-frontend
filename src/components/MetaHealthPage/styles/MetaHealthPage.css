@@ -201,6 +201,40 @@
   margin: 0;
 }
 
+/* Preserve emoji colors in headers */
+.mh-summary-header h2 .emoji,
+.mh-role-header h2 .emoji,
+.mh-composition-header h2 .emoji,
+.mh-issues-header h2 .emoji {
+  color: initial;
+  font-style: normal;
+}
+
+/* General rule to preserve emoji colors in all MetaHealthPage headers */
+.mh-meta-health-page h2 .emoji,
+.mh-meta-health-page h3 .emoji {
+  color: initial !important;
+  font-style: normal;
+}
+
+/* Preserve emoji colors throughout the MetaHealthPage */
+.mh-meta-health-page .emoji {
+  color: initial !important;
+  font-style: normal;
+}
+
+/* Ensure emojis in headers maintain their natural colors */
+.mh-meta-health-page h2,
+.mh-meta-health-page h3 {
+  color: #f3f4f6;
+}
+
+/* Force emojis to use their natural colors instead of inheriting text color */
+.mh-meta-health-page h2,
+.mh-meta-health-page h3 {
+  -webkit-text-fill-color: initial;
+}
+
 .mh-state-badge {
   padding: 10px 20px;
   border-radius: 25px;
@@ -269,6 +303,12 @@
   color: #f3f4f6;
   margin: 0 0 25px 0;
   text-align: center;
+}
+
+/* Preserve emoji colors in role section headers */
+.mh-roles-section h2 .emoji {
+  color: initial;
+  font-style: normal;
 }
 
 .mh-roles-grid {
@@ -422,6 +462,12 @@
   font-size: 1.75rem;
   font-weight: 700;
   margin: 0;
+}
+
+/* Preserve emoji colors in composition section headers */
+.mh-composition-section h2 .emoji {
+  color: initial;
+  font-style: normal;
 }
 
 .mh-composition-subtitle {
