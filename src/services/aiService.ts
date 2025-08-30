@@ -48,26 +48,11 @@ export interface MetaHealthRequest {
 }
 
 export interface CompositionAnalysis {
-  mostPopularGroup?: {
+  mostPopularGroup: {
     specs: number[]; // Array of 5 spec IDs in the most popular composition
     specNames: string[]; // Array of spec names for display
     usage: number; // Percentage of total runs this composition represents
-    avgLevel: number; // Average keystone level for this composition
     count: number; // Total count of this composition
-  };
-  specReplacements?: {
-    [specId: number]: {
-      specName: string; // Name of the spec in the most popular group
-      role: string; // "tank", "healer", or "dps"
-      replacements: Array<{
-        specId: number; // ID of the replacement spec
-        specName: string; // Name of the replacement spec
-        count: number; // How many times this replacement occurred
-        avgLevel: number; // Average keystone level for this replacement
-        usage: number; // Percentage of total runs this replacement represents
-        role: string; // Role of the replacement spec
-      }>;
-    };
   };
   compositionDiversity: string; // "High", "Medium", "Low" - assessment of composition variety
   dominantPatterns: string[]; // 1-2 sentences about composition flexibility and meta adaptability
