@@ -174,8 +174,8 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ runs, dungeo
 
   return (
     <>
-      <div className="leaderboard-table-container">
-        <table className="leaderboard-table">
+      <div className="leaderboard-table-container cls-prevention">
+        <table className="leaderboard-table stable-data-table">
           <thead>
             <tr>
               <th className="table-cell rank-cell">Rank</th>

@@ -9,12 +9,11 @@ import ErrorBoundary, { TableErrorFallback } from './ErrorBoundary';
 import { Link } from 'react-router-dom';
 // no eager toast import; we'll load it on demand when needed
 import { fetchTopKeys, fetchSeasonInfo, fetchSeasons } from '../services/api';
+
 import type { TopKeyParams, MythicKeystoneRun, Dungeon, Season } from '../types/api';
 
 // Home page only: contains heavy data fetching for table and stats
 export const HomePage: React.FC = () => {
-
-
   const [apiData, setApiData] = useState<MythicKeystoneRun[] | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
   const [dungeons, setDungeons] = useState<Dungeon[]>([]);
@@ -23,6 +22,8 @@ export const HomePage: React.FC = () => {
   const filter = useFilterState();
   const dispatch = useFilterDispatch();
   const fallbackTriedRef = useRef<number | null>(null);
+  
+
 
   // Allow fallback again whenever the user changes the season explicitly
   useEffect(() => {
@@ -48,9 +49,13 @@ export const HomePage: React.FC = () => {
 
     (async () => {
       try {
+
+        
         // First batch
         const firstBatchResponse = await fetchTopKeys({ ...baseParams, limit: initialLimit });
         const firstBatch = firstBatchResponse.data;
+        
+
 
         if (cancelled) return;
 
@@ -164,7 +169,7 @@ export const HomePage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4">
+    <div className="max-w-7xl mx-auto px-4 layout-stable">
       <FilterBar
         showExpansion={false}
         showPeriod={true}
@@ -176,10 +181,10 @@ export const HomePage: React.FC = () => {
         Looking for the latest meta? Check out{' '}
         <Link to="/wow-meta-season-3" className="text-blue-400 hover:underline">WoW Meta — TWW Season 3</Link>.
       </div>
-      <div>
+      <div className={`homepage-stats-container progressive-content-container cls-prevention ${apiData ? 'loaded has-content' : ''}`}>
         <Suspense
           fallback={
-            <div className="w-full" style={{ minHeight: 220 }}>
+            <div className="w-full cls-preserve-height" style={{ '--min-height': '220px' } as React.CSSProperties}>
               {/* lightweight placeholder to reserve space and avoid CLS */}
               <div className="skeleton skeleton-bar mb-2" style={{ width: '40%' }} />
               <div className="skeleton skeleton-bar mb-2" style={{ width: '60%' }} />
@@ -190,11 +195,11 @@ export const HomePage: React.FC = () => {
           <SummaryStats runs={apiData || []} dungeons={dungeons} />
         </Suspense>
       </div>
-      <div>
+      <div className={`homepage-table-container progressive-content-container cls-prevention ${apiData ? 'loaded has-content' : ''}`}>
         <ErrorBoundary fallback={TableErrorFallback}>
           <Suspense
             fallback={
-              <div className="leaderboard-table-container" aria-busy="true">
+              <div className="leaderboard-table-container cls-preserve-height" style={{ '--min-height': '600px' } as React.CSSProperties} aria-busy="true">
                 <table className="leaderboard-table">
                   <thead>
                     <tr>

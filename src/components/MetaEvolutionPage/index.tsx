@@ -122,7 +122,7 @@ export const MetaEvolutionPage: React.FC = () => {
         </div>
       )}
 
-      <div className="chart-container-wrapper" style={{ position: 'relative' }}>
+      <div className={`chart-container-wrapper ${!loading ? 'loaded' : ''}`} style={{ position: 'relative' }}>
         {/* Skeleton loading overlay - non-blocking, dark themed */}
         {isLoading && (
           <div className="meta-skeleton-overlay">
@@ -140,44 +140,46 @@ export const MetaEvolutionPage: React.FC = () => {
           </div>
         )}
 
-        <div key={activeChart} className="chart-fade">
-          {activeChart === 'line' && (
-              <LineChart 
-                data={currentChart.data} 
-                topSpecs={currentChart.topSpecs} 
-                isMobile={isMobile}
-              />
-            )}
-            {activeChart === 'bar' && (
-              <BarChart 
-                data={currentChart.data} 
-                topSpecs={currentChart.topSpecs} 
-                isMobile={isMobile}
-              />
-            )}
-            {activeChart === 'area' && (
-              <AreaChart 
-                data={currentChart.data} 
-                topSpecs={currentChart.topSpecs} 
-                isMobile={isMobile}
-              />
-            )}
-            {activeChart === 'heatmap' && (
-              <HeatmapChart 
-                data={currentChart.data} 
-                topSpecs={currentChart.topSpecs}
-              />
-            )}
-            {activeChart === 'treemap' && (
-              <TreemapChart 
-                data={currentChart.data} 
-                topSpecs={currentChart.topSpecs}
-                treemapWeek={treemapWeek}
-                setTreemapWeek={setTreemapWeek}
-                chartView={chartView}
-                allSpecs={allSpecs}
-              />
-            )}
+        <div className="chart-content-area">
+          <div key={activeChart} className="content-fade-transition">
+            {activeChart === 'line' && (
+                <LineChart 
+                  data={currentChart.data} 
+                  topSpecs={currentChart.topSpecs} 
+                  isMobile={isMobile}
+                />
+              )}
+              {activeChart === 'bar' && (
+                <BarChart 
+                  data={currentChart.data} 
+                  topSpecs={currentChart.topSpecs} 
+                  isMobile={isMobile}
+                />
+              )}
+              {activeChart === 'area' && (
+                <AreaChart 
+                  data={currentChart.data} 
+                  topSpecs={currentChart.topSpecs} 
+                  isMobile={isMobile}
+                />
+              )}
+              {activeChart === 'heatmap' && (
+                <HeatmapChart 
+                  data={currentChart.data} 
+                  topSpecs={currentChart.topSpecs}
+                />
+              )}
+              {activeChart === 'treemap' && (
+                <TreemapChart 
+                  data={currentChart.data} 
+                  topSpecs={currentChart.topSpecs}
+                  treemapWeek={treemapWeek}
+                  setTreemapWeek={setTreemapWeek}
+                  chartView={chartView}
+                  allSpecs={allSpecs}
+                />
+              )}
+          </div>
         </div>
       </div>
     </div>

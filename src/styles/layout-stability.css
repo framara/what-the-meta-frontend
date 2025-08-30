@@ -1,0 +1,206 @@
+/**
+ * Layout Stability & CLS Prevention
+ * 
+ * Consolidated styles to prevent Cumulative Layout Shift (CLS)
+ * and maintain stable layouts during dynamic content loading.
+ */
+
+/* Core Layout Stability */
+.layout-stable {
+  /* Prevent layout shifts with hardware acceleration */
+  transform: translateZ(0);
+  will-change: auto;
+  contain: layout style;
+}
+
+.layout-stable * {
+  box-sizing: border-box;
+}
+
+/* Content Containers */
+.progressive-content-container {
+  min-height: var(--min-content-height, 400px);
+  position: relative;
+  transition: none;
+}
+
+.progressive-content-container.has-content {
+  min-height: unset;
+}
+
+/* Height Preservation */
+.cls-preserve-height {
+  min-height: var(--min-height, 200px);
+  position: relative;
+}
+
+.cls-fixed-height {
+  height: var(--fixed-height, 200px);
+  overflow: hidden;
+}
+
+/* Table Stability */
+.stable-data-table {
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: collapse;
+  min-height: 200px;
+}
+
+.stable-data-table thead {
+  position: sticky;
+  top: 0;
+  background: #111827;
+  z-index: 10;
+}
+
+.stable-data-table th {
+  padding: 0.75rem 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid #374151;
+  height: 48px;
+}
+
+.stable-data-table td {
+  padding: 0.75rem 0.5rem;
+  vertical-align: top;
+  height: 56px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Skeleton Loaders */
+.skeleton {
+  background: linear-gradient(90deg, #374151 25%, #4B5563 50%, #374151 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+.skeleton-bar {
+  height: 1rem;
+  width: 100%;
+}
+
+.skeleton-bar.small {
+  height: 0.75rem;
+  width: 60%;
+}
+
+.skeleton-bar.tiny {
+  height: 0.5rem;
+  width: 40%;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Filter Bar Stability */
+.filter-bar-container {
+  min-height: 64px;
+  position: relative;
+}
+
+/* Chart Container Stability */
+.chart-container-wrapper {
+  min-height: 400px;
+  position: relative;
+  background: #1F2937;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.chart-container-wrapper.loaded {
+  min-height: unset;
+}
+
+.chart-content-area {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.content-fade-transition {
+  transition: opacity 0.3s ease;
+}
+
+/* Progress Indicators */
+.progress-container {
+  height: 32px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dynamic-text-container {
+  min-height: 24px;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+
+/* Homepage Specific */
+.homepage-stats-container {
+  min-height: 220px;
+  position: relative;
+}
+
+.homepage-stats-container.loaded {
+  min-height: unset;
+}
+
+.homepage-table-container {
+  min-height: 600px;
+  position: relative;
+}
+
+.homepage-table-container.loaded {
+  min-height: unset;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  .progressive-content-container {
+    --min-content-height: 300px;
+  }
+  
+  .chart-container-wrapper {
+    min-height: 300px;
+  }
+  
+  .homepage-stats-container {
+    min-height: 180px;
+  }
+  
+  .homepage-table-container {
+    min-height: 400px;
+  }
+}
+
+/* Performance Optimizations */
+.performance-optimized {
+  will-change: opacity, transform;
+  transform: translateZ(0);
+}
+
+/* Prevent Margin Collapse */
+.margin-stable {
+  padding-top: var(--spacing, 1rem);
+  padding-bottom: var(--spacing, 1rem);
+  margin: 0;
+}
+
+/* CLS Prevention Global */
+.cls-prevention {
+  contain: layout style;
+  transform: translateZ(0);
+  will-change: auto;
+}
+
+.cls-prevention * {
+  contain: inherit;
+  box-sizing: border-box;
+}
