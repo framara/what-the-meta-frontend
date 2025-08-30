@@ -1,4 +1,5 @@
 /* Inter via @fontsource-variable/inter with swap; falls back to system font stack. */
+@import './styles/layout-stability.css';
 
 /* Collapsible FilterBar for mobile */
 .filterbar-toggle-btn {

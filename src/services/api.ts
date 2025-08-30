@@ -1,4 +1,5 @@
 import axios from 'axios';
+
 import type {
   TopKeyParams,
   TopKeysResponse,
@@ -34,6 +35,25 @@ const inflightRequests = new Map<string, Promise<any>>();
 
 function isFresh(ts: number): boolean {
   return Date.now() - ts < API_CACHE_TTL_MS;
+}
+
+// Simple axios wrapper
+async function apiRequest<T>(
+  url: string, 
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
+  config: any = {}
+): Promise<T> {
+  try {
+    const response = await axios.request<T>({
+      url,
+      method,
+      ...config
+    });
+    
+    return response.data;
+  } catch (error: any) {
+    throw error;
+  }
 }
 
 // Request deduplication helper
@@ -83,11 +103,11 @@ export async function fetchTopKeys(params: TopKeyParams): Promise<TopKeysRespons
     const url = `${API_BASE_URL}/meta/top-keys?${searchParams.toString()}`;
     console.log('API: fetchTopKeys executing request:', url);
     
-    const response = await axios.get<TopKeysResponse>(url, { 
+    const data = await apiRequest<TopKeysResponse>(url, 'GET', { 
       timeout: 10000 // 10 second timeout
     });
     
-    return response.data;
+    return data;
   });
 }
 
@@ -180,6 +200,8 @@ export async function fetchSeasons() {
   // Cache hit
   if (seasonsCache.entry && isFresh(seasonsCache.entry.ts)) {
     console.log('API: fetchSeasons cache hit');
+    // Track cache hit
+
     return seasonsCache.entry.data;
   }
   // Deduplicate in-flight requests

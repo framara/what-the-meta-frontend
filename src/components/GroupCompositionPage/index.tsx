@@ -9,6 +9,7 @@ import './styles/GroupCompositionPage.css';
 import SEO from '../SEO';
 import { useSeasonLabel } from '../../hooks/useSeasonLabel';
 
+
 interface Season {
   season_id: number;
   season_name: string;
@@ -57,6 +58,8 @@ export const GroupCompositionPage: React.FC = () => {
   const filter = useFilterState();
   const { seasonLabel } = useSeasonLabel(filter.season_id);
   const isMobile = useMemo(() => (typeof window !== 'undefined' && window.innerWidth <= 768), []);
+  
+
   const [runs, setRuns] = useState<Run[]>([]);
   const [seasonData, setSeasonData] = useState<SeasonData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -226,6 +229,8 @@ export const GroupCompositionPage: React.FC = () => {
     const requestId = `${filter.season_id}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     lastRequestIdRef.current = requestId;
     
+
+    
     // Always (re)create worker to cancel any in-flight previous req
     if (workerRef.current) {
       try { workerRef.current.terminate(); } catch { /* no-op */ }
@@ -255,6 +260,10 @@ export const GroupCompositionPage: React.FC = () => {
         // Update with rich data
         setSeasonData(seasonData);
         setTrendLoading(false);
+        
+        // Track web worker completion
+        const dataSize = JSON.stringify(seasonData).length;
+
 
         // Update cache with rich data
         const richCacheKey = `rich-${cacheKey}`;
@@ -412,10 +421,16 @@ export const GroupCompositionPage: React.FC = () => {
                 ))}
               </div>
               <div className="gc-skeleton-note">
-                <div className="loading-spinner" />
-                <div className="gc-skeleton-text">Loading composition data... {loadingProgress}%</div>
+                <div className="progress-container">
+                  <div className="loading-spinner" />
+                  <div className="dynamic-text-container">
+                    <div className="loading-text">Loading composition data... {loadingProgress}%</div>
+                  </div>
+                </div>
                 {runs.length > 0 && (
-                  <div className="gc-skeleton-subtext">Showing {runs.length} runs (loading more...)</div>
+                  <div className="dynamic-text-container">
+                    <div className="loading-text">Showing {runs.length} runs (loading more...)</div>
+                  </div>
                 )}
               </div>
             </div>

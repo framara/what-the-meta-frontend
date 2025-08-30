@@ -8,6 +8,7 @@ import ScrollUpNavigation from './components/ScrollUpNavigation';
 import Footer from './components/Footer';
 import HomePage from './components/HomePage';
 
+
 // Route-level code splitting for heavy pages
 const MetaEvolutionPage = React.lazy(() => import('./components/MetaEvolutionPage/index').then(m => ({ default: m.MetaEvolutionPage })));
 const RaceBarsPage = React.lazy(() => import('./components/RaceBarsPage').then(m => ({ default: m.RaceBarsPage })));
@@ -26,8 +27,8 @@ function App() {
   const filter = useFilterState();
 
   return (
-    <Router>
-      <div className="min-h-screen flex flex-col">
+      <Router>
+        <div className="min-h-screen flex flex-col">
         {/* Fixed scroll-up navigation */}
         <ScrollUpNavigation />
         
@@ -95,8 +96,8 @@ function App() {
           </Suspense>
         </main>
         <Footer />
-      </div>
-    </Router>
+        </div>
+      </Router>
   );
 }
 
