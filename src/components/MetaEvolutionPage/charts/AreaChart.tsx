@@ -28,11 +28,6 @@ export const AreaChart: React.FC<AreaChartProps> = ({ data, topSpecs, isMobile }
     <div className="chart-container">
       <div className="chart-header">
         <h3 className="chart-title">Spec Popularity Percentage</h3>
-        {!isMobile && (
-          <p className="chart-subtitle" style={{ color: '#a0a0a0', fontSize: '0.8rem', marginTop: '0.25rem' }}>
-            Hover over an area to see specific spec details
-          </p>
-        )}
       </div>
       <div className="meta-chart-scroll">
         <ResponsiveContainer width="100%" height={600}>
