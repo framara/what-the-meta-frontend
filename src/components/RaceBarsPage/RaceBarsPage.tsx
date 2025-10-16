@@ -72,14 +72,10 @@ export const RaceBarsPage: React.FC = () => {
     setRacerInstance(racer);
   }, []);
 
-  // Memoize loading state to prevent unnecessary re-renders
-  const shouldShowLoading = useMemo(() => raceBarsData.loading, [raceBarsData.loading]);
-
-  // Memoize error state
-  const hasError = useMemo(() => !!raceBarsData.error, [raceBarsData.error]);
-
-  // Memoize empty periods state
-  const hasNoPeriods = useMemo(() => raceBarsData.periods.length === 0, [raceBarsData.periods.length]);
+  // Simple state access (no need for useMemo)
+  const shouldShowLoading = raceBarsData.loading;
+  const hasError = !!raceBarsData.error;
+  const hasNoPeriods = raceBarsData.periods.length === 0;
 
   // Memoize page header content to prevent re-renders
   const pageHeaderContent = useMemo(() => (

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useFilterState } from '../FilterContext';
 import { fetchTopKeys, fetchCompositionData } from '../../services/api';
+import { ApiError } from '../../utils/apiError';
 import { GroupCompositionStats } from './components/GroupCompositionStats';
 import LoadingScreen from '../LoadingScreen';
 import { FilterBar } from '../FilterBar';
@@ -73,6 +74,7 @@ export const GroupCompositionPage: React.FC = () => {
   const workerRef = useRef<Worker | null>(null);
   const lastRequestIdRef = useRef<string | null>(null);
   const fetchRequestIdRef = useRef<string | null>(null);
+  const requestIdCounterRef = useRef(0); // Atomic counter for unique request IDs
 
   // Memoized cache key for current filter state
   const cacheKey = useMemo(() => {
@@ -82,7 +84,7 @@ export const GroupCompositionPage: React.FC = () => {
   // Progressive loading function
   const fetchData = useCallback(async () => {
     const startTime = performance.now();
-    const requestId = `fetch-${filter.season_id}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const requestId = `fetch-${++requestIdCounterRef.current}`; // Use atomic counter
     
     if (!filter.season_id) return;
 
@@ -206,7 +208,13 @@ export const GroupCompositionPage: React.FC = () => {
       console.error(`❌ [${new Date().toISOString()}] Error after ${errorTime.toFixed(2)}ms:`, err);
       // Only surface the error if this request is still current
       if (fetchRequestIdRef.current === requestId) {
-        setError('Failed to load group composition data');
+        if (err instanceof ApiError) {
+          setError(err.getUserMessage());
+        } else if (err instanceof Error) {
+          setError(err.message || 'Failed to load group composition data');
+        } else {
+          setError('Failed to load group composition data');
+        }
       }
     } finally {
       // Only clear loading state if this request is still the latest
@@ -226,8 +234,8 @@ export const GroupCompositionPage: React.FC = () => {
     setTrendLoading(true);
     setTrendProgress(0);
     setTrendStage('requesting');
-    const requestId = `${filter.season_id}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    lastRequestIdRef.current = requestId;
+    const requestId = ++requestIdCounterRef.current; // Use atomic counter for unique ID
+    lastRequestIdRef.current = String(requestId);
     
 
     
@@ -240,8 +248,8 @@ export const GroupCompositionPage: React.FC = () => {
     // Set up message handler
     workerRef.current.onmessage = (event: MessageEvent) => {
       const data = event.data as any;
-      // Ignore messages from stale requests
-      if (!data || (data.requestId && data.requestId !== lastRequestIdRef.current)) {
+      // Ignore messages from stale requests by comparing numeric ID
+      if (!data || (data.requestId && data.requestId !== requestId)) {
         return;
       }
 
@@ -324,11 +332,15 @@ export const GroupCompositionPage: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Cleanup worker on unmount
+  // Cleanup worker on unmount or when dependencies change
   useEffect(() => {
     return () => {
       if (workerRef.current) {
-        workerRef.current.terminate();
+        try {
+          workerRef.current.terminate();
+        } catch (e) {
+          // Ignore errors during termination
+        }
         workerRef.current = null;
       }
     };

@@ -1,4 +1,7 @@
 import axios from 'axios';
+import { logger } from '../utils/logger';
+import { ApiError } from '../utils/apiError';
+import { cacheService } from './cacheService';
 
 import type {
   TopKeyParams,
@@ -13,31 +16,17 @@ import type {
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
-// Lightweight in-memory cache for cross-page reuse (browser memory; resets on reload)
-// TTL configurable via VITE_API_CACHE_TTL_MS (defaults to 5 minutes)
+// Cache configuration
 const API_CACHE_TTL_MS: number = (() => {
   const v = Number(import.meta.env?.VITE_API_CACHE_TTL_MS);
   return Number.isFinite(v) && v > 0 ? v : 5 * 60 * 1000; // 5 minutes
 })();
 
-type CacheEntry<T> = { data: T; ts: number };
-
-const seasonsCache: { entry: CacheEntry<Season[]> | null; inflight: Promise<Season[]> | null } = {
-  entry: null,
-  inflight: null,
-};
-
-const seasonInfoCache = new Map<number, CacheEntry<SeasonInfo>>();
+// Inflight request tracking for deduplication
+const seasonsInflight = { promise: null as Promise<Season[]> | null };
 const seasonInfoInflight = new Map<number, Promise<SeasonInfo>>();
 
-// Global request deduplication cache
-const inflightRequests = new Map<string, Promise<any>>();
-
-function isFresh(ts: number): boolean {
-  return Date.now() - ts < API_CACHE_TTL_MS;
-}
-
-// Simple axios wrapper
+// Simple axios wrapper with ApiError normalization
 async function apiRequest<T>(
   url: string, 
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
@@ -52,15 +41,17 @@ async function apiRequest<T>(
     
     return response.data;
   } catch (error: any) {
-    throw error;
+    throw ApiError.fromAxiosError(error);
   }
 }
 
 // Request deduplication helper
 function deduplicateRequest<T>(key: string, requestFn: () => Promise<T>): Promise<T> {
+  const inflightRequests = new Map<string, Promise<any>>();
+  
   // Check if request is already in flight
   if (inflightRequests.has(key)) {
-    console.log(`API: Deduplicating request for key: ${key}`);
+    logger.log(`API: Deduplicating request for key: ${key}`);
     return inflightRequests.get(key) as Promise<T>;
   }
 
@@ -76,20 +67,20 @@ function deduplicateRequest<T>(key: string, requestFn: () => Promise<T>): Promis
 }
 
 export function invalidateSeasonsCache() {
-  seasonsCache.entry = null;
+  cacheService.invalidate('seasons');
 }
 
 export function invalidateSeasonInfoCache(seasonId?: number) {
   if (typeof seasonId === 'number') {
-    seasonInfoCache.delete(seasonId);
+    cacheService.invalidate('season-info', String(seasonId));
   } else {
-    seasonInfoCache.clear();
+    cacheService.invalidate('season-info');
   }
 }
 
 
 
-export async function fetchTopKeys(params: TopKeyParams): Promise<TopKeysResponse> {
+export async function fetchTopKeys(params: TopKeyParams, options?: { signal?: AbortSignal }): Promise<TopKeysResponse> {
   const requestKey = `top-keys-${JSON.stringify(params)}`;
   
   return deduplicateRequest(requestKey, async () => {
@@ -101,10 +92,11 @@ export async function fetchTopKeys(params: TopKeyParams): Promise<TopKeysRespons
     if (params.offset) searchParams.append('offset', params.offset.toString());
 
     const url = `${API_BASE_URL}/meta/top-keys?${searchParams.toString()}`;
-    console.log('API: fetchTopKeys executing request:', url);
+    logger.log('API: fetchTopKeys executing request:', url);
     
     const data = await apiRequest<TopKeysResponse>(url, 'GET', { 
-      timeout: 10000 // 10 second timeout
+      timeout: 10000, // 10 second timeout
+      signal: options?.signal
     });
     
     return data;
@@ -152,81 +144,75 @@ export async function fetchSeasonData(seasonId: number) {
 }
 
 // New: Fetch composition data optimized for group composition analysis
-export async function fetchCompositionData(seasonId: number) {
-  const requestKey = `composition-data-${seasonId}`;
+export async function fetchCompositionData(seasonId: number, options?: { signal?: AbortSignal }) {
+  const url = `${API_BASE_URL}/meta/composition-data/${seasonId}`;
   
-  return deduplicateRequest(requestKey, async () => {
-    console.log('API: fetchCompositionData called with seasonId:', seasonId);
-    const url = `${API_BASE_URL}/meta/composition-data/${seasonId}`;
-    console.log('API: fetchCompositionData URL:', url);
-    try {
-      const response = await axios.get(url);
-      console.log('API: fetchCompositionData response received:', {
-        status: response.status,
-        hasData: !!response.data,
-        dataKeys: Object.keys(response.data || {}),
-        periodsCount: response.data?.periods?.length || 0
-      });
-      return response.data as {
-        season_id: number;
-        total_periods: number;
-        total_keys: number;
-        periods: Array<{
-          period_id: number;
-          keys_count: number;
-          keys: Array<{
-            id: number;
-            keystone_level: number;
-            score: number;
-            members: Array<{
-              spec_id: string;
-              class_id: string;
-              role: string;
+  return cacheService.getOrFetch(
+    'composition-data',
+    String(seasonId),
+    async () => {
+      logger.log('API: fetchCompositionData called with seasonId:', seasonId);
+      logger.log('API: fetchCompositionData URL:', url);
+      try {
+        const response = await axios.get(url, { signal: options?.signal });
+        logger.log('API: fetchCompositionData response received:', {
+          status: response.status,
+          hasData: !!response.data,
+          dataKeys: Object.keys(response.data || {}),
+          periodsCount: response.data?.periods?.length || 0
+        });
+        return response.data as {
+          season_id: number;
+          total_periods: number;
+          total_keys: number;
+          periods: Array<{
+            period_id: number;
+            keys_count: number;
+            keys: Array<{
+              id: number;
+              keystone_level: number;
+              score: number;
+              members: Array<{
+                spec_id: string;
+                class_id: string;
+                role: string;
+              }>;
+              [key: string]: any;
             }>;
-            [key: string]: any;
           }>;
-        }>;
-      };
-    } catch (error) {
-      console.error('API: fetchCompositionData error:', error);
-      throw error;
-    }
-  });
+        };
+      } catch (error) {
+        logger.error('API: fetchCompositionData error:', error);
+        throw ApiError.fromAxiosError(error);
+      }
+    },
+    { maxSize: 30, ttl: API_CACHE_TTL_MS }
+  );
 }
 
 // New: Fetch all seasons
-export async function fetchSeasons() {
+export async function fetchSeasons(options?: { signal?: AbortSignal }) {
   const url = `${API_BASE_URL}/wow/advanced/seasons`;
-  // Cache hit
-  if (seasonsCache.entry && isFresh(seasonsCache.entry.ts)) {
-    console.log('API: fetchSeasons cache hit');
-    // Track cache hit
-
-    return seasonsCache.entry.data;
-  }
-  // Deduplicate in-flight requests
-  if (seasonsCache.inflight) {
-    console.log('API: fetchSeasons awaiting inflight');
-    return seasonsCache.inflight;
-  }
-  console.log('API: fetchSeasons fetch', { url });
-  const req = axios.get(url)
-    .then((response) => {
-      seasonsCache.entry = { data: response.data, ts: Date.now() };
-      seasonsCache.inflight = null;
-      console.log('API: fetchSeasons response received:', {
-        status: response.status,
-        dataLength: response.data?.length || 0,
-      });
-      return response.data;
-    })
-    .catch((error) => {
-      seasonsCache.inflight = null;
-      console.error('API: fetchSeasons error:', error);
-      throw error;
-    });
-  seasonsCache.inflight = req;
-  return req;
+  
+  return cacheService.getOrFetch(
+    'seasons',
+    'all-seasons',
+    async () => {
+      logger.log('API: fetchSeasons fetch', { url });
+      try {
+        const response = await axios.get(url, { signal: options?.signal });
+        logger.log('API: fetchSeasons response received:', {
+          status: response.status,
+          dataLength: response.data?.length || 0,
+        });
+        return response.data;
+      } catch (error) {
+        logger.error('API: fetchSeasons error:', error);
+        throw ApiError.fromAxiosError(error);
+      }
+    },
+    { maxSize: 10, ttl: API_CACHE_TTL_MS }
+  );
 }
 
 // Helper: Get latest season id (API provides DB-first data)
@@ -249,35 +235,26 @@ export async function getLatestSeasonId(): Promise<number | null> {
 }
 
 // New: Fetch season info (periods and dungeons) for a given seasonId
-export async function fetchSeasonInfo(seasonId: number) {
-  // Cache hit
-  const cached = seasonInfoCache.get(seasonId);
-  if (cached && isFresh(cached.ts)) {
-    console.log('API: fetchSeasonInfo cache hit for', seasonId);
-    return cached.data;
-  }
-  // Deduplicate in-flight requests per season
-  const inflight = seasonInfoInflight.get(seasonId);
-  if (inflight) {
-    console.log('API: fetchSeasonInfo awaiting inflight for', seasonId);
-    return inflight;
-  }
+export async function fetchSeasonInfo(seasonId: number, options?: { signal?: AbortSignal }) {
   const url = `${API_BASE_URL}/wow/advanced/season-info/${seasonId}`;
-  console.log('API: fetchSeasonInfo fetch', { seasonId, url });
-  const req = axios.get(url)
-    .then((response) => {
-      const data = response.data as SeasonInfo;
-      seasonInfoInflight.delete(seasonId);
-      seasonInfoCache.set(seasonId, { data, ts: Date.now() });
-      return data;
-    })
-    .catch((error) => {
-      seasonInfoInflight.delete(seasonId);
-      console.error('API: fetchSeasonInfo error:', error);
-      throw error;
-    });
-  seasonInfoInflight.set(seasonId, req);
-  return req;
+  
+  return cacheService.getOrFetch(
+    'season-info',
+    String(seasonId),
+    async () => {
+      logger.log('API: fetchSeasonInfo fetch', { seasonId, url });
+      try {
+        const response = await axios.get(url, { signal: options?.signal });
+        const data = response.data as SeasonInfo;
+        logger.log('API: fetchSeasonInfo response received for', seasonId);
+        return data;
+      } catch (error) {
+        logger.error('API: fetchSeasonInfo error:', error);
+        throw ApiError.fromAxiosError(error);
+      }
+    },
+    { maxSize: 20, ttl: API_CACHE_TTL_MS }
+  );
 }
 
 // Cutoff snapshots
@@ -300,8 +277,8 @@ export async function fetchCutoffBySeason(season: string) {
   return resp.data as CutoffSnapshot[];
 }
 
-export async function fetchSpecEvolution(seasonId?: number, params?: { period_id?: number; dungeon_id?: number }) {
-  console.log('API: fetchSpecEvolution called with seasonId:', seasonId, 'params:', params);
+export async function fetchSpecEvolution(seasonId?: number, params?: { period_id?: number; dungeon_id?: number }, options?: { signal?: AbortSignal }) {
+  logger.log('API: fetchSpecEvolution called with seasonId:', seasonId, 'params:', params);
   
   const searchParams = new URLSearchParams();
   if (params?.period_id) searchParams.append('period_id', params.period_id.toString());
@@ -312,29 +289,39 @@ export async function fetchSpecEvolution(seasonId?: number, params?: { period_id
     ? `${API_BASE_URL}/meta/spec-evolution/${seasonId}${queryString ? `?${queryString}` : ''}`
     : `${API_BASE_URL}/meta/spec-evolution${queryString ? `?${queryString}` : ''}`;
   
-  console.log('API: fetchSpecEvolution URL:', url);
-  try {
-    const response = await axios.get(url);
-    console.log('API: fetchSpecEvolution response received:', {
-      status: response.status,
-      hasData: !!response.data,
-      dataKeys: Object.keys(response.data || {}),
-      evolutionLength: response.data?.evolution?.length || 0
-    });
-    return response.data as {
-    season_id: number;
-    expansion_id: number;
-    expansion_name: string;
-    season_name: string;
-    evolution: Array<{
-      period_id: number;
-      week: number;
-      period_label: string;
-      spec_counts: Record<string, number>;
-    }>;
-  };
-  } catch (error) {
-    console.error('API: fetchSpecEvolution error:', error);
-    throw error;
-  }
+  // Create cache key that includes params
+  const cacheKey = `${seasonId || 'all'}-${queryString || 'default'}`;
+  
+  return cacheService.getOrFetch(
+    'spec-evolution',
+    cacheKey,
+    async () => {
+      logger.log('API: fetchSpecEvolution URL:', url);
+      try {
+        const response = await axios.get(url, { signal: options?.signal });
+        logger.log('API: fetchSpecEvolution response received:', {
+          status: response.status,
+          hasData: !!response.data,
+          dataKeys: Object.keys(response.data || {}),
+          evolutionLength: response.data?.evolution?.length || 0
+        });
+        return response.data as {
+          season_id: number;
+          expansion_id: number;
+          expansion_name: string;
+          season_name: string;
+          evolution: Array<{
+            period_id: number;
+            week: number;
+            period_label: string;
+            spec_counts: Record<string, number>;
+          }>;
+        };
+      } catch (error) {
+        logger.error('API: fetchSpecEvolution error:', error);
+        throw ApiError.fromAxiosError(error);
+      }
+    },
+    { maxSize: 30, ttl: API_CACHE_TTL_MS }
+  );
 }
