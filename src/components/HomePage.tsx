@@ -9,8 +9,21 @@ import ErrorBoundary, { TableErrorFallback } from './ErrorBoundary';
 import { Link } from 'react-router-dom';
 // no eager toast import; we'll load it on demand when needed
 import { fetchTopKeys, fetchSeasonInfo, fetchSeasons } from '../services/api';
+import { ApiError } from '../utils/apiError';
 
 import type { TopKeyParams, MythicKeystoneRun, Dungeon, Season } from '../types/api';
+
+// Type for dynamic react-hot-toast import
+interface ToastFn {
+  (message: string, options?: { id?: string }): void;
+  success?: (message: string, options?: { id?: string }) => void;
+  dismiss?: (id?: string) => void;
+}
+
+interface ToastModule {
+  default?: ToastFn;
+  toast?: ToastFn;
+}
 
 // Home page only: contains heavy data fetching for table and stats
 export const HomePage: React.FC = () => {
@@ -36,7 +49,7 @@ export const HomePage: React.FC = () => {
     setApiError(null);
     setLoading(true);
 
-    let cancelled = false;
+    const abortController = new AbortController();
 
     const seasonId = Number(filter.season_id);
     const baseParams: TopKeyParams = { season_id: seasonId };
@@ -52,12 +65,12 @@ export const HomePage: React.FC = () => {
 
         
         // First batch
-        const firstBatchResponse = await fetchTopKeys({ ...baseParams, limit: initialLimit });
+        const firstBatchResponse = await fetchTopKeys({ ...baseParams, limit: initialLimit }, { signal: abortController.signal });
         const firstBatch = firstBatchResponse.data;
         
 
 
-        if (cancelled) return;
+        if (abortController.signal.aborted) return;
 
         // If no data and this is the latest season, fallback to previous season once
         if ((Array.isArray(firstBatch) && firstBatch.length === 0) && fallbackTriedRef.current !== filter.season_id) {
@@ -69,10 +82,11 @@ export const HomePage: React.FC = () => {
               const prev = sorted[1];
               if (prev?.season_id) {
                 const latestLabel = sorted[0]?.season_name || `Season ${latestId}`;
-                import('react-hot-toast').then(m => {
-                  const t: any = (m as any).default || (m as any).toast || m;
-                  t.dismiss?.('season-fallback');
-                  t.success?.(`${latestLabel} has not started yet. Showing previous season instead.`, { id: 'season-fallback' });
+                import('react-hot-toast').then((m: unknown) => {
+                  const module = m as ToastModule;
+                  const toastFn: ToastFn = module.default || module.toast || (() => {});
+                  toastFn.dismiss?.('season-fallback');
+                  toastFn.success?.(`${latestLabel} has not started yet. Showing previous season instead.`, { id: 'season-fallback' });
                 }).catch(() => {/* ignore */});
                 fallbackTriedRef.current = filter.season_id ?? null;
                 dispatch({ type: 'SET_SEASON', season_id: prev.season_id });
@@ -92,8 +106,8 @@ export const HomePage: React.FC = () => {
   if (initialLimit < targetLimit) {
           const remaining = targetLimit - initialLimit;
           try {
-            const restResponse = await fetchTopKeys({ ...baseParams, limit: remaining, offset: initialLimit });
-            if (cancelled) return;
+            const restResponse = await fetchTopKeys({ ...baseParams, limit: remaining, offset: initialLimit }, { signal: abortController.signal });
+            if (abortController.signal.aborted) return;
             const combined = [
               ...((firstBatch || []) as MythicKeystoneRun[]),
               ...(restResponse.data as MythicKeystoneRun[]),
@@ -101,19 +115,31 @@ export const HomePage: React.FC = () => {
             setApiData(combined);
           } catch (e) {
             // Ignore background fetch errors; user still sees initial data
+            if (e instanceof ApiError && e.isAbortError()) {
+              return; // Expected cancellation, silently ignore
+            }
             console.error('Background fetch (remaining runs) failed:', e);
           }
         }
-      } catch (err: any) {
-        if (cancelled) return;
-        setApiError(err?.message || 'API error');
+      } catch (err: unknown) {
+        if (abortController.signal.aborted) return;
+        
+        // Handle ApiError with proper user-friendly messages
+        if (err instanceof ApiError) {
+          setApiError(err.getUserMessage());
+        } else if (err instanceof Error) {
+          setApiError(err.message || 'An unexpected error occurred');
+        } else {
+          setApiError('An unexpected error occurred');
+        }
+        
         setLoading(false);
         if (!hasBooted) setHasBooted(true);
       }
     })();
 
     return () => {
-      cancelled = true;
+      abortController.abort();
     };
   }, [filter.season_id, filter.period_id, filter.dungeon_id, filter.limit, dispatch, hasBooted]);
 
@@ -153,11 +179,21 @@ export const HomePage: React.FC = () => {
                   const restResponse = await fetchTopKeys({ ...baseParams, limit: targetLimit - initialLimit, offset: initialLimit });
                   setApiData([...(firstResponse.data || []), ...(restResponse.data || [])] as MythicKeystoneRun[]);
                 } catch (e) {
+                  if (e instanceof ApiError && e.isAbortError()) {
+                    return; // Expected cancellation
+                  }
                   console.error('Background fetch (remaining runs) failed:', e);
                 }
               }
-            } catch (err: any) {
-              setApiError(err?.message || 'API error');
+            } catch (err: unknown) {
+              // Handle ApiError with proper user-friendly messages
+              if (err instanceof ApiError) {
+                setApiError(err.getUserMessage());
+              } else if (err instanceof Error) {
+                setApiError(err.message || 'An unexpected error occurred');
+              } else {
+                setApiError('An unexpected error occurred');
+              }
               setLoading(false);
             }
           }}

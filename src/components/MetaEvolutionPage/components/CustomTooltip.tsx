@@ -3,13 +3,16 @@ import type { TooltipProps } from 'recharts';
 import { WOW_SPECIALIZATIONS, WOW_CLASS_COLORS, WOW_SPEC_TO_CLASS } from '../../../constants/wow-constants';
 
 interface CustomTooltipProps extends TooltipProps<number, string> {
+  payload?: Array<{ dataKey?: string; value?: number; [key: string]: any }>;
+  active?: boolean;
+  label?: string | number;
   percent?: boolean;
   hoveredSpecId?: number | null;
   showOnlyHovered?: boolean;
 }
 
 export const CustomTooltip: React.FC<CustomTooltipProps> = (props) => {
-  const { active, payload, label, percent, hoveredSpecId, showOnlyHovered } = props as any;
+  const { active, payload, label, percent, hoveredSpecId, showOnlyHovered } = props;
   if (!active || !payload || payload.length === 0) return null;
 
   // Don't show tooltip on mobile
@@ -42,7 +45,7 @@ export const CustomTooltip: React.FC<CustomTooltipProps> = (props) => {
     });
 
   // Calculate total for percentage display
-  const total = sortedPayload.reduce((sum, entry) => sum + entry.value, 0);
+  const total = sortedPayload.reduce((sum, entry) => sum + (entry.value ?? 0), 0);
 
   // If showing only hovered spec, don't split into columns
   let columns: any[][];
