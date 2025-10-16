@@ -8,9 +8,6 @@ import type {
   TopKeysResponse,
   AllSeasonsParams,
   SeasonInfo,
-  MythicKeystoneRun,
-  CompositionData,
-  Season,
   CutoffSnapshot
 } from '../types/api';
 
@@ -21,10 +18,6 @@ const API_CACHE_TTL_MS: number = (() => {
   const v = Number(import.meta.env?.VITE_API_CACHE_TTL_MS);
   return Number.isFinite(v) && v > 0 ? v : 5 * 60 * 1000; // 5 minutes
 })();
-
-// Inflight request tracking for deduplication
-const seasonsInflight = { promise: null as Promise<Season[]> | null };
-const seasonInfoInflight = new Map<number, Promise<SeasonInfo>>();
 
 // Simple axios wrapper with ApiError normalization
 async function apiRequest<T>(
