@@ -123,13 +123,14 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({ prediction, type
   };
 
   return (
-    <div 
-      className={`prediction-card-container ${isFlipped ? 'flipped' : ''}`} 
+    <div
+      className={`prediction-card-container ${isFlipped ? 'flipped' : ''}`}
       onClick={handleClick}
       style={style}
     >
-      {/* Front of card */}
-      <div className={`prediction-card front ${type}`}>
+      <div className="card-inner">
+        {/* Front of card */}
+        <div className={`prediction-card front ${type}`}>
         <div className="card-header">
           <div className="spec-info">
             <div className="spec-icon" style={{ border: `2px solid ${classColor}` }}>
@@ -268,6 +269,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({ prediction, type
         <div className="flip-hint">
           <span>Click to flip back</span>
         </div>
+      </div>
       </div>
     </div>
   );

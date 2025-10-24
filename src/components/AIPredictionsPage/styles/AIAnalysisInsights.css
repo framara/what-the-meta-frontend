@@ -1,10 +1,9 @@
 .ai-analysis-insights {
-  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-  border-radius: 12px;
+  background: #1e293b;
+  border-radius: 8px;
   padding: 24px;
   margin: 20px 0;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  border: 1px solid #334155;
   position: relative;
   z-index: 1;
 }
@@ -15,7 +14,7 @@
   align-items: center;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid #334155;
 }
 
 .ai-analysis-insights .insights-header h3 {
@@ -23,7 +22,6 @@
   color: #f8fafc;
   font-size: 1.5rem;
   font-weight: 700;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .ai-analysis-insights .insights-metrics {
@@ -49,7 +47,6 @@
 .ai-analysis-insights .metric-value {
   font-size: 1.125rem;
   font-weight: 700;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .ai-analysis-insights .metric-value.confidence {
@@ -83,17 +80,15 @@
   align-items: flex-start;
   gap: 12px;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.05);
+  background: #0f172a;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.2s ease;
+  border: 1px solid #334155;
+  transition: background-color 0.2s ease;
 }
 
 .ai-analysis-insights .trend-item:hover,
 .ai-analysis-insights .insight-item:hover {
-  background: rgba(255, 255, 255, 0.08);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background: #1e293b;
 }
 
 .trend-icon {
@@ -121,7 +116,7 @@
 .insights-footer {
   margin-top: 24px;
   padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid #334155;
 }
 
 .ai-disclaimer {
@@ -138,6 +133,7 @@
   .ai-analysis-insights {
     padding: 16px;
     margin: 16px 0;
+    border-radius: 8px;
   }
 
   .insights-header {
@@ -162,30 +158,4 @@
   }
 }
 
-/* Animation for new insights */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.ai-analysis-insights {
-  animation: fadeInUp 0.5s ease-out;
-}
-
-.trend-item,
-.insight-item {
-  animation: fadeInUp 0.3s ease-out;
-}
-
-.trend-item:nth-child(1) { animation-delay: 0.1s; }
-.trend-item:nth-child(2) { animation-delay: 0.2s; }
-.trend-item:nth-child(3) { animation-delay: 0.3s; }
-.insight-item:nth-child(1) { animation-delay: 0.1s; }
-.insight-item:nth-child(2) { animation-delay: 0.2s; }
-.insight-item:nth-child(3) { animation-delay: 0.3s; } 
+ 

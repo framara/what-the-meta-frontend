@@ -1,7 +1,7 @@
 .wow-loading-screen {
   position: fixed;
   inset: 0;
-  background: #181c2a;
+  background: #0f172a;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -10,10 +10,10 @@
 }
 
 .wow-spinner {
-  width: 64px;
-  height: 64px;
-  border: 8px solid #444;
-  border-top: 8px solid #7dd3fc;
+  width: 48px;
+  height: 48px;
+  border: 3px solid #334155;
+  border-top: 3px solid #3b82f6;
   border-radius: 50%;
   animation: wow-spin 1s linear infinite;
   margin-bottom: 24px;
@@ -26,8 +26,7 @@
 }
 
 .wow-loading-text {
-  color: #fff;
-  font-size: 1.25rem;
-  letter-spacing: 0.05em;
+  color: #e2e8f0;
+  font-size: 1rem;
   font-weight: 500;
 }

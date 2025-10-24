@@ -107,7 +107,6 @@
 .chart-container-wrapper {
   min-height: 400px;
   position: relative;
-  background: #1F2937;
   border-radius: 8px;
   overflow: hidden;
 }
