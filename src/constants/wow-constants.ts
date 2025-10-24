@@ -130,9 +130,9 @@ export const WOW_SEASONS_PER_EXPANSION: Record<number, number[]> = {
  7: [1, 2, 3, 4], // Battle for Azeroth
  8: [5, 6, 7, 8], // Shadowlands
  9: [9, 10, 11, 12], // Dragonflight
- 10: [13, 14, 15, 16], // The War Within
- 11: [17, 18, 19, 20], // Midnight
- 12: [21, 22, 23, 24] // The Last Titan
+ 10: [13, 14, 15], // The War Within
+ 11: [16, 17, 18], // Midnight
+ 12: [19, 20, 21] // The Last Titan
 };
 
 export const WOW_EXPANSIONS = [
@@ -146,9 +146,9 @@ export const WOW_EXPANSIONS = [
   { id: 7, name: 'Battle for Azeroth', shortName: 'BfA', seasons: [1, 2, 3, 4] },
   { id: 8, name: 'Shadowlands', shortName: 'SL', seasons: [5, 6, 7, 8] },
   { id: 9, name: 'Dragonflight', shortName: 'DF', seasons: [9, 10, 11, 12] },
-  { id: 10, name: 'The War Within', shortName: 'TWW', seasons: [13, 14, 15, 16] },
-  { id: 11, name: 'Midnight', shortName: 'MN', seasons: [17, 18, 19, 20] },
-  { id: 12, name: 'The Last Titan', shortName: 'TLT', seasons: [21, 22, 23, 24] },
+  { id: 10, name: 'The War Within', shortName: 'TWW', seasons: [13, 14, 15] },
+  { id: 11, name: 'Midnight', shortName: 'MN', seasons: [16, 17, 18] },
+  { id: 12, name: 'The Last Titan', shortName: 'TLT', seasons: [19, 20, 21] },
 ];
 
 // Season metadata (id -> metadata)
@@ -167,7 +167,13 @@ export const SEASON_METADATA: Record<number, { expansion: string; patch: string;
   12: { expansion: 'Dragonflight', patch: '10.2.6', name: 'DF S4' },
   13: { expansion: 'The War Within', patch: '11.0', name: 'TWW S1' },
   14: { expansion: 'The War Within', patch: '11.1', name: 'TWW S2' },
-  15: { expansion: 'The War Within', patch: '11.2', name: 'TWW S3' }
+  15: { expansion: 'The War Within', patch: '11.2', name: 'TWW S3' },
+  16: { expansion: 'Midnight', patch: '12.0', name: 'MN S1' },
+  17: { expansion: 'Midnight', patch: '12.1', name: 'MN S2' },
+  18: { expansion: 'Midnight', patch: '12.2', name: 'MN S3' },  
+  19: { expansion: 'The Last Titan', patch: '13.0', name: 'TLT S1' },
+  20: { expansion: 'The Last Titan', patch: '13.1', name: 'TLT S2' },
+  21: { expansion: 'The Last Titan', patch: '13.2', name: 'TLT S3' },
 };
 
 // Dungeon on-time thresholds (upgrade_level 1 qualifying_duration in ms)
