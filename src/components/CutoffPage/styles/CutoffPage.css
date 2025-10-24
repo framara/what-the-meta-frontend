@@ -49,6 +49,8 @@
 
 /* Chart view selector styling */
 .cutoff-page .chart-view-selector {
+  display: flex;
+  gap: 0.75rem;
   flex: 1;
   max-width: 600px;
 }
@@ -68,6 +70,15 @@
 .cutoff-page .chart-type-toggle .chart-view-button {
   flex: 1;
   min-width: 80px;
+}
+
+/* Button group styling */
+.cutoff-page .button-group {
+  display: flex;
+  gap: 0;
+}
+.cutoff-page .button-group .chart-view-button {
+  margin: 0;
 }
 
 /* Chart-view button styling */
