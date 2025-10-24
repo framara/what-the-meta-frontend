@@ -4,10 +4,9 @@
   max-width: 80rem;
   margin: 0 auto;
   padding: 2rem 1rem;
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: 20px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
 }
 
 /* Header */
@@ -19,10 +18,7 @@
 .mh-meta-health-header h1 {
   font-size: 2.5rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #f1f5f9;
   margin: 0 0 10px 0;
 }
 
@@ -47,19 +43,18 @@
 .mh-skeleton-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(2, 6, 23, 0.55) 0%, rgba(15,23,42,0.55) 100%);
-  backdrop-filter: blur(6px);
+  background: rgba(15, 23, 42, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10;
-  border-radius: 12px;
+  border-radius: 8px;
 }
 
 .mh-skeleton {
   width: 100%;
   padding: 16px;
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(51, 65, 85, 0.8) 100%);
+  background: #1e293b;
 }
 
 .mh-skeleton-bar {
@@ -74,14 +69,6 @@
 
 .mh-skeleton-bar.wide { width: 75%; }
 
-.mh-skeleton-bar::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.1), rgba(255,255,255,0));
-  animation: shimmer 1.6s infinite;
-}
 
 .mh-skeleton-grid {
   display: grid;
@@ -98,18 +85,6 @@
   overflow: hidden;
 }
 
-.mh-skeleton-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.1), rgba(255,255,255,0));
-  animation: shimmer 1.6s infinite;
-}
-
-@keyframes shimmer { 
-  to { transform: translateX(100%); } 
-}
 
 /* Error States */
 .mh-error-container {
@@ -120,9 +95,9 @@
   min-height: 400px;
   text-align: center;
   padding: 2rem;
-  background: rgba(31, 41, 55, 0.6);
+  background: #1e293b;
   border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 16px;
+  border-radius: 8px;
 }
 
 .mh-error-container h2 {
@@ -139,18 +114,17 @@
 
 .mh-retry-button {
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  background: #3b82f6;
   color: white;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 6px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.2s ease;
 }
 
 .mh-retry-button:hover {
-  background: linear-gradient(135deg, #2563eb, #1e40af);
-  transform: translateY(-1px);
+  background: #2563eb;
 }
 
 /* Content */
@@ -162,17 +136,10 @@
 
 /* Summary Section */
 .mh-summary-section {
-  background: linear-gradient(135deg, rgba(31, 41, 55, 0.8), rgba(17, 24, 39, 0.9));
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  border-radius: 20px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
   padding: 2.5rem;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
-}
-
-.mh-summary-section:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
 }
 
 .mh-summary-header {
@@ -237,13 +204,12 @@
 
 .mh-state-badge {
   padding: 10px 20px;
-  border-radius: 25px;
+  border-radius: 12px;
   color: white;
   font-weight: 700;
   font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 1px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
 .mh-summary-text {
@@ -270,14 +236,13 @@
 }
 
 .mh-insight-item {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.1));
+  background: rgba(59, 130, 246, 0.1);
   border: 1px solid rgba(59, 130, 246, 0.3);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 20px;
   color: #f1f5f9;
   font-size: 1rem;
   line-height: 1.7;
-  transition: all 0.3s ease;
   font-weight: 500;
   display: flex;
   align-items: flex-start;
@@ -291,10 +256,6 @@
   flex-shrink: 0;
 }
 
-.mh-insight-item:hover {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(139, 92, 246, 0.2));
-  transform: translateY(-2px);
-}
 
 /* Role Analysis */
 .mh-roles-section h2 {
@@ -318,20 +279,13 @@
 }
 
 .mh-role-card {
-  background: rgba(31, 41, 55, 0.6);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: 16px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
   padding: 2rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
   min-height: 400px;
-}
-
-.mh-role-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
 }
 
 .mh-role-header {
@@ -436,16 +390,10 @@
 
 /* Composition Analysis */
 .mh-composition-section {
-  background: rgba(31, 41, 55, 0.6);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: 20px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
   padding: 2.5rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
-}
-
-.mh-composition-section:hover {
-  border-color: rgba(59, 130, 246, 0.4);
 }
 
 .mh-composition-header {
@@ -528,16 +476,10 @@
 }
 
 .mh-composition-card {
-  background: rgba(17, 24, 39, 0.8);
-  border: 1px solid rgba(75, 85, 99, 0.3);
-  border-radius: 16px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 8px;
   padding: 1.5rem;
-  transition: all 0.3s ease;
-}
-
-.mh-composition-card:hover {
-  border-color: rgba(59, 130, 246, 0.5);
-  transform: translateY(-4px);
 }
 
 .mh-card-icon {
@@ -594,12 +536,6 @@
   font-size: 0.8rem;
   font-weight: 600;
   border: 1px solid rgba(59, 130, 246, 0.3);
-  transition: all 0.2s ease;
-}
-
-.mh-composition-spec:hover {
-  background: rgba(59, 130, 246, 0.25);
-  transform: translateY(-1px);
 }
 
 /* Composition Info */
@@ -699,18 +635,11 @@
 }
 
 .mh-issue-card {
-  background: rgba(31, 41, 55, 0.6);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: 12px;
+  background: #1e293b;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
   padding: 1.5rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
   margin-bottom: 0.5rem;
-}
-
-.mh-issue-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
 .mh-issue-header {
@@ -737,15 +666,15 @@
 }
 
 .mh-severity-badge.high {
-  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  background: #dc2626;
 }
 
 .mh-severity-badge.medium {
-  background: linear-gradient(135deg, #d97706, #b45309);
+  background: #d97706;
 }
 
 .mh-severity-badge.low {
-  background: linear-gradient(135deg, #16a34a, #15803d);
+  background: #16a34a;
 }
 
 .mh-issue-description {

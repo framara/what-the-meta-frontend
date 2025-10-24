@@ -383,7 +383,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
             <div
               className="spec-icon"
               style={{
-                border: `3px solid ${WOW_CLASS_COLORS[tankClassId] || '#fff'}`,
+                border: `4px solid ${WOW_CLASS_COLORS[tankClassId] || '#fff'}`,
               }}
               onMouseEnter={(e: React.MouseEvent) => {
                 const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
@@ -411,7 +411,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
             <div
               className="spec-icon"
               style={{
-                border: `3px solid ${WOW_CLASS_COLORS[healerClassId] || '#fff'}`,
+                border: `4px solid ${WOW_CLASS_COLORS[healerClassId] || '#fff'}`,
               }}
               onMouseEnter={(e: React.MouseEvent) => {
                 const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
@@ -445,7 +445,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
                 <div
                   className="spec-icon"
                   style={{
-                    border: `3px solid ${WOW_CLASS_COLORS[dpsClassId] || '#fff'}`,
+                    border: `4px solid ${WOW_CLASS_COLORS[dpsClassId] || '#fff'}`,
                   }}
                   onMouseEnter={(e: React.MouseEvent) => {
                     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
@@ -500,7 +500,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ runs, dungeons }) =>
                 <div
                   className="spec-icon"
                   style={{
-                    border: `3px solid ${WOW_CLASS_COLORS[Number(classId)] || '#fff'}`,
+                    border: `4px solid ${WOW_CLASS_COLORS[Number(classId)] || '#fff'}`,
                   }}
                   onMouseEnter={(e: React.MouseEvent) => {
                     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();

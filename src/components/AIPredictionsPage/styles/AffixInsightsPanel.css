@@ -1,9 +1,8 @@
 .affix-panel {
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: 12px;
+  border: 1px solid #334155;
+  border-radius: 8px;
   padding: 16px;
-  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-  backdrop-filter: blur(10px);
+  background: #1e293b;
   margin-bottom: 20px;
   color: #e5e7eb;
 }

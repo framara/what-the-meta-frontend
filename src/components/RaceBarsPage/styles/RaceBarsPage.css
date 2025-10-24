@@ -19,10 +19,7 @@
   gap: 0.75rem;
   font-size: 2.5rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #f1f5f9;
   margin-bottom: 0.5rem;
 }
 
@@ -36,25 +33,20 @@
 
 /* ===== MAIN PAGE CONTAINER ===== */
 .race-bars-page {
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: 20px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
   padding: 2rem;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
   margin-bottom: 2rem;
   margin-left: auto;
   margin-right: auto;
   max-width: 80rem;
-  transition: all 0.4s ease;
   position: relative;
   overflow-y: visible;
   overflow-x: hidden;
   height: auto;
   min-height: 600px;
 }
-
-/* Removed shiny effect and elevate effect on hover */
 
 /* ===== CONTROLS SECTION ===== */
 .controls-section {
@@ -63,35 +55,10 @@
   gap: 1.5rem;
   margin-bottom: 2.5rem;
   padding: 2rem;
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%);
-  border-radius: 16px;
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  transition: all 0.4s ease;
+  background: #1e293b;
+  border-radius: 8px;
+  border: 1px solid #334155;
   position: relative;
-  overflow: hidden;
-}
-
-.controls-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.08), transparent);
-  transition: left 0.8s ease;
-}
-
-.controls-section:hover::before {
-  left: 100%;
-}
-
-.controls-section:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
-  border-color: rgba(59, 130, 246, 0.3);
 }
 
 /* ===== CHART VIEW SELECTOR ===== */
@@ -102,15 +69,13 @@
 
 .chart-view-button {
   padding: 0.875rem 1.75rem;
-  background: linear-gradient(135deg, #1e293b, #334155);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: 10px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
   color: #cbd5e1;
   font-weight: 600;
   font-size: 0.875rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
+  transition: background-color 0.2s ease;
   cursor: pointer;
   flex: 1;
   min-width: 0;
@@ -121,48 +86,23 @@
   white-space: nowrap;
 }
 
-.chart-view-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.2), transparent);
-  transition: left 0.5s ease;
-}
-
-.chart-view-button:hover::before {
-  left: 100%;
-}
-
 .chart-view-button:hover {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(99, 102, 241, 0.2) 100%);
-  border-color: rgba(59, 130, 246, 0.4);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  background: #334155;
 }
 
 .chart-view-button.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(99, 102, 241, 0.3) 100%);
-  border-color: rgba(59, 130, 246, 0.6);
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #3b82f6;
   color: white;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .chart-view-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
 }
 
 .chart-view-button:disabled:hover {
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.6) 100%);
-  border-color: rgba(59, 130, 246, 0.1);
-  transform: none;
-  box-shadow: none;
+  background: #1e293b;
 }
 
 /* ===== CHART CONTROLS ===== */
@@ -188,13 +128,13 @@
 }
 
 .button-group .chart-view-button:first-child {
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
 }
 
 .button-group .chart-view-button:last-child {
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
   border-right: none;
 }
 
@@ -208,7 +148,7 @@
   }
   .chart-view-button {
     padding: 0.5rem 0.25rem;
-    font-size: 1rem; /* emojis readable but compact */
+    font-size: 1rem;
   }
 }
 
@@ -226,22 +166,21 @@
 .rb-skeleton-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(2, 6, 23, 0.55) 0%, rgba(15,23,42,0.55) 100%);
-  backdrop-filter: blur(6px);
+  background: rgba(15, 23, 42, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10;
-  border-radius: 12px;
+  border-radius: 8px;
 }
 
 .rb-skeleton {
   width: min(900px, 95%);
   height: 360px;
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 16px;
-  border: 1px solid rgba(59,130,246,0.25);
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(51, 65, 85, 0.8) 100%);
+  border: 1px solid #334155;
+  background: #1e293b;
   position: relative;
   overflow: hidden;
 }
@@ -282,37 +221,13 @@
   overflow: hidden;
 }
 
-.rb-skeleton-bar::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.1), rgba(255,255,255,0));
-  animation: rbShimmer 1.6s infinite;
-}
-
-@keyframes rbShimmer { to { transform: translateX(100%); } }
-
-.rb-fade { animation: rbFade 220ms ease-in-out; }
-@keyframes rbFade {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  .rb-skeleton-bar::after { display: none; animation: none !important; }
-  .rb-fade { animation: none !important; }
-}
-
 /* ===== COMING SOON SECTION ===== */
 .coming-soon-container {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  border-radius: 16px;
+  background: #1e293b;
+  border-radius: 8px;
   padding: 3rem;
   text-align: center;
-  border: 1px solid #2d3748;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid #334155;
   max-width: 600px;
   width: 100%;
 }
@@ -329,7 +244,6 @@
   font-weight: 800;
   color: #60a5fa;
   margin: 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .coming-soon-description {
@@ -353,20 +267,12 @@
   gap: 0.75rem;
   padding: 0.75rem 1rem;
   background: rgba(45, 55, 72, 0.5);
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid #4a5568;
-  transition: all 0.2s ease;
-}
-
-.feature-item:hover {
-  background: rgba(45, 55, 72, 0.8);
-  border-color: #60a5fa;
-  transform: translateY(-2px);
 }
 
 .feature-icon {
   font-size: 1.5rem;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
 
 .feature-item span:last-child {
@@ -387,9 +293,9 @@
 
 /* ===== ERROR STATES ===== */
 .error-container {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%);
+  background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 2rem;
   text-align: center;
   max-width: 500px;
@@ -422,45 +328,45 @@
 @media (max-width: 768px) {
   .race-bars-page {
     padding: 1.5rem;
-    border-radius: 16px;
+    border-radius: 8px;
     margin: 0.5rem;
     min-height: 500px;
   }
-  
+
   .controls-section {
     padding: 1.5rem;
     gap: 1rem;
   }
-  
+
   .chart-view-selector {
     flex-wrap: wrap;
     gap: 0.5rem;
     padding: 1rem;
   }
-  
+
   .chart-view-button {
     padding: 0.75rem 1rem;
     font-size: 0.8rem;
     flex: 1;
     min-width: 0;
   }
-  
+
   .coming-soon-container {
     padding: 2rem 1.5rem;
   }
-  
+
   .coming-soon-title {
     font-size: 2rem;
   }
-  
+
   .coming-soon-description {
     font-size: 1rem;
   }
-  
+
   .features-preview {
     gap: 0.75rem;
   }
-  
+
   .feature-item {
     padding: 0.5rem 0.75rem;
   }
@@ -470,21 +376,21 @@
   .race-bars-page {
     padding: 1rem;
   }
-  
+
   .controls-section {
     padding: 1rem;
   }
-  
+
   .chart-view-button {
     padding: 0.625rem 0.875rem;
     font-size: 0.75rem;
   }
-  
+
   .coming-soon-container {
     padding: 1.5rem 1rem;
   }
-  
+
   .coming-soon-title {
     font-size: 1.75rem;
   }
-} 
+}

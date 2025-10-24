@@ -1,71 +1,43 @@
-.cutoff-page .metric-card {
-	background: #0b1220;
-	border: 1px solid #1f2a44;
-	border-radius: 0.5rem;
-	padding: 0.75rem 1rem;
+/* Dedicated CutoffPage styles */
+.cutoff-page-header {
+  text-align: center;
+  margin-bottom: 2rem;
 }
-.cutoff-page .metric-card .label {
-	color: #94a3b8;
-	font-size: 0.8rem;
-	margin-bottom: 0.25rem;
+.cp-header-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
 }
-.cutoff-page .metric-card .value {
-	color: #e5e7eb;
-	font-weight: 700;
-}
-.cutoff-page .chart-card {
-	box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-}
-.cutoff-controls .chart-type-toggle .chart-view-button {
-	min-width: 64px;
-}
-
-/* Dedicated CutoffPage styles (aligned with MetaEvolution) */
-.cutoff-page-header { 
-  text-align: center; 
-  margin-bottom: 2rem; 
-}
-.cp-header-content { 
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
-  gap: 1rem; 
-}
-.cutoff-page-title { 
-  font-size: 2.5rem; 
-  font-weight: 800; 
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6); 
-  -webkit-background-clip: text; 
-  -webkit-text-fill-color: transparent; 
-  background-clip: text; 
+.cutoff-page-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #f1f5f9;
   margin-bottom: 0.5rem;
 }
-.cutoff-page-description { 
-  font-size: 1.125rem; 
-  color: #9ca3af; 
+.cutoff-page-description {
+  font-size: 1.125rem;
+  color: #9ca3af;
   max-width: 600px;
   line-height: 1.6;
   text-align: center;
 }
 
-.cutoff-page { 
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%); 
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(59, 130, 246, 0.2); 
-  border-radius: 20px; 
-  padding: 2rem; 
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+.cutoff-page {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 2rem;
   margin-bottom: 2rem;
   margin-left: auto;
   margin-right: auto;
   max-width: 80rem;
-  transition: all 0.4s ease;
   position: relative;
-  overflow: hidden;
 }
-.cp-card { box-shadow: 0 8px 24px rgba(0,0,0,0.2); border-radius: 12px; }
-/* Chart controls row styling (matching MetaEvolution) */
-.cp-controls-section { 
+.cp-card { border-radius: 8px; }
+
+/* Chart controls row styling */
+.cp-controls-section {
   display: flex;
   flex-direction: row;
   gap: 2rem;
@@ -73,26 +45,6 @@
   align-items: center;
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
-}
-
-/* Button group styling (matching MetaEvolution) */
-.cutoff-page .button-group {
-  display: flex;
-  gap: 0;
-}
-.cutoff-page .button-group .chart-view-button {
-  border-radius: 0;
-  margin: 0;
-  border-right: 1px solid rgba(59, 130, 246, 0.1);
-}
-.cutoff-page .button-group .chart-view-button:first-child {
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
-}
-.cutoff-page .button-group .chart-view-button:last-child {
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
-  border-right: none;
 }
 
 /* Chart view selector styling */
@@ -108,7 +60,7 @@
   white-space: nowrap;
 }
 
-/* Chart type toggle styling (matching MetaEvolution) */
+/* Chart type toggle styling */
 .cutoff-page .chart-type-toggle {
   display: flex;
   flex: 0 0 auto;
@@ -118,18 +70,16 @@
   min-width: 80px;
 }
 
-/* Chart-view button styling (aligned with MetaEvolution) */
+/* Chart-view button styling */
 .cutoff-page .chart-view-button {
   padding: 0.875rem 1.75rem;
-  background: linear-gradient(135deg, #1e293b, #334155);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: 10px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
   color: #cbd5e1;
   font-weight: 600;
   font-size: 0.875rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
+  transition: background-color 0.2s ease;
   cursor: pointer;
   flex: 1;
   min-width: 0;
@@ -140,66 +90,42 @@
   white-space: nowrap;
 }
 
-/* Override button radius for button groups - important for connected appearance */
+/* Override button radius for button groups */
 .cutoff-page .button-group .chart-view-button {
   border-radius: 0 !important;
 }
 .cutoff-page .button-group .chart-view-button:first-child {
-  border-top-left-radius: 10px !important;
-  border-bottom-left-radius: 10px !important;
+  border-top-left-radius: 8px !important;
+  border-bottom-left-radius: 8px !important;
 }
 .cutoff-page .button-group .chart-view-button:last-child {
-  border-top-right-radius: 10px !important;
-  border-bottom-right-radius: 10px !important;
+  border-top-right-radius: 8px !important;
+  border-bottom-right-radius: 8px !important;
   border-right: none !important;
 }
-.cutoff-page .chart-view-button::before { 
-  content: ''; 
-  position: absolute; 
-  top: 0; 
-  left: -100%; 
-  width: 100%; 
-  height: 100%; 
-  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.2), transparent); 
-  transition: left 0.5s ease; 
-}
-.cutoff-page .chart-view-button:hover::before { 
-  left: 100%; 
-}
+
 .cutoff-page .chart-view-button:hover {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(99, 102, 241, 0.2) 100%);
-  border-color: rgba(59, 130, 246, 0.4);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  background: #334155;
 }
 .cutoff-page .chart-view-button.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(99, 102, 241, 0.3) 100%);
-  border-color: rgba(59, 130, 246, 0.6);
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #3b82f6;
   color: white;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
-.cutoff-page .chart-view-button:disabled { 
-  opacity: 0.5; 
-  cursor: not-allowed; 
-  transform: none; 
-  box-shadow: none; 
+.cutoff-page .chart-view-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 .cutoff-page .chart-view-button:disabled:hover {
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.6) 100%);
-  border-color: rgba(59, 130, 246, 0.1);
-  transform: none;
-  box-shadow: none;
+  background: #1e293b;
 }
 
-/* Nicer tooltip styling to match MetaEvolution */
+/* Tooltip styling */
 .cutoff-tooltip {
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
-  backdrop-filter: blur(12px);
-  border: 2px solid rgba(59, 130, 246, 0.25);
-  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 6px;
   padding: 0.5rem 0.75rem;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
   color: #f8fafc;
   font-size: 0.85rem;
   font-weight: 600;
@@ -223,26 +149,19 @@
 .cutoff-tooltip__value { font-weight: 700; }
 .cutoff-tooltip__percentage { color:#94a3b8; font-size: 0.8rem; }
 
-/* removed bottom class legend */
-
-
-
 .cp-loading { display:flex; justify-content:center; align-items:center; padding:2rem; }
 .cp-spinner { width: 40px; height: 40px; border: 4px solid rgba(20,184,166,0.25); border-top:4px solid #14b8a6; border-radius: 50%; animation: cp-spin 1s linear infinite; }
 @keyframes cp-spin { to { transform: rotate(360deg); } }
 
-.cp-chart-container { 
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%); 
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(59, 130, 246, 0.2); 
-  border-radius: 16px; 
-  padding: 2rem; 
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); 
-  transition: all 0.4s ease;
+.cp-chart-container {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 2rem;
   margin-bottom: 2.5rem;
-  position: relative; 
-  overflow: hidden; 
+  position: relative;
 }
+
 /* Generic chart wrappers used by CutoffCharts */
 .cp-chart-wrapper {
   width: 100%;
@@ -262,58 +181,23 @@
   margin-right: 6px;
 }
 .cp-chart-rc-wrapper { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-.cp-chart-container::before { 
-  content: ''; 
-  position: absolute; 
-  top: 0; 
-  left: -100%; 
-  width: 100%; 
-  height: 100%; 
-  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.05), transparent); 
-  transition: left 0.6s ease; 
+
+.cp-chart-header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #334155;
 }
-.cp-chart-container:hover::before { 
-  left: 100%; 
-}
-.cp-chart-container:hover {
-  border-color: rgba(59, 130, 246, 0.3);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-  transform: translateY(-2px);
-}
-.cp-chart-fade { 
-  animation: cpChartFade 220ms ease-in-out; 
-}
-@keyframes cpChartFade { 
-  from { 
-    opacity: 0; 
-    transform: translateY(6px);
-  } 
-  to { 
-    opacity: 1; 
-    transform: translateY(0);
-  } 
-}
-.cp-chart-header { 
-  display: flex; 
-  justify-content: flex-start; 
-  align-items: center; 
-  gap: 0.5rem; 
-  margin-bottom: 2rem; 
-  padding-bottom: 1.5rem; 
-  border-bottom: 1px solid rgba(59, 130, 246, 0.2); 
-}
-.cp-chart-title { 
-  font-size: 1.5rem; 
-  font-weight: 700; 
-  color: #f8fafc; 
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6); 
-  -webkit-background-clip: text; 
-  -webkit-text-fill-color: transparent; 
-  background-clip: text; 
+.cp-chart-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #f8fafc;
 }
 
-/* New compact metric cards */
+/* Metric cards */
 .cp-metric-cards {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -321,11 +205,10 @@
   margin-bottom: 1rem;
 }
 .cp-metric-card {
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: 12px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
   padding: 1rem 1.25rem;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.2);
 }
 .cp-metric-label {
   color: #94a3b8;
@@ -355,26 +238,24 @@
   display: flex;
   align-items: baseline;
   gap: 0.4rem;
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 41, 59, 0.85) 100%);
+  background: rgba(15, 23, 42, 0.9);
   border: 1px solid rgba(59,130,246,0.25);
   color: #e2e8f0;
   padding: 0.35rem 0.6rem;
-  border-radius: 8px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.22);
-  backdrop-filter: blur(6px);
+  border-radius: 6px;
 }
 .cp-chart-metric .label { font-size: 0.75rem; color: #94a3b8; font-weight: 600; }
 .cp-chart-metric .value { font-size: 0.95rem; font-weight: 800; color: #f8fafc; }
 .cp-chart-metric.cutoff .value { color: var(--cutoff-color, #f77149); }
 
-/* Responsive design matching MetaEvolution */
+/* Responsive design */
 @media (max-width: 768px) {
-  .cutoff-page { 
-    padding: 1.5rem; 
-    border-radius: 16px; 
-    margin: 0.5rem 0.5rem 0.5rem 0.5rem; 
+  .cutoff-page {
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 0.5rem;
   }
-  .cp-controls-section { 
+  .cp-controls-section {
     flex-direction: column;
     gap: 1rem;
     align-items: stretch;
@@ -389,7 +270,7 @@
   }
   .cutoff-page .chart-view-selector .chart-view-button {
     padding: 0.5rem 0.25rem;
-    font-size: 1.1rem; /* emoji size */
+    font-size: 1.1rem;
   }
 
   .cutoff-page .chart-view-button {
@@ -398,9 +279,9 @@
     flex: 1;
     min-width: 0;
   }
-  .cp-chart-container { 
-    padding: 1.5rem; 
-    border-radius: 12px; 
+  .cp-chart-container {
+    padding: 1.5rem;
+    border-radius: 8px;
   }
   .cp-chart-header {
     flex-direction: column;
@@ -434,7 +315,7 @@
   }
   .cutoff-page .chart-view-selector .chart-view-button {
     padding: 0.45rem 0.2rem;
-    font-size: 1.05rem; /* emoji */
+    font-size: 1.05rem;
   }
   .cp-chart-container {
     padding: 1rem;
@@ -452,19 +333,16 @@
     gap: 1rem;
     align-items: stretch;
   }
-
 }
 
 /* FilterBar styling for CutoffPage */
 .cutoff-page-filter {
   margin-bottom: 1.5rem;
   background-color: #1F2937;
-  border-radius: 0.5rem;
+  border-radius: 8px;
   padding: 1rem;
-  border-radius: 16px;
 }
 
 .cutoff-page-filter .filterbar-controls {
   justify-content: flex-start;
 }
-
